@@ -6,6 +6,7 @@ designed for Causal Dynamical Models (CDMs) and integration with the SciML ecosy
 
 This package provides:
 - Causal graph operations (d-separation, paths, sets)
+- Hypergraph support for higher-order causal interactions
 - Identification algorithms (backdoor, frontdoor, do-calculus)
 - Structural Causal Model (SCM) framework
 - Intervention operators and counterfactual reasoning
@@ -51,6 +52,7 @@ include("graphs/validation.jl")
 include("graphs/sets.jl")
 include("graphs/d_separation.jl")  # d_separation needs sets
 include("graphs/paths.jl")  # paths needs d_separation
+include("graphs/hypergraph.jl")  # hypergraph for higher-order interactions
 
 # Identification algorithms
 include("identification/backdoor.jl")
