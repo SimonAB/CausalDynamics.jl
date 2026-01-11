@@ -1,5 +1,7 @@
 # CausalDynamics.jl
 
+> ⚠️ **Work in Progress**: This package is under active development and has not yet been submitted to the Julia General registry. APIs may change without notice. Contributions and feedback are welcome!
+
 | Minimum V-1.10 | V-1.11 | V-1.12 | Nightly |
 |-----------------|---------------------|---------------------|-------------------------|
 | [![Build Status](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-V1-10.yml/badge.svg)](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-V1-10.yml) | [![Build Status](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-V1-11.yml/badge.svg)](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-V1-11.yml) | [![Build Status](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-V1-12.yml/badge.svg)](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-V1-12.yml)| [![Build Status](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-Nightly.yml/badge.svg)](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-Nightly.yml)|
