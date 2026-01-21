@@ -55,7 +55,7 @@ get_prop(g, :data)  # DataFrame
 - `get_node_prop`: Get node properties
 - `attach_data!`: Convenience function to attach data with node names
 """
-struct CausalGraph <: Graphs.AbstractGraph
+struct CausalGraph <: Graphs.AbstractGraph{Int}
     graph::Graphs.DiGraph
     node_props::Dict{Int, Dict{Symbol, Any}}
     edge_props::Dict{Tuple{Int, Int}, Dict{Symbol, Any}}
@@ -779,7 +779,6 @@ end
 # ============================================================================
 
 # Core graph operations - delegate to underlying graph
-Base.length(g::CausalGraph) = length(g.graph)
 Graphs.nv(g::CausalGraph) = Graphs.nv(g.graph)
 Graphs.ne(g::CausalGraph) = Graphs.ne(g.graph)
 Graphs.vertices(g::CausalGraph) = Graphs.vertices(g.graph)
