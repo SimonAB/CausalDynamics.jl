@@ -14,11 +14,12 @@ to bridge the two packages.
 Prepare adjustment set from causal graph for use with TMLE.jl.
 
 # Arguments
-- `g`: Directed acyclic graph
+- `g`: Directed acyclic graph (DiGraph or CausalGraph)
 - `X`: Treatment node (integer or symbol)
 - `Y`: Outcome node (integer or symbol)
 - `node_names`: Optional mapping from node indices to symbols/names. If provided,
-  returns symbol names; otherwise returns node indices.
+  returns symbol names; otherwise returns node indices. For `CausalGraph`, node names
+  are automatically extracted from graph properties if not provided.
 
 # Returns
 - `adj_set`: Vector of confounders (symbols or integers) ready for TMLE.jl
@@ -43,6 +44,17 @@ confounders, identifiable = prepare_for_tmle(g, 2, 3; node_names=node_names)
 # Without node names (returns indices)
 confounders, identifiable = prepare_for_tmle(g, 2, 3)
 # Returns: ([1], true)
+
+# With CausalGraph (auto-detects node names)
+g2 = CausalGraph(3)
+add_edge!(g2, 1, 2)
+add_edge!(g2, 1, 3)
+add_edge!(g2, 2, 3)
+set_node_prop!(g2, 1, :name, :Z)
+set_node_prop!(g2, 2, :name, :X)
+set_node_prop!(g2, 3, :name, :Y)
+confounders, identifiable = prepare_for_tmle(g2, 2, 3)  # Auto-uses node names
+# Returns: ([:Z], true)
 ```
 
 # See Also
@@ -73,21 +85,36 @@ function prepare_for_tmle(g::AbstractGraph, X::Int, Y::Int; node_names=nothing)
     return confounders, is_identifiable
 end
 
+# Specialised method for CausalGraph - auto-detects node names
+function prepare_for_tmle(g::CausalGraph, X::Int, Y::Int; node_names=nothing)
+    # Auto-detect node names from graph properties if not provided
+    if node_names === nothing
+        detected_names = get_node_names(g)
+        # Use detected names if available, otherwise keep nothing
+        node_names = isempty(detected_names) ? nothing : detected_names
+    end
+    
+    # Delegate to base implementation
+    return prepare_for_tmle(g.graph, X, Y; node_names=node_names)
+end
+
 """
     estimate_effect(g, data, X, Y; node_names=nothing, method=:tmle, kwargs...)
+    estimate_effect(g, X, Y; method=:tmle, kwargs...)
 
 Estimate causal effect using identified adjustment set and TMLE.jl.
 
 This function combines identification (CausalDynamics.jl) with estimation (TMLE.jl)
-in a single workflow.
+in a single workflow. For `CausalGraph`, data and node names can be automatically
+extracted from graph properties.
 
 # Arguments
-- `g`: Directed acyclic graph
-- `data`: DataFrame or table with observed data
+- `g`: Directed acyclic graph (DiGraph or CausalGraph)
+- `data`: DataFrame or table with observed data (optional for CausalGraph if data is attached)
 - `X`: Treatment variable (integer index or symbol/name)
 - `Y`: Outcome variable (integer index or symbol/name)
-- `node_names`: Optional mapping from node indices to symbols/names. Required if
-  X and Y are integers and data columns are named.
+- `node_names`: Optional mapping from node indices to symbols/names. For `CausalGraph`,
+  node names are automatically extracted from graph properties if not provided.
 - `method`: Estimation method (currently only `:tmle` supported)
 - `kwargs...`: Additional arguments passed to TMLE.jl estimation function
 
@@ -116,8 +143,16 @@ data = DataFrame(
 node_names = Dict(1 => :Z, 2 => :X, 3 => :Y)
 result = estimate_effect(g, data, 2, 3; node_names=node_names)
 
-# Or use symbols directly if graph uses symbols
-result = estimate_effect(g, data, :X, :Y)
+# With CausalGraph - data and names attached
+g2 = CausalGraph(3)
+add_edge!(g2, 1, 2)
+add_edge!(g2, 1, 3)
+add_edge!(g2, 2, 3)
+set_node_prop!(g2, 1, :name, :Z)
+set_node_prop!(g2, 2, :name, :X)
+set_node_prop!(g2, 3, :name, :Y)
+attach_data!(g2, data)
+result = estimate_effect(g2, 2, 3)  # Auto-uses attached data and names
 ```
 
 # Notes
@@ -125,10 +160,12 @@ result = estimate_effect(g, data, :X, :Y)
 - Requires TMLE.jl to be loaded: `using TMLE`
 - If no adjustment set is found, a warning is issued but estimation may still proceed
 - Additional TMLE.jl arguments can be passed via `kwargs...`
+- For `CausalGraph`, if data is attached and node names are set, they are used automatically
 
 # See Also
 - `prepare_for_tmle`: Prepare adjustment set for TMLE.jl
 - `backdoor_adjustment_set`: Find backdoor adjustment set
+- `attach_data!`: Attach data to CausalGraph
 """
 function estimate_effect(g::AbstractGraph, data, X::Int, Y::Int; node_names=nothing, method=:tmle, kwargs...)
     # Validate node indices first (before checking TMLE)
@@ -190,6 +227,40 @@ function estimate_effect(g::AbstractGraph, data, X::Int, Y::Int; node_names=noth
     end
 end
 
+# Specialised method for CausalGraph - auto-detects data and node names
+function estimate_effect(g::CausalGraph, X::Int, Y::Int; node_names=nothing, method=:tmle, kwargs...)
+    # Auto-detect data from graph properties
+    data = get_data(g)
+    if data === nothing
+        error("No data attached to CausalGraph. Use attach_data!(g, data) or pass data explicitly.")
+    end
+    
+    # Auto-detect node names from graph properties if not provided
+    if node_names === nothing
+        node_names = get_node_names(g)
+        if isempty(node_names)
+            node_names = nothing  # No names available
+        end
+    end
+    
+    # Delegate to base implementation with detected data and names
+    return estimate_effect(g.graph, data, X, Y; node_names=node_names, method=method, kwargs...)
+end
+
+# Overload that allows explicit data (takes precedence over attached data)
+function estimate_effect(g::CausalGraph, data, X::Int, Y::Int; node_names=nothing, method=:tmle, kwargs...)
+    # Auto-detect node names from graph properties if not provided
+    if node_names === nothing
+        node_names = get_node_names(g)
+        if isempty(node_names)
+            node_names = nothing  # No names available
+        end
+    end
+    
+    # Delegate to base implementation with explicit data
+    return estimate_effect(g.graph, data, X, Y; node_names=node_names, method=method, kwargs...)
+end
+
 """
     get_tmle_confounders(g, X, Y; node_names=nothing)
 
@@ -230,6 +301,20 @@ function get_tmle_confounders(g::AbstractGraph, X::Int, Y::Int; node_names=nothi
     # Validation happens in prepare_for_tmle
     confounders, _ = prepare_for_tmle(g, X, Y; node_names=node_names)
     return confounders
+end
+
+# Specialised method for CausalGraph - auto-detects node names
+function get_tmle_confounders(g::CausalGraph, X::Int, Y::Int; node_names=nothing)
+    # Auto-detect node names from graph properties if not provided
+    if node_names === nothing
+        node_names = get_node_names(g)
+        if isempty(node_names)
+            node_names = nothing  # No names available
+        end
+    end
+    
+    # Delegate to base implementation
+    return get_tmle_confounders(g.graph, X, Y; node_names=node_names)
 end
 
 export prepare_for_tmle, estimate_effect, get_tmle_confounders

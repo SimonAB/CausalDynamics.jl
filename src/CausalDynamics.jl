@@ -53,6 +53,7 @@ include("graphs/sets.jl")
 include("graphs/d_separation.jl")  # d_separation needs sets
 include("graphs/paths.jl")  # paths needs d_separation
 include("graphs/hypergraph.jl")  # hypergraph for higher-order interactions
+include("graphs/causal_graph.jl")  # CausalGraph with properties
 
 # Identification algorithms
 include("identification/backdoor.jl")
@@ -74,5 +75,6 @@ include("utils/visualization.jl")
 
 # Integration with other packages
 include("integration/tmle.jl")
+include("integration/ppl.jl")
 
 end # module
