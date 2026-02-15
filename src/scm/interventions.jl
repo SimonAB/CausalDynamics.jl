@@ -1,61 +1,15 @@
 """
     DoIntervention
 
-Represents a `do(·)` intervention.
+Represents a `do(·)` intervention on a single variable.
 
 # Fields
-- `variable`: Variable to intervene on
-- `value`: Value to set
+- `variable::Union{Int, Symbol}`: Variable to intervene on (node index or symbol)
+- `value::Any`: Value to set the variable to
 """
 struct DoIntervention
     variable::Union{Int, Symbol}
     value::Any
-end
-
-"""
-    apply_intervention(scm, intervention)
-
-Apply a `do(·)` intervention to an SCM.
-
-An intervention `do(X = x)` sets variable X to value x, removing its dependence
-on its parents (modularity principle).
-
-# Arguments
-- `scm::AbstractSCM`: Structural Causal Model
-- `intervention::DoIntervention`: Intervention to apply
-
-# Returns
-- `AbstractSCM`: Modified SCM with intervention applied
-
-# Examples
-
-```julia
-using CausalDynamics
-
-# Create intervention: do(X = 1.0)
-intervention = DoIntervention(:x, 1.0)
-scm_intervened = apply_intervention(scm, intervention)
-
-# Or use convenience function
-intervention2 = do_intervention(:x, 1.0)
-scm_intervened2 = apply_intervention(scm, intervention2)
-```
-
-# Notes
-- **Modularity**: Intervention only affects the intervened variable's equation
-- Other equations remain unchanged
-- Currently returns a new SCM (immutable operation)
-
-# References
-- Pearl, J. (2009). *Causality*, Chapter 1.3
-
-# See Also
-- `do_intervention`: Convenience function to create interventions
-- `DoIntervention`: Type representing interventions
-"""
-function apply_intervention(scm::AbstractSCM, intervention::DoIntervention)
-    # TODO: Implement intervention application
-    error("Intervention application not yet implemented. For now, use graph-based methods (backdoor_adjustment_set, frontdoor_adjustment_set) for identification, or modify the SCM equations manually.")
 end
 
 """
@@ -80,9 +34,6 @@ intervention = do_intervention(:x, 1.0)
 
 # Intervene on node 2, setting it to 0
 intervention2 = do_intervention(2, 0)
-
-# Apply intervention
-scm_intervened = apply_intervention(scm, intervention)
 ```
 
 # See Also
@@ -93,4 +44,166 @@ function do_intervention(variable, value)
     return DoIntervention(variable, value)
 end
 
-export DoIntervention, apply_intervention, do_intervention
+"""
+    apply_intervention(scm::GraphSCM, intervention::DoIntervention)
+
+Apply a `do(·)` intervention to a GraphSCM, returning a new SCM.
+
+An intervention `do(X = x)` replaces the structural equation for variable X
+with a constant assignment `X := x`, removing its dependence on parents
+(modularity principle). All other equations remain unchanged.
+
+# Arguments
+- `scm::GraphSCM`: Structural Causal Model
+- `intervention::DoIntervention`: Intervention to apply
+
+# Returns
+- `GraphSCM`: New SCM with the intervention applied (mutilated model)
+
+# Examples
+
+```julia
+using CausalDynamics, Graphs
+
+g = DiGraph(3)
+add_edge!(g, 1, 2)  # Z → X
+add_edge!(g, 2, 3)  # X → Y
+
+equations = Dict{Int, Function}(
+    1 => (args...) -> args[end],          # Z = U_Z
+    2 => (z, u) -> z + u,                 # X = Z + U_X
+    3 => (x, u) -> 2x + u                 # Y = 2X + U_Y
+)
+
+scm = GraphSCM(g, equations, Set([1]))
+
+# Intervene: do(X = 5)
+intervention = do_intervention(2, 5.0)
+scm_do = apply_intervention(scm, intervention)
+
+# In scm_do, node 2's equation is replaced with constant 5.0,
+# and the edge Z → X is removed.
+```
+
+# Notes
+- **Modularity principle**: Only the intervened variable's equation is changed
+- Creates a new graph with incoming edges to the intervened variable removed
+- The intervened variable's equation becomes `(args...) -> value`
+
+# References
+- Pearl, J. (2009). *Causality*, Chapter 1.3 and Chapter 3.2
+"""
+function apply_intervention(scm::GraphSCM, intervention::DoIntervention)
+    var = intervention.variable
+    val = intervention.value
+
+    # Resolve variable to node index
+    node = var isa Int ? var : error("Symbol-based variable resolution not yet supported for GraphSCM. Use integer node indices.")
+
+    if node < 1 || node > nv(scm.graph)
+        throw(ArgumentError("Intervention node $node is out of range [1, $(nv(scm.graph))]."))
+    end
+
+    # Create mutilated graph: remove all incoming edges to the intervened node
+    new_graph = copy(scm.graph)
+    parents_to_remove = collect(Graphs.inneighbors(new_graph, node))
+    for parent in parents_to_remove
+        Graphs.rem_edge!(new_graph, parent, node)
+    end
+
+    # Create new equations: replace the intervened variable's equation with a constant
+    new_equations = copy(scm.equations)
+    new_equations[node] = (args...) -> val
+
+    return GraphSCM(new_graph, new_equations, scm.exogenous)
+end
+
+"""
+    apply_intervention(scm::GraphSCM, interventions::Vector{DoIntervention})
+
+Apply multiple simultaneous interventions to a GraphSCM.
+
+# Arguments
+- `scm::GraphSCM`: Structural Causal Model
+- `interventions::Vector{DoIntervention}`: Vector of interventions to apply
+
+# Returns
+- `GraphSCM`: New SCM with all interventions applied
+"""
+function apply_intervention(scm::GraphSCM, interventions::Vector{DoIntervention})
+    result = scm
+    for intervention in interventions
+        result = apply_intervention(result, intervention)
+    end
+    return result
+end
+
+"""
+    simulate_scm(scm::GraphSCM, exogenous_values::Dict{Int, <:Any})
+
+Simulate an SCM forward given exogenous noise values, producing endogenous
+variable values in topological order.
+
+# Arguments
+- `scm::GraphSCM`: Structural Causal Model
+- `exogenous_values::Dict{Int, <:Any}`: Dictionary mapping node indices to exogenous noise values
+
+# Returns
+- `Dict{Int, Any}`: Dictionary mapping each node to its computed value
+
+# Examples
+
+```julia
+using CausalDynamics, Graphs
+
+g = DiGraph(3)
+add_edge!(g, 1, 2)  # X → Y
+add_edge!(g, 2, 3)  # Y → Z
+
+equations = Dict{Int, Function}(
+    1 => (u) -> u,
+    2 => (x, u) -> x + u,
+    3 => (y, u) -> 2y + u
+)
+
+scm = GraphSCM(g, equations, Set{Int}())
+
+# Simulate with exogenous values
+U = Dict(1 => 1.0, 2 => 0.5, 3 => -0.3)
+values = simulate_scm(scm, U)
+# values[1] = 1.0, values[2] = 1.5, values[3] = 2.7
+```
+
+# Notes
+- Computes values in topological order so parent values are available
+- Each equation receives parent values followed by the exogenous value
+"""
+function simulate_scm(scm::GraphSCM, exogenous_values::Dict{Int, T}) where T
+    g = scm.graph
+    n = nv(g)
+
+    # Topological sort for evaluation order
+    topo_order = Graphs.topological_sort(g)
+
+    values = Dict{Int, Any}()
+
+    for node in topo_order
+        parents = sort(collect(Graphs.inneighbors(g, node)))
+        parent_vals = [values[p] for p in parents]
+        u = get(exogenous_values, node, 0.0)
+
+        if haskey(scm.equations, node)
+            eq = scm.equations[node]
+            # Call equation with parent values followed by exogenous value
+            args = vcat(parent_vals, [u])
+            values[node] = eq(args...)
+        else
+            # No equation defined — use exogenous value directly
+            values[node] = u
+        end
+    end
+
+    return values
+end
+
+export DoIntervention, apply_intervention, do_intervention, simulate_scm

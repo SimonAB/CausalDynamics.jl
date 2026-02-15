@@ -95,10 +95,9 @@ function find_directed_paths(g::AbstractGraph, X::Int, Y::Int)
     if X < 1 || X > nv(g) || Y < 1 || Y > nv(g)
         throw(ArgumentError("Node indices X=$X and Y=$Y must be in range [1, $(nv(g))]. Graph has $(nv(g)) nodes."))
     end
-    
-    # All simple paths in a DAG are directed (if they exist)
-    # Use the helper from d_separation.jl (available after it's included)
-    return _all_simple_paths(g, X, Y)
+
+    # Find paths following only edge direction (forward edges only)
+    return _all_simple_paths(g, X, Y; directed=true)
 end
 
 # _all_simple_paths is available from d_separation.jl (included before this file)
