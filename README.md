@@ -121,4 +121,4 @@ Please see the [documentation](https://simonab.github.io/CausalDynamics.jl/dev/)
 
 CausalDynamics.jl is part of the Causal Dynamics for Complex Systems (CDCS) project, which provides a unified framework for causal inference in dynamical systems. The package integrates with the broader SciML ecosystem and complements packages like UniversalDiffEq.jl, StateSpaceDynamics.jl, and TMLE.jl for complete Causal Dynamical Model workflows.
 
-See the [CDCS Book](https://simonab.quarto.pub/cdcs/) for comprehensive examples and theoretical background.
+See the [CDCS Book](https://simonab.quarto.pub/causal-dynamics-for-complex-systems/) for comprehensive examples and theoretical background.

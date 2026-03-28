@@ -17,4 +17,4 @@
 
 ## Further Reading
 
-For deeper conceptual background and worked examples, see the [CDCS Book](https://simonab.quarto.pub/cdcs/).
+For deeper conceptual background and worked examples, see the [CDCS Book](https://simonab.quarto.pub/causal-dynamics-for-complex-systems/).
