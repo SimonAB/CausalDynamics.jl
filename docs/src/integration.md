@@ -172,7 +172,7 @@ filtered_states = filter(ssm, observations)
 # Both are part of CDM, but serve different purposes
 ```
 
-See the [CDCS Book](https://simonab.quarto.pub/causal-dynamics-for-complex-systems/) for comprehensive examples of using both packages together in CDM workflows.
+See the [CDCS Book](https://simonab.github.io/causal-dynamics-book/) for comprehensive examples of using both packages together in CDM workflows.
 
 ## Integration with UniversalDiffEq.jl
 
@@ -230,7 +230,7 @@ Use CausalDynamics.jl when:
 
 Both packages can be used together in complete CDM workflows where causal structure informs dynamics learning, and learned dynamics enable intervention analysis.
 
-See the [CDCS Book](https://simonab.quarto.pub/causal-dynamics-for-complex-systems/) for comprehensive examples of combining causal structure analysis with dynamics learning.
+See the [CDCS Book](https://simonab.github.io/causal-dynamics-book/) for comprehensive examples of combining causal structure analysis with dynamics learning.
 
 ## Integration with SciML Ecosystem
 

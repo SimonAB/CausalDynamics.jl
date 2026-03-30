@@ -48,7 +48,7 @@ Pkg.add("CausalDynamics")
 
 See the [API Reference](@ref) pages for detailed documentation of all functions.
 
-For conceptual background and worked examples, see the [CDCS Book](https://simonab.quarto.pub/causal-dynamics-for-complex-systems/).
+For conceptual background and worked examples, see the [CDCS Book](https://simonab.github.io/causal-dynamics-book/).
 
 ## Integration with TMLE.jl
 

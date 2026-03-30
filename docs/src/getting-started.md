@@ -49,4 +49,4 @@ adj_set = backdoor_adjustment_set(g, 2, 3)  # Set([1])
 
 - See the [API Reference](@ref) pages for detailed function documentation
 - Check the [Examples](@ref) for more comprehensive usage
-- Read the [CDCS Book](https://simonab.quarto.pub/causal-dynamics-for-complex-systems/) for conceptual background
+- Read the [CDCS Book](https://simonab.github.io/causal-dynamics-book/) for conceptual background
