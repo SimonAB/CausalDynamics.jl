@@ -11,6 +11,7 @@ makedocs(
     ),
     pages = [
         "Home" => "index.md",
+        "Terminology" => "terminology.md",
         "Getting Started" => "getting-started.md",
         "Integration" => "integration.md",
         "API Reference" => [

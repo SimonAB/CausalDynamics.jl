@@ -54,9 +54,8 @@ counterfactual = simulate_scm(scm_cf, U_observed)
 ```
 
 # Notes
-- **Shared exogenous noise**: The key to counterfactual reasoning is using
-  the SAME exogenous noise realisation U for both factual and counterfactual worlds.
-  This ensures we reason about the same unit (individual/occasion).
+- **Shared exogenous noise**: Use the same `U` for factual and counterfactual simulation
+  so you compare **alternative concrescences** for one unit, not two populations.
 - For deterministic SCMs, abduction is straightforward (solve for U).
 - For stochastic SCMs, abduction requires posterior inference P(U | evidence).
 - The returned SCM is structurally identical to `apply_intervention(scm, intervention)`,
@@ -85,9 +84,9 @@ and the exogenous noise realisation for a specific unit, compute both
 the factual and counterfactual outcomes.
 
 This implements Pearl's three-step procedure:
-1. **Abduction**: Use provided exogenous values (assumed already inferred)
+1. **Abduction**: Use provided exogenous values (assumed already inferred from evidence)
 2. **Action**: Create mutilated model via `counterfactual_graph`
-3. **Prediction**: Simulate both factual and counterfactual worlds
+3. **Prediction**: Simulate factual and counterfactual outcomes with the same `U`
 
 # Arguments
 - `scm::GraphSCM`: Original Structural Causal Model

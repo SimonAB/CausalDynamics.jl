@@ -1,7 +1,4 @@
-# Hypergraph implementation for higher-order causal interactions
-# 
-# A hypergraph extends a graph with hyperedges that can connect multiple vertices
-# simultaneously, enabling representation of group interactions in causal systems.
+# Hypergraph implementation for higher-order causal interactions.
 
 export Hypergraph, HyperedgeData
 export add_hyperedge!, rem_hyperedge!, hyperedge_vertices, incident_hyperedges
@@ -30,10 +27,10 @@ end
 A hypergraph with vertices, edges, and hyperedges for modeling higher-order
 causal interactions.
 
-In causal modeling, hypergraphs are useful for representing:
-- **Group interventions**: Multiple variables affected simultaneously
-- **Multi-way interactions**: Causal effects that involve more than two variables
-- **Collective behaviour**: Agents interacting in groups
+In causal modelling, hypergraphs are useful for representing:
+- **Group interventions**: Multiple variables set or affected simultaneously (`do(·)` on a set)
+- **Multi-way interactions**: Effects involving more than two variables
+- **Collective behaviour**: Several variables linked by a shared hyperedge
 
 # Fields
 - `graph::SimpleDiGraph`: The underlying directed graph for pairwise edges

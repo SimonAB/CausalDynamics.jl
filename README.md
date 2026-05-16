@@ -9,9 +9,9 @@
 [![Docs](https://img.shields.io/badge/docs-dev-blue)](https://simonab.github.io/CausalDynamics.jl/dev/)
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 
-CausalDynamics.jl provides causal graph operations and identification algorithms for Causal Dynamical Models (CDMs). This package implements fundamental causal inference algorithms including d-separation, backdoor and frontdoor criteria, instrumental variables, and structural causal model (SCM) operations. It integrates with the SciML ecosystem (ModelingToolkit.jl, Symbolics.jl, DifferentialEquations.jl) and complements packages like TMLE.jl for causal effect estimation and StateSpaceDynamics.jl for state-space inference.
+CausalDynamics.jl provides causal graph operations and identification algorithms for **Causal Dynamical Models (CDMs)**. It implements d-separation, backdoor and frontdoor criteria, instrumental variables, SCM operations, `do(·)` interventions, and counterfactual simulation. It integrates with the SciML ecosystem (ModelingToolkit.jl, Symbolics.jl, DifferentialEquations.jl) and complements [TMLE.jl](https://github.com/TARGENE/TMLE.jl) for estimation.
 
-The package provides a focused implementation of causal graph algorithms. For highly customised causal models or advanced do-calculus operations, please use [ModelingToolkit.jl](https://mtk.sciml.ai/stable/) and [Symbolics.jl](https://symbolics.juliasymbolics.org/stable/) directly.
+For highly customised dynamical mechanisms or advanced symbolic do-calculus, use [ModelingToolkit.jl](https://mtk.sciml.ai/stable/) and [Symbolics.jl](https://symbolics.juliasymbolics.org/stable/) directly.
 
 To install and load CausalDynamics.jl, open Julia and type the following code:
 

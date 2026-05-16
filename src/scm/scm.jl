@@ -4,9 +4,9 @@
 Abstract type for Structural Causal Models (SCMs).
 
 An SCM consists of:
-- A causal graph (DAG) representing causal structure
-- Structural equations defining how each variable depends on its parents
-- Exogenous variables (noise terms) representing unobserved causes
+- A causal graph (DAG): **prehensive structure** (directed prehensive relations)
+- Structural equations: each variable from its parents and exogenous noise
+- Exogenous variables (`U`): **creative advance** (unmodelled factors for that unit)
 
 # Subtypes
 - `GraphSCM`: SCM with graph and function-based equations
@@ -22,8 +22,8 @@ abstract type AbstractSCM end
 
 A Structural Causal Model represented as a graph and structural equations.
 
-Each variable X is defined by a function: X = f_X(Pa(X), U_X), where Pa(X) are
-parents of X and U_X is exogenous noise.
+Each variable `X` is defined by a function `X = f_X(Pa(X), U_X)`, where `Pa(X)` are
+parents and `U_X` is exogenous noise.
 
 # Fields
 - `graph::DiGraph`: Directed acyclic graph representing causal structure
@@ -52,6 +52,7 @@ scm = GraphSCM(g, equations, Set([2, 4]))
 # Notes
 - Functions should be deterministic given parents and exogenous noise
 - Exogenous nodes must have no parents in the graph
+- One `simulate_scm` call settles all endogenous values for a fixed `U` (one concrescence step)
 """
 struct GraphSCM <: AbstractSCM
     graph::Graphs.DiGraph

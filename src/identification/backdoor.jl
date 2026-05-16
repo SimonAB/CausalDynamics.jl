@@ -1,9 +1,10 @@
 """
     backdoor_adjustment_set(g, X, Y)
 
-Find a valid backdoor adjustment set for estimating the causal effect of X on Y.
+Find a valid backdoor adjustment set for estimating the causal effect of `X` on `Y`.
 
-The backdoor criterion states that a set Z is a valid adjustment set if:
+Conditioning on the adjustment set blocks confounding **prehension paths** that enter
+`X` against the directed flow. The backdoor criterion states that a set `Z` is valid if:
 1. Z blocks all backdoor paths from X to Y
 2. Z does not contain any descendants of X
 

@@ -1,11 +1,7 @@
 """
-Basic identification examples using CausalDynamics.jl
+Basic identification examples using CausalDynamics.jl.
 
-This example demonstrates:
-- d-separation testing
-- Backdoor adjustment
-- Frontdoor adjustment
-- Instrumental variables
+Demonstrates d-separation, backdoor/frontdoor adjustment, and instrumental variables.
 """
 
 using CausalDynamics

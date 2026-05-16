@@ -1,8 +1,5 @@
 """
-Comprehensive examples using CausalDynamics.jl
-
-This file demonstrates various causal graph operations and identification
-algorithms, suitable for use in book chapters.
+Comprehensive examples using CausalDynamics.jl.
 """
 
 using CausalDynamics

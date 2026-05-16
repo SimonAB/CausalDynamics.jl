@@ -3,8 +3,8 @@
 
 A causal graph with attached properties (node names, data, metadata).
 
-Extends `DiGraph` with property storage for causal inference workflows, including
-integration with statistical estimation packages (TMLE.jl, Turing.jl, RxInfer.jl).
+Extends `DiGraph` with property storage (node names, attached data, metadata).
+Integrates with TMLE.jl, Turing.jl, and RxInfer.jl for estimation after identification.
 
 # Fields
 - `graph::DiGraph`: The underlying directed acyclic graph structure

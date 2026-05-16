@@ -1,7 +1,8 @@
 """
     DoIntervention
 
-Represents a `do(·)` intervention on a single variable.
+Represents a `do(·)` intervention on a single variable, fixing it to a definite value
+(**physical prehension**: the mechanism is imposed, not merely observed).
 
 # Fields
 - `variable::Union{Int, Symbol}`: Variable to intervene on (node index or symbol)
@@ -87,7 +88,7 @@ scm_do = apply_intervention(scm, intervention)
 
 # Notes
 - **Modularity principle**: Only the intervened variable's equation is changed
-- Creates a new graph with incoming edges to the intervened variable removed
+- Incoming edges to the intervened node are removed (parents no longer prehend into it)
 - The intervened variable's equation becomes `(args...) -> value`
 
 # References
@@ -177,6 +178,8 @@ values = simulate_scm(scm, U)
 # Notes
 - Computes values in topological order so parent values are available
 - Each equation receives parent values followed by the exogenous value
+- `exogenous_values` fixes exogenous noise `U` for this unit (creative advance held constant)
+- Returned endogenous values are the **superject** each node leaves for its descendants
 """
 function simulate_scm(scm::GraphSCM, exogenous_values::Dict{Int, T}) where T
     g = scm.graph

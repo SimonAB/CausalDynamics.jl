@@ -1,6 +1,6 @@
 # Integration with TMLE.jl
 
-CausalDynamics.jl is designed to work seamlessly with [TMLE.jl](https://github.com/TARGENE/TMLE.jl) for complete causal inference workflows. CausalDynamics.jl handles **identification** (determining what to adjust for), while TMLE.jl handles **estimation** (computing causal effects from data).
+CausalDynamics.jl is designed to work seamlessly with [TMLE.jl](https://github.com/TARGENE/TMLE.jl) for complete causal inference workflows. CausalDynamics.jl handles **identification** (adjustment sets from the causal graph); TMLE.jl handles **estimation** from data.
 
 ## Workflow
 

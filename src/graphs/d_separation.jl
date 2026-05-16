@@ -4,7 +4,8 @@ using Graphs: outneighbors
 """
     d_separated(g, X, Y, Z)
 
-Check if nodes X and Y are d-separated by set Z in directed acyclic graph g.
+Check if nodes `X` and `Y` are d-separated by set `Z` in directed acyclic graph `g`
+(associative dependence blocked given `Z`; Pearl Level 1).
 
 Uses the Bayes-Ball algorithm (Shachter 1998) for O(V+E) complexity,
 rather than path enumeration which is exponential in graph size.

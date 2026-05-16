@@ -1,11 +1,7 @@
 """
     TMLE Integration
 
-Functions to integrate CausalDynamics.jl with TMLE.jl for causal effect estimation.
-
-CausalDynamics.jl identifies adjustment sets from causal graphs, and TMLE.jl estimates
-causal effects using those adjustment sets. This module provides convenience functions
-to bridge the two packages.
+Bridge graph-based identification (adjustment sets) with effect estimation in TMLE.jl.
 """
 
 """

@@ -1,8 +1,13 @@
 """
     CausalDynamics.jl
 
-A Julia package for causal graph operations and identification algorithms,
-designed for Causal Dynamical Models (CDMs) and integration with the SciML ecosystem.
+Causal graph operations and identification for **Causal Dynamical Models (CDMs)**,
+with SciML-friendly SCM support.
+
+Functions use standard Pearl and SciML names. Where helpful, docstrings note a **process**
+reading (causality through prehensive relations and occasions, not static substances):
+edges as structure, `do(·)` as physical prehension, shared `U` for unit-level counterfactuals.
+See the `terminology` page in the package docs for a short map.
 
 This package provides:
 - Causal graph operations (d-separation, paths, sets)

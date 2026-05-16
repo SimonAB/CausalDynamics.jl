@@ -8,7 +8,7 @@ CurrentModule = CausalDynamics
 CausalDynamics
 ```
 
-A Julia package for causal graph operations and identification algorithms, designed for Causal Dynamical Models (CDMs) and integration with the SciML ecosystem.
+A Julia package for causal graph operations and identification algorithms, designed for **Causal Dynamical Models (CDMs)** and integration with the SciML ecosystem. Standard Pearl/SciML names in the API; see [Terminology](@ref) for a short process-over-substance map where it helps interpretation.
 
 ## Features
 

@@ -1,7 +1,4 @@
-# TMLE.jl Integration Example
-#
-# This example demonstrates how to use CausalDynamics.jl with TMLE.jl
-# for complete causal inference workflow: identification → estimation
+# TMLE.jl integration: identify adjustment sets, then estimate effects.
 
 using CausalDynamics
 using Graphs
