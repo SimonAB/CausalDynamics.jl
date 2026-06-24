@@ -12,5 +12,8 @@ CausalDynamics.jl keeps standard Pearl and SciML names (`DoIntervention`, `backd
 | `backdoor_adjustment_set` | Occasions to condition on so confounding prehension paths close |
 | `compute_counterfactual` with shared `U` | **Alternative concrescences** for the same unit |
 | Endogenous output of `simulate_scm` | What the occasion **leaves** for successors (**superject**) |
+| `prepare_for_rxinfer` | Centrifugal bridge: adjustment set for the observable generative head |
+| GraphPPL `@model` (extension) | **Form of relatedness** for backdoor-adjusted outcomes |
+| `infer_backdoor_effect` (RxInfer) | **Epistemic concrescence**: VI over `τ` given presentational data |
 
 Use process terms in prose and docstrings where they clarify; keep function names familiar to the causal-inference literature.

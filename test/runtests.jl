@@ -9,4 +9,5 @@ include("test_scm.jl")
 include("test_utils.jl")
 include("test_integration.jl")
 include("test_best_practices.jl")
+include("test_rxinfer.jl")
 end

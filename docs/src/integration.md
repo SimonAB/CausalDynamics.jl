@@ -275,6 +275,28 @@ using CausalDynamics, ModelingToolkit, Symbolics
 
 These packages enable symbolic computation for advanced causal inference tasks.
 
+## Integration with RxInfer.jl and GraphPPL.jl
+
+CausalDynamics.jl identifies backdoor adjustment sets; **GraphPPL.jl** specifies a Gaussian linear outcome model; **RxInfer.jl** runs variational inference for the treatment effect `τ`.
+
+See [RxInfer / GraphPPL](@ref) for installation, dependency notes, and process terminology.
+
+```julia
+using CausalDynamics, RxInfer, Graphs, DataFrames
+
+g = DiGraph(3)
+add_edge!(g, 1, 2)
+add_edge!(g, 1, 3)
+add_edge!(g, 2, 3)
+node_names = Dict(1 => :Z, 2 => :X, 3 => :Y)
+data = DataFrame(Z=randn(200), X=randn(200), Y=randn(200))
+
+result = infer_backdoor_effect(g, data, 2, 3; node_names=node_names)
+result.τ_mean   # Frisch–Waugh partialing + conjugate VI; see RXINFER_INTEGRATION.md
+```
+
+**When to use RxInfer vs TMLE**: TMLE targets doubly robust scalar effects on tables; RxInfer scales to large **N** and supports full Bayesian posteriors on `τ` (and extension to hierarchical heads on latent summaries in application code).
+
 ## Integration with Turing.jl
 
 CausalDynamics.jl complements [@turing.jl] for Bayesian causal inference:

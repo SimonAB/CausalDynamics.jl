@@ -13,7 +13,10 @@ makedocs(
         "Home" => "index.md",
         "Terminology" => "terminology.md",
         "Getting Started" => "getting-started.md",
-        "Integration" => "integration.md",
+        "Integration" => [
+            "Overview" => "integration.md",
+            "RxInfer / GraphPPL" => "RXINFER_INTEGRATION.md",
+        ],
         "API Reference" => [
             "Graph Operations" => "api/graphs.md",
             "Identification" => "api/identification.md",

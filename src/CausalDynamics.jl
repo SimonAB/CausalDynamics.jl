@@ -81,5 +81,6 @@ include("utils/visualization.jl")
 # Integration with other packages
 include("integration/tmle.jl")
 include("integration/ppl.jl")
+include("integration/rxinfer.jl")
 
 end # module
