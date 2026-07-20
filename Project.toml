@@ -1,5 +1,5 @@
 name = "CausalDynamics"
-uuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+uuid = "823b1367-efac-4af0-bbfc-73ee462bce07"
 version = "0.1.0"
 authors = ["CDCS Book Contributors"]
 repo = "https://github.com/SimonAB/CausalDynamics.jl.git"
