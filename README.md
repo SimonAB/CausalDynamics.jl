@@ -1,124 +1,85 @@
 # CausalDynamics.jl
 
-> ⚠️ **Work in Progress**: This package is under active development and has not yet been submitted to the Julia General registry. APIs may change without notice. Contributions and feedback are welcome!
+Causal graph operations and identification for **Causal Dynamical Models (CDMs)**: d-separation, backdoor / frontdoor / IV criteria, `GraphSCM` simulation, `do(·)` interventions, and counterfactuals. Optional plotting via [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl); optional variational backdoor inference via RxInfer / GraphPPL.
 
-| Minimum V-1.10 | V-1.11 | V-1.12 | Nightly |
-|-----------------|---------------------|---------------------|-------------------------|
-| [![Build Status](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-V1-10.yml/badge.svg)](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-V1-10.yml) | [![Build Status](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-V1-11.yml/badge.svg)](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-V1-11.yml) | [![Build Status](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-V1-12.yml/badge.svg)](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-V1-12.yml)| [![Build Status](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-Nightly.yml/badge.svg)](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI-Nightly.yml)|
+> **Not yet on the General registry.** Install from GitHub until registration completes (blocked on DAGMakie AutoMerge — see [REGISTRATION.md](REGISTRATION.md)). Requires Julia **1.12+**.
 
+[![Build Status](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI.yml)
 [![Docs](https://img.shields.io/badge/docs-dev-blue)](https://simonab.github.io/CausalDynamics.jl/dev/)
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 
-CausalDynamics.jl provides causal graph operations and identification algorithms for **Causal Dynamical Models (CDMs)**. It implements d-separation, backdoor and frontdoor criteria, instrumental variables, SCM operations, `do(·)` interventions, and counterfactual simulation. It integrates with the SciML ecosystem (ModelingToolkit.jl, Symbolics.jl, DifferentialEquations.jl) and complements [TMLE.jl](https://github.com/TARGENE/TMLE.jl) for estimation.
+## Installation
 
-For highly customised dynamical mechanisms or advanced symbolic do-calculus, use [ModelingToolkit.jl](https://mtk.sciml.ai/stable/) and [Symbolics.jl](https://symbolics.juliasymbolics.org/stable/) directly.
-
-To install and load CausalDynamics.jl, open Julia and type the following code:
-
-```
-]add CausalDynamics
+```julia
+using Pkg
+Pkg.add(url="https://github.com/SimonAB/CausalDynamics.jl.git")
 using CausalDynamics
 ```
 
-To access the latest version under development with the newest features use:
+After registry publication:
 
+```julia
+Pkg.add("CausalDynamics")
 ```
-add https://github.com/SimonAB/CausalDynamics.jl.git
+
+For DAG plots (optional):
+
+```julia
+Pkg.add(url="https://github.com/SimonAB/DAGMakie.jl.git")  # until DAGMakie is on General
+using DAGMakie, CairoMakie
 ```
 
-# Tutorial
+## Quick start
 
-As a simple example to get started with CausalDynamics.jl, we analyse a causal graph with confounding and identify the adjustment set needed to estimate the causal effect of treatment $X$ on outcome $Y$ in the presence of confounder $Z$.
-
-**Causal Graph**: $Z \to X$, $Z \to Y$, $X \to Y$
-
-**Identification**: The backdoor criterion identifies $Z$ as a sufficient adjustment set to block all backdoor paths from $X$ to $Y$.
+Confounding graph ``Z \to X``, ``Z \to Y``, ``X \to Y`` — adjust for ``Z``:
 
 ```julia
 using CausalDynamics, Graphs
 
-# Create causal graph: Z → X → Y, Z → Y (confounding)
 g = DiGraph(3)
 add_edge!(g, 1, 2)  # Z → X
 add_edge!(g, 1, 3)  # Z → Y
 add_edge!(g, 2, 3)  # X → Y
 
-# Check d-separation: X and Y are d-separated by Z
-d_separated(g, 2, 3, [1])  # true
-
-# Find backdoor adjustment set
+d_separated(g, 2, 3, [1])                 # true
 adj_set = backdoor_adjustment_set(g, 2, 3)  # Set([1]) = {Z}
-println("Adjustment set: ", adj_set)
-
-# Check if causal effect is identifiable
-identifiable = !isempty(adj_set)  # true
 ```
 
-**Result**: The causal effect of $X$ on $Y$ is identifiable by adjusting for $Z$. This means we can estimate $P(Y \mid do(X))$ from observational data using $P(Y \mid X, Z)$.
-
-## Integration with TMLE.jl
-
-CausalDynamics.jl identifies what to adjust for, and [TMLE.jl](https://github.com/TARGENE/TMLE.jl) estimates the causal effect:
+Plot with DAGMakie (after `using DAGMakie`):
 
 ```julia
-using CausalDynamics, TMLE, DataFrames, Graphs
+using DAGMakie, CairoMakie
+fig = plot_backdoor_paths(g, 2, 3; node_labels = ["Z", "X", "Y"])
+```
 
-# Create causal graph
+## SCM intervention sketch
+
+```julia
+using CausalDynamics, Graphs
+
 g = DiGraph(3)
-add_edge!(g, 1, 2)  # Z → X
-add_edge!(g, 1, 3)  # Z → Y
-add_edge!(g, 2, 3)  # X → Y
-
-# Create observational data
-data = DataFrame(
-    Z = randn(100),
-    X = rand([0, 1], 100),
-    Y = randn(100)
+add_edge!(g, 1, 2)
+add_edge!(g, 2, 3)
+equations = Dict{Int, Function}(
+    1 => (u,) -> u,
+    2 => (z, u) -> z + u,
+    3 => (x, u) -> 2x + u,
 )
-
-# Identify adjustment set
-node_names = Dict(1 => :Z, 2 => :X, 3 => :Y)
-adj_set = backdoor_adjustment_set(g, 2, 3)  # Set([1])
-
-# Estimate causal effect using TMLE
-confounders = [node_names[i] for i in adj_set]  # [:Z]
-result = TMLE.tmle(data, treatment=:X, outcome=:Y, confounders=confounders)
+scm = GraphSCM(g, equations, Set{Int}())
+U = Dict(1 => 1.0, 2 => 0.5, 3 => -0.3)
+factual = simulate_scm(scm, U)
+scm_do = apply_intervention(scm, do_intervention(2, 10.0))
+intervened = simulate_scm(scm_do, U)
 ```
 
-## Integration with DifferentialEquations.jl
+## Integrations
 
-For dynamical systems with causal structure:
+- **TMLE.jl** — identify adjustment sets, then estimate effects on tables (`prepare_for_tmle`)
+- **RxInfer / GraphPPL** — optional extension (`using RxInfer`) for variational backdoor heads
+- **DAGMakie.jl** — optional extension for DAG figures
 
-```julia
-using CausalDynamics, DifferentialEquations, Graphs
+See the [documentation](https://simonab.github.io/CausalDynamics.jl/dev/) and the [CDCS book](https://simonab.github.io/causal-dynamics-book/).
 
-# Analyse causal structure
-g = DiGraph(3)
-add_edge!(g, 1, 2)  # Z → X
-add_edge!(g, 2, 3)  # X → Y
+## Acknowledgements
 
-# Identify adjustment set for intervention
-adj_set = backdoor_adjustment_set(g, 2, 3)  # Set([1])
-
-# Define ODE with causal structure
-function dynamics!(du, u, p, t)
-    # System dynamics respecting causal graph
-    du[1] = p.r_z * u[1]  # Z dynamics (exogenous)
-    du[2] = p.r_x * u[2] + p.β_zx * u[1]  # X depends on Z
-    du[3] = p.r_y * u[3] + p.β_xy * u[2]  # Y depends on X
-end
-
-# Simulate with intervention do(X = 1.0)
-u0 = [1.0, 0.0, 0.0]
-p = (r_z=0.1, r_x=0.2, r_y=0.15, β_zx=0.5, β_xy=0.8)
-prob = ODEProblem(dynamics!, u0, (0.0, 10.0), p)
-sol = solve(prob)
-```
-
-Please see the [documentation](https://simonab.github.io/CausalDynamics.jl/dev/) for detailed tutorials and API reference.
-
-# Acknowledgements
-
-CausalDynamics.jl is part of the Causal Dynamics for Complex Systems (CDCS) project, which provides a unified framework for causal inference in dynamical systems. The package integrates with the broader SciML ecosystem and complements packages like UniversalDiffEq.jl, StateSpaceDynamics.jl, and TMLE.jl for complete Causal Dynamical Model workflows.
-
-See the [CDCS Book](https://simonab.github.io/causal-dynamics-book/) for comprehensive examples and theoretical background.
+Part of the Causal Dynamics for Complex Systems (CDCS) project. Maintainer: Simon A. Babayan.

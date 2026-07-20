@@ -10,6 +10,4 @@ is_valid_instrument
 find_all_adjustment_sets
 is_valid_adjustment_set
 minimal_adjustment_set
-is_identifiable
-identify_formula
 ```

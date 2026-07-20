@@ -2,7 +2,7 @@
     DoIntervention
 
 Represents a `do(·)` intervention on a single variable, fixing it to a definite value
-(**physical prehension**: the mechanism is imposed, not merely observed).
+(the mechanism is imposed, not merely observed).
 
 # Fields
 - `variable::Union{Int, Symbol}`: Variable to intervene on (node index or symbol)
@@ -189,7 +189,7 @@ values = simulate_scm(scm, U)
 - Computes values in topological order so parent values are available
 - Each equation receives parent values followed by the exogenous value
 - `exogenous_values` fixes exogenous noise `U` for this unit (creative advance held constant)
-- Returned endogenous values are the **superject** each node leaves for its descendants
+- Returned endogenous values are the settled outcomes each node contributes to its descendants
 """
 function simulate_scm(scm::GraphSCM, exogenous_values::Dict{Int, T}) where T
     g = scm.graph

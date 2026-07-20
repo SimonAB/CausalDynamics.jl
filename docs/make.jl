@@ -1,21 +1,35 @@
 using Documenter
 using CausalDynamics
+using Graphs
+
+# Optional live figures when DAGMakie is available in the docs environment
+const HAS_DAGMAKIE = try
+    @eval using DAGMakie
+    @eval using CairoMakie
+    CairoMakie.activate!(type = "png")
+    CairoMakie.enable_only_mime!("png")
+    true
+catch
+    false
+end
 
 makedocs(
     sitename = "CausalDynamics.jl",
-    authors = "CDCS Book Contributors",
+    authors = "Simon A. Babayan",
+    modules = [CausalDynamics],
     format = Documenter.HTML(
-        prettyurls = get(ENV, "CI", "false") == "true",
+        prettyurls = get(ENV, "CI", nothing) == "true",
         canonical = "https://simonab.github.io/CausalDynamics.jl",
         assets = String[],
+        example_size_threshold = 0,
     ),
     pages = [
         "Home" => "index.md",
-        "Terminology" => "terminology.md",
         "Getting Started" => "getting-started.md",
         "Integration" => [
             "Overview" => "integration.md",
             "RxInfer / GraphPPL" => "RXINFER_INTEGRATION.md",
+            "API" => "api/integration.md",
         ],
         "API Reference" => [
             "Graph Operations" => "api/graphs.md",
@@ -26,12 +40,14 @@ makedocs(
         "Examples" => "examples.md",
         "References" => "references.md",
     ],
-    modules = [CausalDynamics],
     checkdocs = :exports,
-    warnonly = [:cross_references],
+    warnonly = [:cross_references, :missing_docs],
 )
 
-deploydocs(
-    repo = "github.com/SimonAB/CausalDynamics.jl.git",
-    devbranch = "main",
-)
+if get(ENV, "CI", nothing) == "true"
+    deploydocs(
+        repo = "github.com/SimonAB/CausalDynamics.jl.git",
+        devbranch = "main",
+        push_preview = true,
+    )
+end

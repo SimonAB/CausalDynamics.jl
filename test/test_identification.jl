@@ -215,43 +215,23 @@ using Test
         adj_set = backdoor_adjustment_set(g_disconnected, 1, 3)
         @test adj_set == Set()  # No paths, so no adjustment needed (but also no effect)
         
-        # Test same node (X == Y) - returns a set (may contain parents)
+        # Same node (X == Y): no causal effect to identify → `nothing`
         result_same = backdoor_adjustment_set(g, 2, 2)
-        @test result_same isa Set{Int}  # Type check
-        # Note: When X == Y, the function may still return parents of X
-        # This is acceptable behavior - the important thing is it returns a valid Set
+        @test result_same === nothing
     end
     
-    @testset "Do-Calculus (Placeholder Functions)" begin
-        # These functions are placeholders that will be implemented with Symbolics.jl
+    @testset "Do-calculus placeholders (unexported)" begin
+        # Symbolic do-calculus stubs exist but are not part of the public API.
         g = DiGraph(3)
         add_edge!(g, 1, 2)
         add_edge!(g, 2, 3)
-        
-        # Test that functions exist
+
         @test isdefined(CausalDynamics, :is_identifiable)
         @test isdefined(CausalDynamics, :identify_formula)
-        
-        # Test that they error with appropriate message (placeholder behavior)
-        @test_throws ErrorException is_identifiable(g, :query)
-        @test_throws ErrorException identify_formula(g, :query)
-        
-        # Test error messages mention Symbolics.jl or template methods
-        try
-            is_identifiable(g, :query)
-        catch e
-            error_msg = sprint(showerror, e)
-            @test occursin("do-calculus", lowercase(error_msg)) || 
-                  occursin("template", lowercase(error_msg)) ||
-                  occursin("backdoor", lowercase(error_msg))
-        end
-        
-        try
-            identify_formula(g, :query)
-        catch e
-            error_msg = sprint(showerror, e)
-            @test occursin("formula", lowercase(error_msg)) || 
-                  occursin("symbolic", lowercase(error_msg))
-        end
+        @test !(:is_identifiable in names(CausalDynamics))
+        @test !(:identify_formula in names(CausalDynamics))
+
+        @test_throws ErrorException CausalDynamics.is_identifiable(g, :query)
+        @test_throws ErrorException CausalDynamics.identify_formula(g, :query)
     end
 end

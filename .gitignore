@@ -1,0 +1,20 @@
+# Julia
+*.jl.cov
+*.jl.mem
+Manifest.toml
+docs/Manifest.toml
+
+# Documentation
+docs/build/
+docs/site/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

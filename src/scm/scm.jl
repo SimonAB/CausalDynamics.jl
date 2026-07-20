@@ -4,9 +4,10 @@
 Abstract type for Structural Causal Models (SCMs).
 
 An SCM consists of:
-- A causal graph (DAG): **prehensive structure** (directed prehensive relations)
+
+- A causal graph (DAG)
 - Structural equations: each variable from its parents and exogenous noise
-- Exogenous variables (`U`): **creative advance** (unmodelled factors for that unit)
+- Exogenous variables (`U`): unmodelled unit-level factors
 
 # Subtypes
 - `GraphSCM`: SCM with graph and function-based equations
@@ -52,7 +53,7 @@ scm = GraphSCM(g, equations, Set([2, 4]))
 # Notes
 - Functions should be deterministic given parents and exogenous noise
 - Exogenous nodes must have no parents in the graph
-- One `simulate_scm` call settles all endogenous values for a fixed `U` (one concrescence step)
+- One `simulate_scm` call settles all endogenous values for a fixed realisation of `U`
 """
 struct GraphSCM <: AbstractSCM
     graph::Graphs.DiGraph
@@ -94,12 +95,11 @@ scm = create_symbolic_scm(g, equations_dict)
 
 # Notes
 - Enables symbolic computation of interventional and counterfactual distributions
-- Integration with ModelingToolkit.jl for equation manipulation
-- Currently under development
+- Integration with ModelingToolkit.jl for equation manipulation is planned
+- Currently a type placeholder; prefer `GraphSCM` for executable models
 
 # See Also
-- `create_symbolic_scm`: Create a SymbolicSCM from graph and equations
-- `GraphSCM`: Function-based SCM (alternative implementation)
+- `GraphSCM`: Function-based SCM (supported implementation)
 """
 struct SymbolicSCM <: AbstractSCM
     graph::Graphs.DiGraph

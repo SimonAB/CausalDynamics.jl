@@ -1,40 +1,41 @@
 name = "CausalDynamics"
 uuid = "823b1367-efac-4af0-bbfc-73ee462bce07"
 version = "0.1.0"
-authors = ["CDCS Book Contributors"]
+authors = ["Simon A. Babayan <simon.babayan@glasgow.ac.uk>"]
 repo = "https://github.com/SimonAB/CausalDynamics.jl.git"
+license = "MIT"
 
 [deps]
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+CausalInference = "8e462317-f959-576b-b3c1-403f26cec956"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
-ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
-RxInfer = "86711068-29c9-4ff7-b620-ae75d7495b3d"
-Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 
 [weakdeps]
+DAGMakie = "4e3bd891-6b6d-4d36-a31e-f0404dd10c7d"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 GraphPPL = "b3f8163a-e979-4e85-b43e-1f63d8c8b42c"
+RxInfer = "86711068-29c9-4ff7-b620-ae75d7495b3d"
 
 [extensions]
-CausalDynamicsRxInfer = ["GraphPPL", "RxInfer"]
+CausalDynamicsDAGMakieExt = "DAGMakie"
+CausalDynamicsRxInfer = ["GraphPPL", "RxInfer", "DataFrames"]
+
+[sources]
+CausalInference = {path = "../CausalInference.jl"}
+DAGMakie = {path = "../DAGMakie.jl"}
 
 [compat]
+CausalInference = "0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19"
+DAGMakie = "0.1"
 DataFrames = "1"
-Documenter = "1"
-ForwardDiff = "1"
 GraphPPL = "4.6"
 Graphs = "1"
-ModelingToolkit = "9, 10, 11"
 RxInfer = "4, 5"
-Symbolics = "6, 7"
 julia = "1.12"
 
 [extras]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+DAGMakie = "4e3bd891-6b6d-4d36-a31e-f0404dd10c7d"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-GraphMakie = "1ecd5474-83a3-4783-bb4f-06765db800d2"
 GraphPPL = "b3f8163a-e979-4e85-b43e-1f63d8c8b42c"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 RxInfer = "86711068-29c9-4ff7-b620-ae75d7495b3d"
@@ -42,5 +43,4 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-docs = ["Documenter"]
-test = ["Test", "CairoMakie", "DataFrames", "GraphMakie", "GraphPPL", "Random", "RxInfer", "Statistics"]
+test = ["Test", "CairoMakie", "DAGMakie", "DataFrames", "GraphPPL", "Random", "RxInfer", "Statistics"]

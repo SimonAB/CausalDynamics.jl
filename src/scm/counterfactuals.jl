@@ -55,7 +55,7 @@ counterfactual = simulate_scm(scm_cf, U_observed)
 
 # Notes
 - **Shared exogenous noise**: Use the same `U` for factual and counterfactual simulation
-  so you compare **alternative concrescences** for one unit, not two populations.
+  so you compare alternative outcomes for one unit, not two populations.
 - For deterministic SCMs, abduction is straightforward (solve for U).
 - For stochastic SCMs, abduction requires posterior inference P(U | evidence).
 - The returned SCM is structurally identical to `apply_intervention(scm, intervention)`,

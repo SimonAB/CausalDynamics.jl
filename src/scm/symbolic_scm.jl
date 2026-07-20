@@ -55,4 +55,5 @@ function create_symbolic_scm(graph::DiGraph, equations_dict::Dict)
     error("Symbolic SCM creation not yet implemented. For now, use GraphSCM with function-based equations, or see book chapters on symbolic SCMs and ModelingToolkit integration.")
 end
 
-export create_symbolic_scm
+# Not exported: placeholder until ModelingToolkit-backed SymbolicSCM construction lands.
+# Prefer GraphSCM with function-based equations for executable SCMs.

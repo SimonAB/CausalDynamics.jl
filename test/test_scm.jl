@@ -154,30 +154,15 @@ using Test
         @test_throws ArgumentError apply_intervention(scm, do_intervention(:x, 1.0))
     end
 
-    @testset "create_symbolic_scm" begin
-        # Test that function exists
+    @testset "create_symbolic_scm (unexported placeholder)" begin
         @test isdefined(CausalDynamics, :create_symbolic_scm)
+        @test !(:create_symbolic_scm in names(CausalDynamics))
+        @test hasmethod(CausalDynamics.create_symbolic_scm, (DiGraph, Dict))
 
-        # Function requires graph and equations_dict
-        @test hasmethod(create_symbolic_scm, (DiGraph, Dict))
-
-        # Test with simple graph and equations
         g = DiGraph(2)
         add_edge!(g, 1, 2)
-
-        # Create a simple equations dict (even if placeholder)
         equations = Dict(1 => :x, 2 => :y)
 
-        # Should error with current placeholder implementation
-        @test_throws ErrorException create_symbolic_scm(g, equations)
-
-        # Verify error message mentions it's not implemented
-        try
-            create_symbolic_scm(g, equations)
-        catch e
-            error_msg = sprint(showerror, e)
-            @test occursin("not yet implemented", lowercase(error_msg)) ||
-                  occursin("coming soon", lowercase(error_msg))
-        end
+        @test_throws ErrorException CausalDynamics.create_symbolic_scm(g, equations)
     end
 end

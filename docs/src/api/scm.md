@@ -13,7 +13,6 @@ compute_counterfactual
 AbstractSCM
 GraphSCM
 SymbolicSCM
-create_symbolic_scm
 DoIntervention
 apply_intervention
 do_intervention

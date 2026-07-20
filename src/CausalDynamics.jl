@@ -2,19 +2,17 @@
     CausalDynamics.jl
 
 Causal graph operations and identification for **Causal Dynamical Models (CDMs)**,
-with SciML-friendly SCM support.
-
-Functions use standard Pearl and SciML names. Where helpful, docstrings note a **process**
-reading (causality through prehensive relations and occasions, not static substances):
-edges as structure, `do(·)` as physical prehension, shared `U` for unit-level counterfactuals.
-See the `terminology` page in the package docs for a short map.
+with a lightweight SCM layer for simulation, interventions, and counterfactuals.
 
 This package provides:
+
 - Causal graph operations (d-separation, paths, sets)
 - Hypergraph support for higher-order causal interactions
-- Identification algorithms (backdoor, frontdoor, do-calculus)
-- Structural Causal Model (SCM) framework
-- Intervention operators and counterfactual reasoning
+- Identification algorithms (backdoor, frontdoor, instruments, adjustment)
+- Structural Causal Model (`GraphSCM`) simulation and `do(·)` interventions
+- Optional plotting via [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl)
+- Identification façades over [CausalInference.jl](https://github.com/SimonAB/CausalInference.jl)
+- Optional RxInfer / GraphPPL backdoor inference extension
 
 # Examples
 
@@ -38,15 +36,12 @@ backdoor_adjustment_set(g, 1, 2)  # [3]
 # References
 
 - Pearl, J. (2009). *Causality: Models, Reasoning, and Inference*
-- Hofmann et al. (2023). Spectral DCM with ModelingToolkit.jl
 - Shpitser, I., & Pearl, J. (2006). Identification of joint interventional distributions
 """
 module CausalDynamics
 
 using Graphs
-using ModelingToolkit
-using Symbolics
-using ForwardDiff
+using CausalInference
 
 # Re-export commonly used types from Graphs.jl
 import Graphs: DiGraph, SimpleDiGraph, inneighbors, outneighbors, vertices, add_edge!, has_edge

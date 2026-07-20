@@ -8,27 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial package structure
-- Graph operations: d-separation, path finding, sets operations
-- Identification algorithms: backdoor, frontdoor, instrumental variables
-- SCM framework: GraphSCM and SymbolicSCM types
-- Intervention operators
-- Graph visualization utilities
+
+- Registration checklist in `REGISTRATION.md` (submit after DAGMakie is on General)
+
+## [0.1.0] - 2026-07-20
+
+### Added
+
+- Core graph operations: d-separation, paths, sets, hypergraphs, `CausalGraph`
+- Identification: backdoor, frontdoor, instruments, adjustment sets
+- `GraphSCM`, `do(·)` interventions, counterfactual simulation with shared `U`
+- Optional `CausalDynamicsDAGMakieExt` plotting (`plot_causal_graph`, `plot_backdoor_paths`, …)
+- Optional `CausalDynamicsRxInfer` extension (GraphPPL + RxInfer + DataFrames)
+- CI, Documentation, TagBot, and CompatHelper workflows (Julia 1.12)
 
 ### Changed
 
-### Deprecated
+- Lean core dependencies: hard dep is Graphs only; Documenter, RxInfer, DataFrames, and SciML stacks demoted or removed from load path
+- Visualisation no longer uses fragile `Main.isdefined(GraphMakie)` checks
 
 ### Removed
 
-### Fixed
-
-### Security
-
-## [0.1.0] - 2026-XX-XX
-
-### Added
-- Initial release
-- Core graph operations
-- Basic identification algorithms
-- SCM framework foundation
+- Process / Whiteheadian terminology page from package docs (book-only)
+- Public exports of unimplemented stubs (`is_identifiable`, `identify_formula`, `create_symbolic_scm`)

@@ -45,11 +45,9 @@ See `examples/rxinfer_backdoor.jl` in the package root.
 | `infer_backdoor_effect` | Full identify + partial + infer pipeline |
 | `posterior_mean_τ` | Scalar mean from `τ_posterior` marginals |
 
-## Process reading (CDCS)
+## Process vs Pearl naming
 
-- **GraphPPL** — form of relatedness for the observable head (mechanism as factor graph).
-- **RxInfer** — epistemic concrescence: unify evidence about `τ` via message passing on the head.
-- **TMLE** remains the default for doubly robust scalar estimation on tables; RxInfer for **scalable Bayesian** heads (and latent interfaces such as **ẑ** in application packages).
+Package APIs stay in Pearl / SciML vocabulary. For a process-metaphysics gloss used in the CDCS book, see the book’s Concept Reference (Table 8), not this package manual.
 
 ## Dependencies
 

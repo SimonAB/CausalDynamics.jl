@@ -59,25 +59,21 @@ confounders, identifiable = prepare_for_tmle(g2, 2, 3)  # Auto-uses node names
 """
 function prepare_for_tmle(g::AbstractGraph, X::Int, Y::Int; node_names=nothing)
     # Validation happens in backdoor_adjustment_set
-    # Find adjustment set
     adj_set = backdoor_adjustment_set(g, X, Y)
-    
-    # Check identifiability
-    is_identifiable = !isempty(adj_set) || is_backdoor_adjustable(g, X, Y)
-    
-    # Convert to vector and apply node names if provided
+
+    # `nothing` means no valid backdoor set; empty Set means identifiable with no confounders
+    is_identifiable = adj_set !== nothing
+    adjustment = is_identifiable ? adj_set : Set{Int}()
+
     if node_names !== nothing
-        # Convert node indices to symbols
-        # Pre-allocate for type stability
-        confounders = Vector{Symbol}(undef, length(adj_set))
-        for (i, node) in enumerate(adj_set)
+        confounders = Vector{Symbol}(undef, length(adjustment))
+        for (i, node) in enumerate(adjustment)
             confounders[i] = node_names[node]
         end
     else
-        # Return as vector of integers
-        confounders = collect(adj_set)
+        confounders = collect(adjustment)
     end
-    
+
     return confounders, is_identifiable
 end
 

@@ -42,4 +42,5 @@ function identify_formula(g::AbstractGraph, query)
     error("Symbolic formula generation not yet implemented. Use template-based identification methods (backdoor_adjustment_set, frontdoor_adjustment_set) to find adjustment sets, then apply standard identification formulas manually.")
 end
 
-export is_identifiable, identify_formula
+# Not exported: placeholders for future symbolic do-calculus (Symbolics.jl).
+# Use backdoor_adjustment_set / frontdoor_adjustment_set / find_instruments instead.

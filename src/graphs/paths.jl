@@ -100,7 +100,51 @@ function find_directed_paths(g::AbstractGraph, X::Int, Y::Int)
     return _all_simple_paths(g, X, Y; directed=true)
 end
 
-# _all_simple_paths is available from d_separation.jl (included before this file)
+"""
+    _all_simple_paths(g, source, target; directed=false)
 
-# Export functions
+Find all simple paths from source to target.
+
+When `directed=false` (default), traverses edges in both directions
+(undirected paths, used for backdoor path finding).
+When `directed=true`, only follows edge direction (used for directed path finding).
+"""
+function _all_simple_paths(g::AbstractGraph, source, target; directed::Bool = false)
+    paths = Vector{Vector{Int}}()
+    current_path = Int[]
+    visited = Set{Int}()
+
+    function dfs(node)
+        push!(current_path, node)
+
+        if node == target
+            push!(paths, copy(current_path))
+            pop!(current_path)
+            return
+        end
+
+        push!(visited, node)
+
+        for neighbor in outneighbors(g, node)
+            if neighbor ∉ visited
+                dfs(neighbor)
+            end
+        end
+
+        if !directed
+            for neighbor in Graphs.inneighbors(g, node)
+                if neighbor ∉ visited
+                    dfs(neighbor)
+                end
+            end
+        end
+
+        pop!(current_path)
+        delete!(visited, node)
+    end
+
+    dfs(source)
+    return paths
+end
+
 export find_backdoor_paths, find_directed_paths
