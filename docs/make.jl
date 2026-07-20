@@ -6,7 +6,7 @@ makedocs(
     authors = "CDCS Book Contributors",
     format = Documenter.HTML(
         prettyurls = get(ENV, "CI", "false") == "true",
-        canonical = "https://yourusername.github.io/CausalDynamics.jl",
+        canonical = "https://simonab.github.io/CausalDynamics.jl",
         assets = String[],
     ),
     pages = [
@@ -32,6 +32,6 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/yourusername/CausalDynamics.jl.git",
+    repo = "github.com/SimonAB/CausalDynamics.jl.git",
     devbranch = "main",
 )

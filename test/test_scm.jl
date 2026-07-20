@@ -149,6 +149,9 @@ using Test
 
         # Test invalid node index
         @test_throws ArgumentError apply_intervention(scm, do_intervention(99, 1.0))
+
+        # Symbol variables are not yet resolved on GraphSCM
+        @test_throws ArgumentError apply_intervention(scm, do_intervention(:x, 1.0))
     end
 
     @testset "create_symbolic_scm" begin

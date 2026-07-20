@@ -13,7 +13,7 @@ For the latest development version:
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/yourusername/CausalDynamics.jl.git")
+Pkg.add(url="https://github.com/SimonAB/CausalDynamics.jl.git")
 ```
 
 ## Basic Usage

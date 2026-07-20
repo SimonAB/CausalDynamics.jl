@@ -7,6 +7,10 @@ Represents a `do(·)` intervention on a single variable, fixing it to a definite
 # Fields
 - `variable::Union{Int, Symbol}`: Variable to intervene on (node index or symbol)
 - `value::Any`: Value to set the variable to
+
+# Notes
+- For `GraphSCM`, use integer node indices; symbol resolution is reserved for future
+  `SymbolicSCM` / `CausalGraph` name maps.
 """
 struct DoIntervention
     variable::Union{Int, Symbol}
@@ -99,7 +103,13 @@ function apply_intervention(scm::GraphSCM, intervention::DoIntervention)
     val = intervention.value
 
     # Resolve variable to node index
-    node = var isa Int ? var : error("Symbol-based variable resolution not yet supported for GraphSCM. Use integer node indices.")
+    node = if var isa Int
+        var
+    else
+        throw(ArgumentError(
+            "Symbol-based variable resolution not yet supported for GraphSCM. Use integer node indices."
+        ))
+    end
 
     if node < 1 || node > nv(scm.graph)
         throw(ArgumentError("Intervention node $node is out of range [1, $(nv(scm.graph))]."))

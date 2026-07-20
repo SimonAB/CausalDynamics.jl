@@ -8,6 +8,8 @@ CausalDynamics.jl keeps standard Pearl and SciML names (`DoIntervention`, `backd
 | Parent in an equation | **Physical prehension** of past or neighbouring occasions |
 | Exogenous `U` in `simulate_scm` | **Creative advance** for this unit (fixed noise realisation) |
 | `do_intervention`, `apply_intervention` | **Physical prehension**: impose a value, negate incoming prehensions |
+| `GraphSCM` + integer node index | Executable SCM path used in book examples (`simulate_scm`, counterfactuals) |
+| `do_intervention(:name, …)` on `GraphSCM` | Not yet supported — use node indices until symbol/name maps land |
 | `d_separated` | Associative dependence blocked (Level 1) |
 | `backdoor_adjustment_set` | Occasions to condition on so confounding prehension paths close |
 | `compute_counterfactual` with shared `U` | **Alternative concrescences** for the same unit |
