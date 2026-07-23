@@ -35,12 +35,18 @@ backdoor_adjustment_set(g, 2, 3)            # Set([1])
 
 ## Installation
 
-Until the package is on General:
-
 ```julia
 using Pkg
 Pkg.add(url="https://github.com/SimonAB/CausalDynamics.jl.git")
 ```
+
+After General registration:
+
+```julia
+Pkg.add("CausalDynamics")
+```
+
+Optional plots: `Pkg.add("DAGMakie")` then `using DAGMakie, CairoMakie`.
 
 See [REGISTRATION.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/REGISTRATION.md) for registry status.
 
