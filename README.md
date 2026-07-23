@@ -2,7 +2,7 @@
 
 Causal graph operations and identification for **Causal Dynamical Models (CDMs)**: d-separation, backdoor / frontdoor / IV criteria, `GraphSCM` simulation, `do(·)` interventions, and counterfactuals. Optional plotting via [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl); optional variational backdoor inference via RxInfer / GraphPPL.
 
-> **Not yet on the General registry.** Install from GitHub until registration completes (blocked on DAGMakie AutoMerge — see [REGISTRATION.md](REGISTRATION.md)). Requires Julia **1.12+**.
+> **Registration in progress.** Until CausalDynamics appears on General, install from GitHub (see [REGISTRATION.md](REGISTRATION.md)). Requires Julia **1.12+**.
 
 [![Build Status](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI.yml)
 [![Docs](https://img.shields.io/badge/docs-dev-blue)](https://simonab.github.io/CausalDynamics.jl/dev/)
@@ -25,7 +25,7 @@ Pkg.add("CausalDynamics")
 For DAG plots (optional):
 
 ```julia
-Pkg.add(url="https://github.com/SimonAB/DAGMakie.jl.git")  # until DAGMakie is on General
+Pkg.add("DAGMakie")  # on General (prefer 0.1.1+)
 using DAGMakie, CairoMakie
 ```
 

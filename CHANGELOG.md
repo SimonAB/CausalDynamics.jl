@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Dropped local monorepo `[sources]` for General registration
+- Default `Pkg.test` no longer pulls DAGMakie/CairoMakie (registry CausalInference
+  GraphMakie 0.5 weakdep conflicts with DAGMakie 0.1.1); extension covered in CDCS
+
 ### Added
 
-- Registration checklist in `REGISTRATION.md` (submit after DAGMakie is on General)
+- Registration checklist in `REGISTRATION.md`
 
 ## [0.1.0] - 2026-07-20
 
