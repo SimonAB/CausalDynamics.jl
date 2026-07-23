@@ -12,8 +12,8 @@ CausalDynamics.jl is ready to submit to the Julia General registry.
 1. Confirm `Pkg.add("DAGMakie")` works from General
 2. `[sources]` removed from `Project.toml` (registry resolve only)
 3. `DAGMakie` listed in `[extras]` (not default `[targets] test` until CausalInference widens GraphMakie compat)
-4. Run `Pkg.test` and docs build on a clean env (registry CausalInference)
-5. `@JuliaRegistrator register` on CausalDynamics
+4. Run `Pkg.test` and docs build on a clean env (registry CausalInference) — done (260 tests)
+5. **Install [JuliaRegistrator](https://github.com/apps/juliareistrator)** on `SimonAB/CausalDynamics.jl` if not already, then `@JuliaRegistrator register` on [issue #1](https://github.com/SimonAB/CausalDynamics.jl/issues/1) or the `v0.1.0` commit
 6. Upstream CausalInference fork deltas only when the CDCS stack is solid (see `packages/CausalInference.jl/FORK.md` in the book monorepo)
 
 ## After AutoMerge
