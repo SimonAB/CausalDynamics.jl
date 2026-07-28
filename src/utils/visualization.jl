@@ -99,4 +99,18 @@ function plot_backdoor_paths(g::AbstractGraph, X::Int, Y::Int;
     return ext.plot_backdoor_paths(g, X, Y; node_labels = node_labels, kwargs...)
 end
 
+"""
+    plot_identification_result(g, result; node_names=nothing, kwargs...) -> Figure
+
+Plot highlighting nodes from an [`IdentificationResult`](@ref). Requires `using DAGMakie`.
+"""
+function plot_identification_result(g::AbstractGraph, result::IdentificationResult;
+    node_names = nothing,
+    kwargs...
+)
+    ext = _require_dagmakie!(:plot_identification_result)
+    return ext.plot_identification_result(g, result; node_names = node_names, kwargs...)
+end
+
 export has_dagmakie, plot_causal_graph, plot_with_adjustment_set, plot_backdoor_paths
+export plot_identification_result

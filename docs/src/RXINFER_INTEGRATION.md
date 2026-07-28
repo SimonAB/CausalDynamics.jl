@@ -59,4 +59,4 @@ If `Pkg.resolve()` fails after adding RxInfer, cap **Graphs** at `1.13` in your 
 
 - [RxInfer docs](https://docs.rxinfer.com/stable/)
 - [GraphPPL docs](https://reactivebayes.github.io/GraphPPL.jl/stable/)
-- [TMLE integration](@ref) for doubly robust estimation
+- [TMLE integration](integration.md) for doubly robust estimation

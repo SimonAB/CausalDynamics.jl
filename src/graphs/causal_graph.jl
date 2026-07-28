@@ -614,6 +614,11 @@ function attach_data!(g::CausalGraph, data; node_names::Union{Dict{Int, Symbol},
     set_prop!(g, :data, data)
     if !isempty(node_names)
         set_prop!(g, :node_names, node_names)
+        # Node props are the source of truth read by get_node_names / TMLE / PPL,
+        # so explicit names must be registered there too.
+        for (node, name) in node_names
+            set_node_prop!(g, node, :name, name)
+        end
     end
     
     return g

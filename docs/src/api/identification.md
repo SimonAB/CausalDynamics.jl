@@ -1,5 +1,9 @@
 # Identification Algorithms
 
+```@meta
+CurrentModule = CausalDynamics
+```
+
 ```@docs
 backdoor_adjustment_set
 is_backdoor_adjustable
@@ -8,6 +12,6 @@ find_frontdoor_mediators
 find_instruments
 is_valid_instrument
 find_all_adjustment_sets
-is_valid_adjustment_set
+CausalDynamics.is_valid_adjustment_set
 minimal_adjustment_set
 ```

@@ -7,15 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-27
+
+### Added
+
+- Optional **Associations.jl** weakdep extension (`CausalDynamicsAssociationsExt`):
+  `infer_pc_graph`, `infer_oce_temporal_spec`, `discover_and_prepare`
+- Core discovery bridge (no Associations required): `prepare_from_discovery`,
+  `oce_parents_to_temporal_spec`, `cpdag_to_dag`, `digraph_with_names`
+- [Associations integration](docs/src/ASSOCIATIONS_INTEGRATION.md);
+  `examples/discovery_to_identification.jl`
+- CDCS book Ch. 05b executable PC and OCE examples
+
+## [0.2.0] - 2026-07-23
+
+### Added
+
+- `DiscreteTimeCDM`, `DoSequence`, `simulate`, and shared-`U` `counterfactual` for
+  discrete-time Causal Dynamical Models ([docs](docs/src/api/cdm.md))
+- Soft interventions: `Policy` / `policy` state-dependent assignment rules, with a
+  state-aware `intervention_value` method
+- `g_computation` Monte Carlo interventional means (`GComputationResult`)
+- Time-indexed identification: `TemporalDAGSpec`, `unroll_temporal_dag`,
+  `temporal_backdoor_adjustment_set` ([docs](docs/src/api/time_graphs.md))
+- SciML composition recipes ([docs](docs/src/SCIML_INTEGRATION.md));
+  `examples/sciml_cdm_recipe.jl`
+- Scope / architecture page documenting what is in core vs deferred
+- Registration checklist in `REGISTRATION.md`
+
+### Fixed
+
+- `attach_data!(g, data; node_names=...)` now registers names as node properties,
+  so `get_node_names`, TMLE, and PPL bridges see them (previously only a
+  graph-level property was written and readers silently saw no names)
+
 ### Changed
 
 - Dropped local monorepo `[sources]` for General registration
 - Default `Pkg.test` no longer pulls DAGMakie/CairoMakie (registry CausalInference
   GraphMakie 0.5 weakdep conflicts with DAGMakie 0.1.1); extension covered in CDCS
-
-### Added
-
-- Registration checklist in `REGISTRATION.md`
 
 ## [0.1.0] - 2026-07-20
 

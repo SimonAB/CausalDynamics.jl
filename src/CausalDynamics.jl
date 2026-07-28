@@ -2,7 +2,7 @@
     CausalDynamics.jl
 
 Causal graph operations and identification for **Causal Dynamical Models (CDMs)**,
-with a lightweight SCM layer for simulation, interventions, and counterfactuals.
+with a lightweight SCM layer and discrete-time trajectory simulation.
 
 This package provides:
 
@@ -10,6 +10,7 @@ This package provides:
 - Hypergraph support for higher-order causal interactions
 - Identification algorithms (backdoor, frontdoor, instruments, adjustment)
 - Structural Causal Model (`GraphSCM`) simulation and `do(·)` interventions
+- Discrete-time CDMs (`DiscreteTimeCDM`, `DoSequence`, shared-`U` `counterfactual`)
 - Optional plotting via [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl)
 - Identification façades over [CausalInference.jl](https://github.com/SimonAB/CausalInference.jl)
 - Optional RxInfer / GraphPPL backdoor inference extension
@@ -42,6 +43,7 @@ module CausalDynamics
 
 using Graphs
 using CausalInference
+using Random
 
 # Re-export commonly used types from Graphs.jl
 import Graphs: DiGraph, SimpleDiGraph, inneighbors, outneighbors, vertices, add_edge!, has_edge
@@ -54,19 +56,28 @@ include("graphs/d_separation.jl")  # d_separation needs sets
 include("graphs/paths.jl")  # paths needs d_separation
 include("graphs/hypergraph.jl")  # hypergraph for higher-order interactions
 include("graphs/causal_graph.jl")  # CausalGraph with properties
+include("graphs/time_indexed.jl")  # unrolled lag DAGs for discrete-time ID
 
 # Identification algorithms
+include("identification/queries.jl")
+include("identification/result.jl")
+include("identification/resolver.jl")
 include("identification/backdoor.jl")
 include("identification/frontdoor.jl")
 include("identification/instruments.jl")
 include("identification/adjustment.jl")
 include("identification/do_calculus.jl")
+include("identification/identify.jl")
+include("identification/report.jl")
 
 # SCM framework
 include("scm/scm.jl")
 include("scm/symbolic_scm.jl")
 include("scm/interventions.jl")
 include("scm/counterfactuals.jl")
+
+# Discrete-time Causal Dynamical Models
+include("cdm/discrete_cdm.jl")
 
 # Utilities
 include("utils/graph_utils.jl")
@@ -77,5 +88,6 @@ include("utils/visualization.jl")
 include("integration/tmle.jl")
 include("integration/ppl.jl")
 include("integration/rxinfer.jl")
+include("integration/discovery.jl")
 
 end # module

@@ -64,16 +64,13 @@ using Test
         add_edge!(g_frontdoor, 3, 4)  # M → Y
         
         # M should be valid frontdoor adjustment
-        # Note: Frontdoor requires specific conditions that may not be met in this simple graph
-        # We test that the function runs without error
         is_valid = frontdoor_adjustment_set(g_frontdoor, 2, 4, [3])
-        # The result depends on implementation - we just check it's a boolean
-        @test is_valid isa Bool
-        
+        @test is_valid == true
+
         # Find frontdoor mediators
         mediators = find_frontdoor_mediators(g_frontdoor, 2, 4)
         @test mediators isa Vector{Set{Int}}
-        # May or may not find mediators depending on implementation
+        @test Set([3]) in mediators
         
         # Test input validation (should throw ArgumentError with our validation)
         @test_throws ArgumentError frontdoor_adjustment_set(g_frontdoor, 10, 4, [3])  # Invalid node
@@ -99,6 +96,23 @@ using Test
         
         is_valid_invalid = frontdoor_adjustment_set(g_invalid_frontdoor, 2, 4, [3])
         @test is_valid_invalid == false  # M is not valid frontdoor due to backdoor path
+    end
+
+    @testset "Frontdoor scales on dense DAGs" begin
+        # Sheep-like density: complete-ish layered DAG where path enumeration explodes
+        n = 24
+        g_dense = DiGraph(n)
+        for i in 1:(n - 1)
+            for j in (i + 1):min(i + 6, n)
+                add_edge!(g_dense, i, j)
+            end
+        end
+        t0 = time()
+        meds = find_frontdoor_mediators(g_dense, 1, n)
+        elapsed = time() - t0
+        @test meds isa Vector{Set{Int}}
+        @test elapsed < 5.0
+        @test nodes_on_directed_paths(g_dense, 1, n) isa Set{Int}
     end
     
     @testset "Instrumental Variables" begin

@@ -9,7 +9,10 @@ using CausalDynamics: CausalDynamics,
     AbstractGraph,
     find_backdoor_paths,
     backdoor_adjustment_set,
-    d_separated
+    d_separated,
+    IdentificationResult,
+    TotalEffectQuery,
+    MediationQuery
 using DAGMakie
 using Graphs: nv, has_edge
 
@@ -105,6 +108,74 @@ function plot_backdoor_paths(g::AbstractGraph, X::Int, Y::Int;
         kwargs...,
     )
     return fig
+end
+
+"""
+    plot_identification_result(g, result; node_names=nothing, kwargs...) -> Figure
+
+Highlight treatment, outcome, adjustment, and mediators from an [`IdentificationResult`](@ref).
+"""
+function plot_identification_result(g::AbstractGraph, result::IdentificationResult;
+    node_names::Union{Nothing, Dict{Int, Symbol}} = nothing,
+    kwargs...
+)
+    labels = if node_names === nothing
+        [string(i) for i in 1:nv(g)]
+    else
+        [string(get(node_names, i, i)) for i in 1:nv(g)]
+    end
+
+    sym_to_idx = Dict{Symbol, Int}()
+    if node_names !== nothing
+        for (i, s) in node_names
+            sym_to_idx[s] = i
+        end
+    end
+
+    query = result.query
+    treat_idx = outcome_idx = Int[]
+    if query isa TotalEffectQuery
+        if query.treatment isa Int
+            treat_idx = [query.treatment]
+        elseif haskey(sym_to_idx, query.treatment)
+            treat_idx = [sym_to_idx[query.treatment]]
+        end
+        if query.outcome isa Int
+            outcome_idx = [query.outcome]
+        elseif haskey(sym_to_idx, query.outcome)
+            outcome_idx = [sym_to_idx[query.outcome]]
+        end
+    elseif query isa MediationQuery
+        if query.treatment isa Symbol && haskey(sym_to_idx, query.treatment)
+            treat_idx = [sym_to_idx[query.treatment]]
+        end
+        if query.outcome isa Symbol && haskey(sym_to_idx, query.outcome)
+            outcome_idx = [sym_to_idx[query.outcome]]
+        end
+    end
+
+    adj_idx = Int[]
+    for a in result.adjustment
+        if a isa Int
+            push!(adj_idx, a)
+        elseif a isa Symbol && haskey(sym_to_idx, a)
+            push!(adj_idx, sym_to_idx[a])
+        end
+    end
+
+    med_idx = Int[]
+    for m in result.mediators
+        m isa Symbol && haskey(sym_to_idx, m) && push!(med_idx, sym_to_idx[m])
+    end
+
+    highlight_nodes = unique(vcat(treat_idx, outcome_idx, adj_idx, med_idx))
+    title = "ID: $(result.strategy), identifiable=$(result.identifiable)"
+    return plot_causal_graph(g;
+        node_labels = labels,
+        highlight_nodes = Set(highlight_nodes),
+        title = title,
+        kwargs...,
+    )
 end
 
 end # module

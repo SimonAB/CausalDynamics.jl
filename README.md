@@ -2,6 +2,8 @@
 
 Causal graph operations and identification for **Causal Dynamical Models (CDMs)**: d-separation, backdoor / frontdoor / IV criteria, `GraphSCM` simulation, `do(·)` interventions, and counterfactuals. Optional plotting via [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl); optional variational backdoor inference via RxInfer / GraphPPL.
 
+**Design principles:** [DESIGN.md](DESIGN.md) · [ecosystem](../DESIGN_PRINCIPLES.md)
+
 > **Registration in progress.** Until CausalDynamics appears on General, install from GitHub (see [REGISTRATION.md](REGISTRATION.md)). Requires Julia **1.12+**.
 
 [![Build Status](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI.yml)
@@ -78,7 +80,10 @@ intervened = simulate_scm(scm_do, U)
 - **RxInfer / GraphPPL** — optional extension (`using RxInfer`) for variational backdoor heads
 - **DAGMakie.jl** — optional extension for DAG figures
 
-See the [documentation](https://simonab.github.io/CausalDynamics.jl/dev/) and the [CDCS book](https://simonab.github.io/causal-dynamics-book/).
+See the [documentation](https://simonab.github.io/CausalDynamics.jl/dev/) (including
+[References](https://simonab.github.io/CausalDynamics.jl/dev/references/) with DOIs) and the
+[CDCS book](https://simonab.github.io/causal-dynamics-book/). Estimation-layer citations live in
+[CausalTargeted.jl](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/references.md).
 
 ## Acknowledgements
 

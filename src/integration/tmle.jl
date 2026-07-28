@@ -58,23 +58,12 @@ confounders, identifiable = prepare_for_tmle(g2, 2, 3)  # Auto-uses node names
 - `is_backdoor_adjustable`: Check if backdoor adjustment is possible
 """
 function prepare_for_tmle(g::AbstractGraph, X::Int, Y::Int; node_names=nothing)
-    # Validation happens in backdoor_adjustment_set
-    adj_set = backdoor_adjustment_set(g, X, Y)
-
-    # `nothing` means no valid backdoor set; empty Set means identifiable with no confounders
-    is_identifiable = adj_set !== nothing
-    adjustment = is_identifiable ? adj_set : Set{Int}()
-
-    if node_names !== nothing
-        confounders = Vector{Symbol}(undef, length(adjustment))
-        for (i, node) in enumerate(adjustment)
-            confounders[i] = node_names[node]
-        end
-    else
-        confounders = collect(adjustment)
-    end
-
-    return confounders, is_identifiable
+    query = TotalEffectQuery(
+        node_names !== nothing && haskey(node_names, X) ? node_names[X] : X,
+        node_names !== nothing && haskey(node_names, Y) ? node_names[Y] : Y,
+    )
+    result = identify(g, query; node_names = node_names)
+    return result.adjustment, result.identifiable
 end
 
 # Specialised method for CausalGraph - auto-detects node names

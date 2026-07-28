@@ -136,11 +136,8 @@ confounders, identifiable = prepare_for_tmle(g, 2, 4; node_names=node_names)
 
 ## API Reference
 
-```@docs
-prepare_for_tmle
-estimate_effect
-get_tmle_confounders
-```
+Docstrings for `prepare_for_tmle`, `estimate_effect`, and `get_tmle_confounders`
+live on the [Integration API](api/integration.md) page.
 
 ## Notes
 
@@ -232,7 +229,9 @@ Both packages can be used together in complete CDM workflows where causal struct
 
 See the [CDCS Book](https://simonab.github.io/causal-dynamics-book/) for comprehensive examples of combining causal structure analysis with dynamics learning.
 
-## Integration with SciML Ecosystem
+### Integration with SciML Ecosystem
+
+See [SciML recipes](SCIML_INTEGRATION.md) for discrete-time CDM + ODE composition patterns (no SciML hard dependency in core).
 
 CausalDynamics.jl is designed to work with the [SciML ecosystem](https://sciml.ai/) for Causal Dynamical Models (CDMs). The SciML packages provide the dynamical systems and symbolic computation infrastructure, while CausalDynamics.jl provides causal graph operations.
 
@@ -279,7 +278,7 @@ These packages enable symbolic computation for advanced causal inference tasks.
 
 CausalDynamics.jl identifies backdoor adjustment sets; **GraphPPL.jl** specifies a Gaussian linear outcome model; **RxInfer.jl** runs variational inference for the treatment effect `τ`.
 
-See [RxInfer / GraphPPL](@ref) for installation, dependency notes, and process terminology.
+See [RxInfer / GraphPPL](RXINFER_INTEGRATION.md) for installation, dependency notes, and process terminology.
 
 ```julia
 using CausalDynamics, RxInfer, Graphs, DataFrames
@@ -375,6 +374,22 @@ Each package serves a specific role in the CDM framework:
 - **DifferentialEquations.jl**: ODE/SDE solving
 - **Turing.jl** [@turing.jl]: Bayesian inference
 
+# Integration with Associations.jl
+
+[Associations.jl](https://juliadynamics.github.io/Associations.jl/stable/) handles **causal discovery**
+(PC on tabular data, OCE on multivariate time series). CausalDynamics.jl bridges discovered
+structure to **identification** (`prepare_from_discovery`, `infer_oce_temporal_spec` →
+`TemporalDAGSpec`).
+
+```julia
+using CausalDynamics, Associations, DataFrames
+
+ĝ = infer_pc_graph(df, [:z, :x, :y]; verbose=false)
+confounders, ok = prepare_from_discovery(ĝ, :x, :y; complete=true)
+```
+
+See [Associations integration](ASSOCIATIONS_INTEGRATION.md) and `examples/discovery_to_identification.jl`.
+
 ## Further Reading
 
 - [TMLE.jl Documentation](https://targene.github.io/TMLE.jl/stable/)
@@ -386,4 +401,6 @@ Each package serves a specific role in the CDM framework:
 - [SciML Ecosystem](https://sciml.ai/) - DifferentialEquations.jl, ModelingToolkit.jl, Symbolics.jl
 - [Turing.jl Documentation](https://turing.ml/dev/)
 - [Turing.jl GitHub Repository](https://github.com/TuringLang/Turing.jl)
+- [Associations.jl Documentation](https://juliadynamics.github.io/Associations.jl/stable/)
+- CausalDynamics.jl [Associations integration](ASSOCIATIONS_INTEGRATION.md)
 - CausalDynamics.jl [API Reference](@ref) for identification functions

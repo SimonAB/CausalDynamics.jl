@@ -33,8 +33,9 @@ jobs:
         with:
           version: ${{ matrix.version }}
       - uses: julia-actions/cache@v2
-      # Use a temporary env so developing DAGMakie does not rewrite Project.toml deps.
-      # Drop the GitHub develop once DAGMakie is on General and listed under [extras].
+      # Optional DAGMakie extension (not in default Project.toml [targets] test).
+      # Restore default-target DAGMakie once CausalInference merges GraphMakie 0.6:
+      # https://github.com/mschauer/CausalInference.jl/pull/179
       - name: Test with optional DAGMakie
         run: |
           julia --startup-file=no --threads=auto -e '

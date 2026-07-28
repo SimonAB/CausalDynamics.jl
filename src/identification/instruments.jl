@@ -174,11 +174,13 @@ has_path(g, 3, 1)  # false (no reverse path)
 
 # Notes
 - Returns `false` if source == target (no self-loops)
-- Uses `find_directed_paths` internally
+- Uses BFS reachability (not path enumeration)
 """
 function has_path(g::AbstractGraph, source::Int, target::Int)
-    paths = find_directed_paths(g, source, target)
-    return !isempty(paths)
+    if source < 1 || source > nv(g) || target < 1 || target > nv(g)
+        throw(ArgumentError("Node indices must be in range [1, $(nv(g))]."))
+    end
+    return _has_directed_path(g, source, target)
 end
 
 export find_instruments, is_valid_instrument

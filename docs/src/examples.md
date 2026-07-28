@@ -72,4 +72,27 @@ exogenous = Set([1])
 scm = GraphSCM(g, equations, exogenous)
 ```
 
+## Discrete-time CDM
+
+```julia
+using CausalDynamics, Random
+
+cdm = DiscreteTimeCDM(
+    [:a, :y];
+    initialise = (rng) -> (a = 0.0, y = 0.0),
+    sample_noise = (rng, state, t) -> (u_a = randn(rng), u_y = randn(rng)),
+    step = (state, t, noise, intervention) -> begin
+        a = intervention_value(intervention, :a, t, 0.5 * state.a + noise.u_a)
+        y = 2a + noise.u_y
+        (a = a, y = y)
+    end,
+)
+
+T = 30
+factual = simulate(cdm, T; rng = Random.Xoshiro(1))
+cf = counterfactual(cdm, factual.noise; intervention = do_sequence(:a, fill(1.0, T)))
+```
+
+The CDCS book Chapter 28 works the confounded protein / treatment example with this API.
+
 For more examples, see the package's `examples/` directory.

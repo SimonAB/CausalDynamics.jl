@@ -23,3 +23,18 @@ ppl_data_from_spec
 prepare_for_turing
 get_data_for_ppl
 ```
+
+## Associations.jl (optional)
+
+Requires `using Associations` to load the `CausalDynamicsAssociationsExt` extension.
+
+```@docs
+has_associations
+prepare_from_discovery
+cpdag_to_dag
+oce_parents_to_temporal_spec
+digraph_with_names
+infer_pc_graph
+infer_oce_temporal_spec
+discover_and_prepare
+```
