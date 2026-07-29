@@ -42,7 +42,7 @@ New integrations follow the same pattern: narrow API in `src/integration/`, impl
 ### Composable dynamical semantics
 
 - **Static:** `GraphSCM`, `DoIntervention`, shared-`U` counterfactuals.
-- **Discrete-time:** `DiscreteTimeCDM`, `DoSequence`, trajectory simulation.
+- **Discrete-time:** `DiscreteTimeCDM`, typed `DoSequence` assignments, `Policy`, trajectory simulation.
 - **Time-indexed ID:** unroll lag structure, then apply backdoor on the unrolled graph.
 
 Keep simulation and identification **orthogonal**: the same `IdentificationResult` should feed TMLE, RxInfer, or custom estimators.
@@ -62,6 +62,13 @@ Keep simulation and identification **orthogonal**: the same `IdentificationResul
 - Cross-fitted nuisances, LMTP grids, or manuscript registry loaders.
 - Process-philosophy renames of Pearl APIs (`do_surgery`, `backdoor_adjustment_set` stay as they are).
 - Full symbolic do-calculus until there is a complete, tested implementation—avoid stub exports that imply completeness.
+
+### Experimental (quarantined)
+
+Keep these exported for exploration, but do not grow the `identify` pipeline around them until they have a real use path:
+
+- **`Hypergraph`** — orthogonal to DAG identification / CDM simulation.
+- **`SymbolicSCM`** — MTK placeholder (`system::Any`); prefer `GraphSCM`.
 
 ## Adding a feature (workflow)
 

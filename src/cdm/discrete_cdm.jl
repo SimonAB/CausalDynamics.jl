@@ -23,14 +23,83 @@ Supertype for interventions applied during [`simulate`](@ref) and
 abstract type AbstractIntervention end
 
 """
+    AbstractDoAssignment
+
+Typed payload for a single variable in a [`DoSequence`](@ref): constant, time
+series, or `t -> value` function.
+"""
+abstract type AbstractDoAssignment end
+
+"""
+    ConstantAssignment(value)
+
+Hold a constant `do(·)` value for all occasions.
+"""
+struct ConstantAssignment{T} <: AbstractDoAssignment
+    value::T
+end
+
+"""
+    SeriesAssignment(values)
+
+Hold a time-indexed `do(·)` series (`values[t]` at occasion `t`).
+"""
+struct SeriesAssignment{V <: AbstractVector} <: AbstractDoAssignment
+    values::V
+end
+
+"""
+    TimedAssignment(f)
+
+Hold a time-dependent `do(·)` rule `f(t)`.
+"""
+struct TimedAssignment{F} <: AbstractDoAssignment
+    f::F
+end
+
+"""
+    normalize_do_assignment(v) -> AbstractDoAssignment
+
+Wrap a raw DoSequence payload as a typed assignment.
+"""
+function normalize_do_assignment(v)
+    v isa AbstractDoAssignment && return v
+    v isa AbstractVector && return SeriesAssignment(v)
+    v isa Function && return TimedAssignment(v)
+    return ConstantAssignment(v)
+end
+
+function _do_assignment_value(a::ConstantAssignment, ::Int)
+    return a.value
+end
+
+function _do_assignment_value(a::SeriesAssignment, t::Int)
+    t > length(a.values) && throw(ArgumentError(
+        "DoSequence series has length $(length(a.values)) but t=$t was requested",
+    ))
+    return a.values[t]
+end
+
+function _do_assignment_value(a::TimedAssignment, t::Int)
+    return a.f(t)
+end
+
+"""
     DoSequence
 
 Time-indexed `do(·)` assignments. Each key is an endogenous variable symbol; each
-value is either a scalar (constant for all `t`), an `AbstractVector` indexed by
-`t`, or a function `(t) -> value`.
+value is a typed [`AbstractDoAssignment`](@ref) (constructed automatically from a
+scalar, an `AbstractVector` indexed by `t`, or a function `(t) -> value`).
 """
 struct DoSequence <: AbstractIntervention
-    values::Dict{Symbol, Any}
+    values::Dict{Symbol, AbstractDoAssignment}
+
+    function DoSequence(values::AbstractDict{<:Symbol})
+        normalised = Dict{Symbol, AbstractDoAssignment}(
+            Symbol(k) => normalize_do_assignment(v) for (k, v) in values
+        )
+        return new(normalised)
+    end
 end
 
 """
@@ -55,12 +124,23 @@ end
     Policy
 
 State-dependent (soft) intervention. Each key is an endogenous variable symbol;
-each value is a rule `(state, t) -> value` evaluated against the *current* state
-before the update. Use for treatment strategies that react to the system, where
-[`DoSequence`](@ref) fixes a value independently of state.
+each value is a `Function` rule `(state, t) -> value` evaluated against the
+*current* state before the update. Use for treatment strategies that react to
+the system, where [`DoSequence`](@ref) fixes a value independently of state.
 """
 struct Policy <: AbstractIntervention
-    rules::Dict{Symbol, Any}
+    rules::Dict{Symbol, Function}
+
+    function Policy(rules::AbstractDict{<:Symbol})
+        normalised = Dict{Symbol, Function}()
+        for (k, r) in rules
+            r isa Function || throw(ArgumentError(
+                "Policy rule for :$(Symbol(k)) must be a Function ((state, t) -> value); got $(typeof(r))",
+            ))
+            normalised[Symbol(k)] = r
+        end
+        return new(normalised)
+    end
 end
 
 """
@@ -69,7 +149,7 @@ end
 Build a [`Policy`](@ref) assigning `variable` via `rule(state, t)`.
 """
 function policy(variable::Symbol, rule)
-    return Policy(Dict{Symbol, Any}(variable => rule))
+    return Policy(Dict{Symbol, Function}(variable => rule))
 end
 
 """
@@ -97,17 +177,7 @@ end
 
 function intervention_value(intervention::DoSequence, variable::Symbol, t::Int, observational_value)
     haskey(intervention.values, variable) || return observational_value
-    raw = intervention.values[variable]
-    if raw isa AbstractVector
-        t > length(raw) && throw(ArgumentError(
-            "DoSequence for :$variable has length $(length(raw)) but t=$t was requested",
-        ))
-        return raw[t]
-    elseif raw isa Function
-        return raw(t)
-    else
-        return raw
-    end
+    return _do_assignment_value(intervention.values[variable], t)
 end
 
 function intervention_value(intervention::Policy, variable::Symbol, t::Int, observational_value)
@@ -185,20 +255,20 @@ Result of simulating a [`DiscreteTimeCDM`](@ref).
 
 # Fields
 - `T`: number of occasions
-- `series`: endogenous trajectories (`Symbol => Vector`)
-- `noise`: realised exogenous draws (`Symbol => Vector`)
+- `series`: endogenous trajectories (`Symbol => Vector{<:Real}`)
+- `noise`: realised exogenous draws (`Symbol => Vector{<:Real}`)
 """
 struct CDMTrajectory
     T::Int
-    series::Dict{Symbol, Vector}
-    noise::Dict{Symbol, Vector}
+    series::Dict{Symbol, Vector{<:Real}}
+    noise::Dict{Symbol, Vector{<:Real}}
 end
 
 function _empty_series(keys_nt::NamedTuple, T::Int)
-    return Dict{Symbol, Vector}(k => Vector{typeof(v)}(undef, T) for (k, v) in pairs(keys_nt))
+    return Dict{Symbol, Vector{<:Real}}(k => Vector{typeof(v)}(undef, T) for (k, v) in pairs(keys_nt))
 end
 
-function _store!(store::Dict{Symbol, Vector}, nt::NamedTuple, t::Int)
+function _store!(store::Dict{Symbol, Vector{<:Real}}, nt::NamedTuple, t::Int)
     for (k, v) in pairs(nt)
         store[k][t] = v
     end
@@ -252,14 +322,14 @@ Resimulate `cdm` under `intervention` using fixed exogenous draws `noise`
 (typically `factual.noise` from a prior [`simulate`](@ref)).
 
 # Arguments
-- `noise`: `Dict{Symbol, Vector}` of realised exogenous series (common length `T`)
+- `noise`: `Dict{Symbol, Vector{<:Real}}` of realised exogenous series (common length `T`)
 - `intervention`: [`DoSequence`](@ref) for the counterfactual world
 - `initial`: optional endogenous `NamedTuple` at `t = 1` before `do` (default:
   `cdm.initialise` with a fixed seed — pass factual initials when they matter)
 """
 function counterfactual(
     cdm::DiscreteTimeCDM,
-    noise::Dict{Symbol, Vector};
+    noise::Dict{Symbol, <:AbstractVector};
     intervention::AbstractIntervention,
     initial::Union{Nothing, NamedTuple} = nothing,
 )
@@ -278,7 +348,7 @@ function counterfactual(
     _store!(series, state, 1)
 
     noise_keys = Tuple(keys(noise))
-    noise_out = Dict{Symbol, Vector}(k => copy(v) for (k, v) in noise)
+    noise_out = Dict{Symbol, Vector{<:Real}}(k => copy(v) for (k, v) in noise)
 
     for t in 2:T
         noise_t = NamedTuple{noise_keys}(ntuple(i -> noise[noise_keys[i]][t], length(noise_keys)))
@@ -355,6 +425,7 @@ end
 
 export AbstractCDM, DiscreteTimeCDM, CDMTrajectory
 export AbstractIntervention, DoSequence, do_sequence, intervention_value
+export AbstractDoAssignment, ConstantAssignment, SeriesAssignment, TimedAssignment
 export Policy, policy
 export GComputationResult, g_computation
 export simulate, counterfactual

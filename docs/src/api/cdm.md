@@ -12,6 +12,10 @@ CDMTrajectory
 AbstractIntervention
 DoSequence
 do_sequence
+AbstractDoAssignment
+ConstantAssignment
+SeriesAssignment
+TimedAssignment
 Policy
 policy
 intervention_value

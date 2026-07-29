@@ -10,8 +10,8 @@ An SCM consists of:
 - Exogenous variables (`U`): unmodelled unit-level factors
 
 # Subtypes
-- `GraphSCM`: SCM with graph and function-based equations
-- `SymbolicSCM`: SCM with symbolic equations (using ModelingToolkit.jl)
+- `GraphSCM`: SCM with graph and function-based equations (supported)
+- `SymbolicSCM`: **Experimental** placeholder for ModelingToolkit-backed equations
 
 # References
 - Pearl, J. (2009). *Causality*, Chapter 1
@@ -64,46 +64,22 @@ end
 """
     SymbolicSCM
 
-A Structural Causal Model with symbolic equations (using ModelingToolkit.jl).
-
-Allows symbolic manipulation of structural equations for identification,
-intervention, and counterfactual reasoning.
+**Experimental.** Placeholder Structural Causal Model for future ModelingToolkit.jl
+integration. Not part of the supported `identify` / `simulate_scm` path; use
+`GraphSCM` for executable models. The `system` field is typed as `Any` until a
+concrete MTK backend lands.
 
 # Fields
 - `graph::DiGraph`: Directed acyclic graph representing causal structure
-- `system::ModelingToolkit.AbstractSystem`: ModelingToolkit system containing symbolic equations
+- `system::Any`: Intended ModelingToolkit system (placeholder)
 - `exogenous::Set{Symbol}`: Set of exogenous variable names (symbols)
-
-# Examples
-
-```julia
-using CausalDynamics, Graphs, ModelingToolkit, Symbolics
-
-@variables x, y, u_x, u_y
-@parameters α, β
-
-g = DiGraph(2)
-add_edge!(g, 1, 2)  # X → Y
-
-# Create symbolic equations
-# x = u_x
-# y = α * x + u_y
-
-# (Implementation details depend on ModelingToolkit integration)
-scm = create_symbolic_scm(g, equations_dict)
-```
-
-# Notes
-- Enables symbolic computation of interventional and counterfactual distributions
-- Integration with ModelingToolkit.jl for equation manipulation is planned
-- Currently a type placeholder; prefer `GraphSCM` for executable models
 
 # See Also
 - `GraphSCM`: Function-based SCM (supported implementation)
 """
 struct SymbolicSCM <: AbstractSCM
     graph::Graphs.DiGraph
-    system::Any  # ModelingToolkit.AbstractSystem (using Any for now to avoid import issues)
+    system::Any  # ModelingToolkit.AbstractSystem placeholder (Any until MTK integration)
     exogenous::Set{Symbol}
 end
 

@@ -8,6 +8,12 @@
 - SCMs, CDMs, temporal unrolling
 - Integration **façades** (TMLE.jl, RxInfer, DAGMakie) via package extensions
 
+### Experimental (exported; outside the main pipeline)
+
+- **`Hypergraph`** — higher-order edges; not used by `identify` / CDM simulation
+- **`SymbolicSCM`** — ModelingToolkit placeholder (`system::Any`); use `GraphSCM`
+- Stub do-calculus (`is_identifiable`, `identify_formula`) — unexported; throw until implemented
+
 ## CausalTargeted.jl
 
 - Cross-fitted nuisances, LMTP, mediation EIF, grid execution

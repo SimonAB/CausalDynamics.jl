@@ -31,17 +31,22 @@ end
     @testset "DoSequence construction" begin
         seq = do_sequence(:a, [1.0, 2.0, 3.0])
         @test seq isa DoSequence
-        @test seq.values[:a] == [1.0, 2.0, 3.0]
+        @test seq.values[:a] isa SeriesAssignment
+        @test seq.values[:a].values == [1.0, 2.0, 3.0]
 
         seq2 = do_sequence(:a => [0.0, 1.0], :b => 5.0)
-        @test seq2.values[:a] == [0.0, 1.0]
-        @test seq2.values[:b] == 5.0
+        @test seq2.values[:a] isa SeriesAssignment
+        @test seq2.values[:a].values == [0.0, 1.0]
+        @test seq2.values[:b] isa ConstantAssignment
+        @test seq2.values[:b].value == 5.0
 
         seq_scalar = do_sequence(:a, 1.0)
-        @test seq_scalar.values[:a] == 1.0
+        @test seq_scalar.values[:a] isa ConstantAssignment
+        @test seq_scalar.values[:a].value == 1.0
 
         seq_fn = do_sequence(:a, t -> Float64(t))
-        @test seq_fn.values[:a] isa Function
+        @test seq_fn.values[:a] isa TimedAssignment
+        @test seq_fn.values[:a].f isa Function
     end
 
     @testset "intervention_value" begin

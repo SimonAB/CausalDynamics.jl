@@ -34,6 +34,13 @@ The [CDCS book](https://simonab.github.io/causal-dynamics-book/) is the primary 
 | Full symbolic do-calculus / ModelingToolkit ID | Stubs only (`is_identifiable`, `SymbolicSCM`); unexported until implemented |
 | Process metaphysics vocabulary | CDCS book prose, not package exports |
 
+## Experimental (exported, quarantined)
+
+| API | Status |
+|-----|--------|
+| `Hypergraph` | Higher-order edges; **not** used by `identify` or CDM simulation |
+| `SymbolicSCM` | ModelingToolkit placeholder (`system::Any`); use `GraphSCM` for executable SCMs |
+
 ## Façade vs own code
 
 - **Façades over CausalInference:** `d_separated` → `dsep`; `backdoor_adjustment_set` / adjustment listing → CausalInference backdoor helpers.

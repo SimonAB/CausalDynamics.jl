@@ -14,6 +14,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `terminal_state`, `state_series` ([docs](docs/src/SCIML_INTEGRATION.md));
   `examples/sciml_cdm_recipe.jl`, `test/test_sciml.jl`
 
+## [0.3.3] - 2026-07-29
+
+### Changed
+
+- `DoSequence` stores typed `AbstractDoAssignment` values
+  (`ConstantAssignment`, `SeriesAssignment`, `TimedAssignment`) instead of
+  bare `Any`.
+- `Policy` rules are `Dict{Symbol, Function}`.
+- `CDMTrajectory` series/noise are `Dict{Symbol, Vector{<:Real}}`.
+
+## [0.3.2] - 2026-07-29
+
+### Changed
+
+- Documented **`Hypergraph`** and **`SymbolicSCM`** as experimental / quarantined
+  (outside the `identify` pipeline); package blurb no longer markets Hypergraph
+  as a primary feature.
+
+## [0.3.1] - 2026-07-29
+
+### Fixed
+
+- **Associations.jl** is only a weak dependency (with DataFrames) for
+  `CausalDynamicsAssociationsExt`. It was incorrectly listed under hard `[deps]`
+  while the changelog already described it as optional.
+
 ## [0.3.0] - 2026-07-27
 
 ### Added

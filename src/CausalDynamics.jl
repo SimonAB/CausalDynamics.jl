@@ -7,13 +7,15 @@ with a lightweight SCM layer and discrete-time trajectory simulation.
 This package provides:
 
 - Causal graph operations (d-separation, paths, sets)
-- Hypergraph support for higher-order causal interactions
 - Identification algorithms (backdoor, frontdoor, instruments, adjustment)
 - Structural Causal Model (`GraphSCM`) simulation and `do(·)` interventions
 - Discrete-time CDMs (`DiscreteTimeCDM`, `DoSequence`, shared-`U` `counterfactual`)
 - Optional plotting via [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl)
 - Identification façades over [CausalInference.jl](https://github.com/SimonAB/CausalInference.jl)
 - Optional RxInfer / GraphPPL backdoor inference extension
+
+Experimental (exported but outside the `identify` pipeline): `Hypergraph` for
+higher-order edges; `SymbolicSCM` as a ModelingToolkit placeholder.
 
 # Examples
 
