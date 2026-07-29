@@ -183,4 +183,4 @@ function has_path(g::AbstractGraph, source::Int, target::Int)
     return _has_directed_path(g, source, target)
 end
 
-export find_instruments, is_valid_instrument, has_path
+export find_instruments, is_valid_instrument

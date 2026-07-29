@@ -22,7 +22,7 @@ using Test
         @test hasmethod(is_backdoor_adjustable, (AbstractGraph, Int, Int))
         @test hasmethod(find_instruments, (AbstractGraph, Int, Int))
         @test hasmethod(is_valid_instrument, (AbstractGraph, Int, Int, Int))
-        @test hasmethod(has_path, (AbstractGraph, Int, Int))
+        @test hasmethod(CausalDynamics.has_path, (AbstractGraph, Int, Int))
         @test hasmethod(frontdoor_adjustment_set, (AbstractGraph, Int, Int, Any))
         @test hasmethod(find_frontdoor_mediators, (AbstractGraph, Int, Int))
         @test hasmethod(find_all_adjustment_sets, (AbstractGraph, Int, Int))
