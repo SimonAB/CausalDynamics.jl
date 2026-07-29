@@ -2,11 +2,18 @@
 # Run from the package root:
 #   julia --project=. examples/sciml_cdm_recipe.jl
 #
-# Requires OrdinaryDiffEq in your environment.
+# Requires OrdinaryDiffEq in your environment for the ODE section.
 
 using CausalDynamics
 using Graphs
 using Random
+
+const HAS_ORDINARYDIFFEQ = try
+    @eval using OrdinaryDiffEq
+    true
+catch
+    false
+end
 
 function main()
     # ── 1. Identification (static summary graph) ─────────────────────
@@ -31,8 +38,7 @@ function main()
     println("Discrete CDM terminal Y: ", round(traj.series[:y][end]; digits = 3))
 
     # ── 3. Continuous CDM via SciML extension ────────────────────────
-    if Base.find_package("OrdinaryDiffEq") !== nothing
-        using OrdinaryDiffEq
+    if HAS_ORDINARYDIFFEQ
         spec = ContinuousCDMSpec([:prey, :predator])
         function lotka!(du, u, p, t)
             X, Y = u

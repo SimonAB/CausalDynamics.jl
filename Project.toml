@@ -1,7 +1,7 @@
 name = "CausalDynamics"
 uuid = "823b1367-efac-4af0-bbfc-73ee462bce07"
 license = "MIT"
-version = "0.3.3"
+version = "0.3.4"
 authors = ["Simon A. Babayan <simon.babayan@glasgow.ac.uk>"]
 repo = "https://github.com/SimonAB/CausalDynamics.jl.git"
 
@@ -31,6 +31,7 @@ DAGMakie = "0.1"
 DataFrames = "1"
 GraphPPL = "4.6"
 Graphs = "1"
+OrdinaryDiffEq = "6, 7"
 Random = "1"
 RxInfer = "4, 5"
 julia = "1.12"

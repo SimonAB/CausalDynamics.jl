@@ -24,6 +24,11 @@ using DataFrames
         confounders2, identifiable2 = prepare_for_tmle(g, 2, 3; node_names=node_names)
         @test confounders2 isa Vector{Symbol}
         @test identifiable2 isa Bool
+
+        # Vector form: index i names node i
+        confounders_v, identifiable_v = prepare_for_tmle(g, 2, 3; node_names=[:Z, :X, :Y])
+        @test confounders_v == [:Z]
+        @test identifiable_v == true
     end
     
     @testset "prepare_for_tmle without node_names" begin

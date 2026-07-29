@@ -13,7 +13,8 @@ Prepare adjustment set from causal graph for use with TMLE.jl.
 - `g`: Directed acyclic graph (DiGraph or CausalGraph)
 - `X`: Treatment node (integer or symbol)
 - `Y`: Outcome node (integer or symbol)
-- `node_names`: Optional mapping from node indices to symbols/names. If provided,
+- `node_names`: Optional mapping from node indices to symbols/names. Accepts
+  `Dict{Int,Symbol}` or a `Vector` of names (index `i` names node `i`). If provided,
   returns symbol names; otherwise returns node indices. For `CausalGraph`, node names
   are automatically extracted from graph properties if not provided.
 
@@ -32,9 +33,12 @@ add_edge!(g, 1, 2)  # Z → X
 add_edge!(g, 1, 3)  # Z → Y
 add_edge!(g, 2, 3)  # X → Y
 
-# With node names
+# With node names (Dict or vector indexed by node)
 node_names = Dict(1 => :Z, 2 => :X, 3 => :Y)
 confounders, identifiable = prepare_for_tmle(g, 2, 3; node_names=node_names)
+# Returns: ([:Z], true)
+
+confounders, identifiable = prepare_for_tmle(g, 2, 3; node_names=[:Z, :X, :Y])
 # Returns: ([:Z], true)
 
 # Without node names (returns indices)
@@ -58,11 +62,12 @@ confounders, identifiable = prepare_for_tmle(g2, 2, 3)  # Auto-uses node names
 - `is_backdoor_adjustable`: Check if backdoor adjustment is possible
 """
 function prepare_for_tmle(g::AbstractGraph, X::Int, Y::Int; node_names=nothing)
+    names = _normalize_node_names(node_names, nv(g))
     query = TotalEffectQuery(
-        node_names !== nothing && haskey(node_names, X) ? node_names[X] : X,
-        node_names !== nothing && haskey(node_names, Y) ? node_names[Y] : Y,
+        names !== nothing && haskey(names, X) ? names[X] : X,
+        names !== nothing && haskey(names, Y) ? names[Y] : Y,
     )
-    result = identify(g, query; node_names = node_names)
+    result = identify(g, query; node_names = names)
     return result.adjustment, result.identifiable
 end
 
@@ -153,6 +158,8 @@ function estimate_effect(g::AbstractGraph, data, X::Int, Y::Int; node_names=noth
     if X < 1 || X > nv(g) || Y < 1 || Y > nv(g)
         throw(ArgumentError("Node indices X=$X and Y=$Y must be in range [1, $(nv(g))]. Graph has $(nv(g)) nodes."))
     end
+
+    names = _normalize_node_names(node_names, nv(g))
     
     # Check if TMLE is available
     # Try to find TMLE module in loaded modules
@@ -169,24 +176,24 @@ function estimate_effect(g::AbstractGraph, data, X::Int, Y::Int; node_names=noth
     end
     
     # Get adjustment set
-    confounders, is_identifiable = prepare_for_tmle(g, X, Y; node_names=node_names)
+    confounders, is_identifiable = prepare_for_tmle(g, X, Y; node_names=names)
     
     # Warn if not identifiable (contextualized error message)
     if !is_identifiable || isempty(confounders)
-        treatment_name = node_names !== nothing && X isa Integer ? node_names[X] : X
-        outcome_name = node_names !== nothing && Y isa Integer ? node_names[Y] : Y
+        treatment_name = names !== nothing && haskey(names, X) ? names[X] : X
+        outcome_name = names !== nothing && haskey(names, Y) ? names[Y] : Y
         @warn "No backdoor adjustment set found for $treatment_name → $outcome_name. Effect may not be identifiable via backdoor adjustment. Consider checking for frontdoor adjustment (find_frontdoor_mediators) or instrumental variables (find_instruments). Proceeding with estimation anyway."
     end
     
     # Determine treatment and outcome names
-    treatment_name = if node_names !== nothing && X isa Integer
-        node_names[X]
+    treatment_name = if names !== nothing && haskey(names, X)
+        names[X]
     else
         X
     end
     
-    outcome_name = if node_names !== nothing && Y isa Integer
-        node_names[Y]
+    outcome_name = if names !== nothing && haskey(names, Y)
+        names[Y]
     else
         Y
     end

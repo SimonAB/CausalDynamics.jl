@@ -10,11 +10,12 @@ function identification_report(
     g::AbstractGraph,
     treatment::Int,
     outcome::Int;
-    node_names::Union{Nothing, Dict{Int, Symbol}} = nothing,
+    node_names = nothing,
 )
     X, Y = treatment, outcome
     _node_index(g, X)
     _node_index(g, Y)
+    names = _normalize_node_names(node_names, nv(g))
     minimal = backdoor_adjustment_set(g, X, Y)
     candidates = find_all_adjustment_sets(g, X, Y)
     rows = NamedTuple{(:set, :valid, :minimal, :size), Tuple{Vector{Any}, Bool, Bool, Int}}[]
@@ -22,7 +23,7 @@ function identification_report(
     for cand in candidates
         valid = is_valid_adjustment_set(g, X, Y, cand)
         is_min = cand == min_set
-        labels = _labels_from_indices(Set(cand), node_names)
+        labels = _labels_from_indices(Set(cand), names)
         push!(rows, (set = labels, valid = valid, minimal = is_min, size = length(cand)))
     end
     return rows

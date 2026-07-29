@@ -7,12 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+## [0.3.4] - 2026-07-29
 
-- Optional **OrdinaryDiffEq** weakdep extension (`CausalDynamicsSciMLExt`):
-  `ContinuousCDMSpec`, `ode_problem_cdm`, `solve_cdm`, `interventional_rhs`,
-  `terminal_state`, `state_series` ([docs](docs/src/SCIML_INTEGRATION.md));
-  `examples/sciml_cdm_recipe.jl`, `test/test_sciml.jl`
+### Fixed
+
+- `node_names` for `identify` / `prepare_for_tmle` now accepts a **vector** of
+  names (index `i` → node `i`) as well as `Dict{Int,Symbol}`; previously a
+  vector raised `MethodError` on `haskey`.
+- `examples/sciml_cdm_recipe.jl`: load `OrdinaryDiffEq` at top level (Julia
+  forbids `using` inside `main`).
+- Do not export `has_path` (name clash with `Graphs.has_path`); document as
+  `CausalDynamics.has_path`.
+
+### Changed
+
+- Documentation build: SciML API `@docs`, graph path helpers, scope/DESIGN links.
 
 ## [0.3.3] - 2026-07-29
 
