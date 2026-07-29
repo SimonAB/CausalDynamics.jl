@@ -59,5 +59,5 @@ The [CDCS book](https://simonab.github.io/causal-dynamics-book/) is the primary 
 - [CDM API](api/cdm.md)
 - [Integration](integration.md)
 - [References](references.md)
-- [Design principles](../../DESIGN.md) (repository root)
+- [Design principles](https://github.com/SimonAB/CausalDynamics.jl/blob/main/DESIGN.md)
 - Estimation citations: [CausalTargeted methods](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/methods.md)

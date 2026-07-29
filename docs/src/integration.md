@@ -405,4 +405,4 @@ See [Associations integration](ASSOCIATIONS_INTEGRATION.md) and `examples/discov
 - [Turing.jl GitHub Repository](https://github.com/TuringLang/Turing.jl)
 - [Associations.jl Documentation](https://juliadynamics.github.io/Associations.jl/stable/)
 - CausalDynamics.jl [Associations integration](ASSOCIATIONS_INTEGRATION.md)
-- CausalDynamics.jl [API Reference](@ref) for identification functions
+- CausalDynamics.jl [API Reference](api/identification.md) for identification functions

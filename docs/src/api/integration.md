@@ -38,3 +38,18 @@ infer_pc_graph
 infer_oce_temporal_spec
 discover_and_prepare
 ```
+
+## SciML / OrdinaryDiffEq (optional)
+
+Requires `using OrdinaryDiffEq` to load `CausalDynamicsSciMLExt` for `solve_cdm`.
+The types and façade functions below are always exported from core.
+
+```@docs
+ContinuousCDMSpec
+has_sciml
+ode_problem_cdm
+solve_cdm
+terminal_state
+state_series
+interventional_rhs
+```

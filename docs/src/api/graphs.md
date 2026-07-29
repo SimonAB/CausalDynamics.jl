@@ -17,6 +17,8 @@ get_children
 markov_boundary
 CausalDynamics.find_backdoor_paths
 CausalDynamics.find_directed_paths
+nodes_on_directed_paths
+has_path
 CausalDynamics.is_dag
 validate_causal_graph
 create_causal_graph

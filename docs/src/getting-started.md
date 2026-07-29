@@ -63,6 +63,6 @@ y_do = simulate_scm(apply_intervention(scm, do_intervention(2, 10.0)), U)
 
 ## Next steps
 
-- See the [API Reference](@ref) pages for detailed function documentation
+- See the [API Reference](api/graphs.md) pages for detailed function documentation
 - Check the [Examples](examples.md) for more usage
 - Read the [CDCS Book](https://simonab.github.io/causal-dynamics-book/) for conceptual background

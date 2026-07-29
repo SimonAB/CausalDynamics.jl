@@ -62,4 +62,4 @@ See [REGISTRATION.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/REG
 - [References](references.md) — Pearl, g-methods, discovery, temporal ID (DOIs / BibTeX keys)
 - Estimation layer citations: [CausalTargeted.jl references](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/references.md)
 
-See the [Getting Started](@ref) and [API Reference](@ref) pages. For conceptual background, see the [CDCS Book](https://simonab.github.io/causal-dynamics-book/).
+See the [Getting Started](getting-started.md) and [API Reference](api/graphs.md) pages. For conceptual background, see the [CDCS Book](https://simonab.github.io/causal-dynamics-book/).
