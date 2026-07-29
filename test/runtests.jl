@@ -16,6 +16,7 @@ include("test_best_practices.jl")
 include("test_rxinfer.jl")
 include("test_discovery.jl")
 include("test_associations.jl")
+include("test_sciml.jl")
 # Load DAGMakie last so its overlapping path exports do not shadow CausalDynamics in earlier tests.
 include("test_utils.jl")
 end

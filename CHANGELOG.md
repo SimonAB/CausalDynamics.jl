@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Optional **OrdinaryDiffEq** weakdep extension (`CausalDynamicsSciMLExt`):
+  `ContinuousCDMSpec`, `ode_problem_cdm`, `solve_cdm`, `interventional_rhs`,
+  `terminal_state`, `state_series` ([docs](docs/src/SCIML_INTEGRATION.md));
+  `examples/sciml_cdm_recipe.jl`, `test/test_sciml.jl`
+
 ## [0.3.0] - 2026-07-27
 
 ### Added

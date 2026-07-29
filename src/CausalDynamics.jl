@@ -89,5 +89,6 @@ include("integration/tmle.jl")
 include("integration/ppl.jl")
 include("integration/rxinfer.jl")
 include("integration/discovery.jl")
+include("integration/sciml.jl")
 
 end # module

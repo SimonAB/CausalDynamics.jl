@@ -2,7 +2,7 @@
 # Run from the package root:
 #   julia --project=. examples/sciml_cdm_recipe.jl
 #
-# Requires OrdinaryDiffEq in your environment if you execute the ODE block.
+# Requires OrdinaryDiffEq in your environment.
 
 using CausalDynamics
 using Graphs
@@ -30,18 +30,20 @@ function main()
     traj = simulate(cdm, 50; rng = Random.Xoshiro(0))
     println("Discrete CDM terminal Y: ", round(traj.series[:y][end]; digits = 3))
 
-    # ── 3. Optional ODE block (load SciML in your app) ───────────────
+    # ── 3. Continuous CDM via SciML extension ────────────────────────
     if Base.find_package("OrdinaryDiffEq") !== nothing
-        @eval using OrdinaryDiffEq
-        function lotka_cdm!(du, u, p, t)
+        using OrdinaryDiffEq
+        spec = ContinuousCDMSpec([:prey, :predator])
+        function lotka!(du, u, p, t)
             X, Y = u
             du[1] = p.r * X - p.α * X * Y
             du[2] = p.β * X * Y - p.δ * Y
+            return nothing
         end
         p = (r = 1.0, α = 0.1, β = 0.02, δ = 0.5)
-        prob = ODEProblem(lotka_cdm!, [40.0, 9.0], (0.0, 10.0), p)
-        sol = solve(prob)
-        println("ODE terminal prey: ", round(sol.u[end][1]; digits = 2))
+        sol = solve_cdm(spec, lotka!, [40.0, 9.0], (0.0, 10.0), p)
+        term = terminal_state(spec, sol)
+        println("ODE terminal prey: ", round(term.prey; digits = 2))
     else
         println("OrdinaryDiffEq not loaded — skipping ODE demo (install in your env).")
     end

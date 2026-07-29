@@ -58,11 +58,10 @@ adjustment sets from identification.
 ## Bridge to ODEs (application code)
 
 When the mechanism is continuous, keep **causal structure** in CausalDynamics and
-**integration** in SciML:
+**integration** in SciML. Load `OrdinaryDiffEq` to activate `CausalDynamicsSciMLExt`:
 
 ```julia
-using CausalDynamics, Graphs
-# using OrdinaryDiffEq  # optional; in your app environment
+using CausalDynamics, Graphs, OrdinaryDiffEq
 
 g = DiGraph(3)
 add_edge!(g, 1, 2)  # Z → X
@@ -70,18 +69,25 @@ add_edge!(g, 1, 3)  # Z → Y
 add_edge!(g, 2, 3)  # X → Y
 adj = backdoor_adjustment_set(g, 2, 3)
 
+spec = ContinuousCDMSpec([:Z, :X, :Y])
 function cdm_dynamics!(du, u, p, t)
     Z, X, Y = u
     du[1] = p.λ_z * Z
     du[2] = p.α * X + p.β * Z
     du[3] = p.γ * Y + p.δ * X + p.ε * Z
 end
+p = (λ_z = -0.1, α = -0.2, β = 0.3, γ = -0.1, δ = 0.5, ε = 0.2)
+sol = solve_cdm(spec, cdm_dynamics!, [1.0, 0.5, 0.2], (0.0, 10.0), p)
+terminal_state(spec, sol)  # NamedTuple(:Z, :X, :Y)
 
-# prob = ODEProblem(cdm_dynamics!, u0, tspan, p)
-# sol = solve(prob)
+# Static do(·): pin X while other equations run
+do_x = do_intervention(:X, 1.0)
+sol_do = solve_cdm(spec, cdm_dynamics!, [1.0, 0.5, 0.2], (0.0, 10.0), p; intervention = do_x)
 ```
 
-Book walkthrough: [Ch. 28 — Learning CDMs from Data](https://simonab.github.io/causal-dynamics-book/part-observable/28-cdms-unified.html#learning-cdms-from-data).
+Helpers: [`ContinuousCDMSpec`](@ref), [`ode_problem_cdm`](@ref), [`solve_cdm`](@ref),
+[`terminal_state`](@ref), [`state_series`](@ref), [`interventional_rhs`](@ref).
+Executable recipe: `examples/sciml_cdm_recipe.jl`.
 
 ## UniversalDiffEq
 
@@ -92,4 +98,4 @@ learn `f` from series. Do not expect UDE training inside CausalDynamics core.
 ## Version note
 
 - **0.2** — `DiscreteTimeCDM`, time-indexed unrolling helpers
-- **0.3+** — optional weakdep SciML recipe module if demand warrants (still no solver in core)
+- **0.3** — `CausalDynamicsSciMLExt` weakdep (`ContinuousCDMSpec`, `solve_cdm`, `do(·)` RHS wrapper)

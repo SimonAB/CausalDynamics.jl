@@ -231,7 +231,9 @@ See the [CDCS Book](https://simonab.github.io/causal-dynamics-book/) for compreh
 
 ### Integration with SciML Ecosystem
 
-See [SciML recipes](SCIML_INTEGRATION.md) for discrete-time CDM + ODE composition patterns (no SciML hard dependency in core).
+See [SciML recipes](SCIML_INTEGRATION.md). Load `OrdinaryDiffEq` to activate
+`CausalDynamicsSciMLExt` (`ContinuousCDMSpec`, `solve_cdm`, static `do(·)` via
+`interventional_rhs`). Core still has **no** SciML hard dependency.
 
 CausalDynamics.jl is designed to work with the [SciML ecosystem](https://sciml.ai/) for Causal Dynamical Models (CDMs). The SciML packages provide the dynamical systems and symbolic computation infrastructure, while CausalDynamics.jl provides causal graph operations.
 
