@@ -97,7 +97,8 @@ function plot_backdoor_paths(g::AbstractGraph, X::Int, Y::Int;
                     push!(dirs, :backward)
                 end
             end
-            push!(paths, CausalPath(nodes; directions = dirs))
+            # Positional constructor works on DAGMakie 0.1.0+; keyword form needs 0.1.1+
+            push!(paths, CausalPath(nodes, dirs))
         end
     end
 
@@ -113,7 +114,7 @@ end
 """
     plot_identification_result(g, result; node_names=nothing, kwargs...) -> Figure
 
-Highlight treatment, outcome, adjustment, and mediators from an [`IdentificationResult`](@ref).
+Highlight treatment, outcome, adjustment, and mediators from an `IdentificationResult`.
 """
 function plot_identification_result(g::AbstractGraph, result::IdentificationResult;
     node_names::Union{Nothing, Dict{Int, Symbol}} = nothing,

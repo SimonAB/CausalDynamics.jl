@@ -26,9 +26,8 @@ The [CDCS book](https://simonab.github.io/causal-dynamics-book/) showcases these
 
 ## Quick start
 
-```julia
-using CausalDynamics
-using Graphs
+```@example home
+using CausalDynamics, Graphs, DAGMakie, CairoMakie
 
 g = DiGraph(3)
 add_edge!(g, 1, 2)  # Z → X
@@ -37,7 +36,14 @@ add_edge!(g, 2, 3)  # X → Y
 
 d_separated(g, 2, 3, [1])                 # true
 backdoor_adjustment_set(g, 2, 3)            # Set([1])
+
+# Optional DAGMakie highlighting of backdoor paths and the adjustment set
+fig = plot_backdoor_paths(g, 2, 3; node_labels = ["Z", "X", "Y"])
+fig
 ```
+
+Publication-style DAG figures use [DAGMakie.jl](https://simonab.github.io/DAGMakie.jl/dev/);
+CausalDynamics supplies the identification sets that the plot helpers consume.
 
 ## Installation
 

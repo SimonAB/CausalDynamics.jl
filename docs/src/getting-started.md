@@ -15,37 +15,46 @@ Afterwards, `Pkg.add("CausalDynamics")` will suffice. Julia **1.12+** is require
 
 ### Creating a causal graph
 
-```julia
-using CausalDynamics
-using Graphs
+```@example getting_started
+using CausalDynamics, Graphs, DAGMakie, CairoMakie
 
 g = DiGraph(3)
 add_edge!(g, 1, 2)  # Z → X
 add_edge!(g, 1, 3)  # Z → Y
 add_edge!(g, 2, 3)  # X → Y
+g
 ```
 
 ### Checking d-separation
 
-```julia
+```@example getting_started
 d_separated(g, 2, 3, [1])  # true (Z blocks the path)
 ```
 
 ### Finding adjustment sets
 
-```julia
+```@example getting_started
 adj_set = backdoor_adjustment_set(g, 2, 3)  # Set([1])
 ```
 
 ### Plotting (optional)
 
-```julia
-using DAGMakie, CairoMakie
+`plot_causal_graph` and friends require `using DAGMakie` so the package extension loads.
+Styling and layout conventions are documented in the
+[DAGMakie user guide](https://simonab.github.io/DAGMakie.jl/dev/); here we feature the
+CausalDynamics façades that pass identification results into those plots.
 
+```@example getting_started
 fig = plot_backdoor_paths(g, 2, 3; node_labels = ["Z", "X", "Y"])
+fig
 ```
 
-`plot_causal_graph` and friends require `using DAGMakie` so the package extension loads.
+Highlight an explicit adjustment set (here `{Z}`):
+
+```@example getting_started
+fig = plot_with_adjustment_set(g, 2, 3, [1]; node_labels = ["Z", "X", "Y"])
+fig
+```
 
 ### SCM simulation and intervention
 

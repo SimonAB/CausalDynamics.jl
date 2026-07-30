@@ -28,12 +28,11 @@ jobs:
           julia --project=docs -e '
             using Pkg
             Pkg.develop(PackageSpec(path=pwd()))
-            try
-              Pkg.add(PackageSpec(name="DAGMakie"))
-            catch
-              @info "DAGMakie not on General yet; adding from GitHub"
-              Pkg.add(url="https://github.com/SimonAB/DAGMakie.jl.git")
-            end
+            # SimonAB CausalInference allows GraphMakie 0.6 (registry CI does not).
+            # SimonAB DAGMakie (≥0.1.1) falls back when GraphMakie lacks forked
+            # attributes such as :nlabels_align_processed.
+            Pkg.add(url="https://github.com/SimonAB/CausalInference.jl.git")
+            Pkg.add(url="https://github.com/SimonAB/DAGMakie.jl.git")
             Pkg.instantiate()'
       - name: Build and deploy documentation
         env:

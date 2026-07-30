@@ -1,17 +1,13 @@
 using Documenter
 using CausalDynamics
 using Graphs
+using DAGMakie
+using CairoMakie
 
-# Optional live figures when DAGMakie is available in the docs environment
-const HAS_DAGMAKIE = try
-    @eval using DAGMakie
-    @eval using CairoMakie
-    CairoMakie.activate!(type = "png")
-    CairoMakie.enable_only_mime!("png")
-    true
-catch
-    false
-end
+# Prefer PNG MIME so Documenter writes figure files instead of huge inline HTML
+# (same convention as DAGMakie.jl docs).
+CairoMakie.activate!(type = "png")
+CairoMakie.enable_only_mime!("png")
 
 makedocs(
     sitename = "CausalDynamics.jl",
@@ -21,7 +17,7 @@ makedocs(
         prettyurls = get(ENV, "CI", nothing) == "true",
         canonical = "https://simonab.github.io/CausalDynamics.jl",
         assets = String[],
-        example_size_threshold = 0,
+        example_size_threshold = 0,  # always write @example figures to files
     ),
     pages = [
         "Home" => "index.md",

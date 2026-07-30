@@ -102,7 +102,7 @@ end
 """
     plot_identification_result(g, result; node_names=nothing, kwargs...) -> Figure
 
-Plot highlighting nodes from an [`IdentificationResult`](@ref). Requires `using DAGMakie`.
+Plot highlighting nodes from an `IdentificationResult`. Requires `using DAGMakie`.
 """
 function plot_identification_result(g::AbstractGraph, result::IdentificationResult;
     node_names = nothing,
