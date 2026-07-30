@@ -2,7 +2,7 @@
 
 This package is the **structural and dynamical core**: graphs, identification, SCMs/CDMs, temporal unrolling, and thin integration façades.
 
-**Shared principles:** [../DESIGN_PRINCIPLES.md](../DESIGN_PRINCIPLES.md)  
+**Shared principles:** [DESIGN_PRINCIPLES.md](DESIGN_PRINCIPLES.md)  
 **Scope and architecture:** [docs/src/scope.md](docs/src/scope.md)  
 **Boundaries:** [BOUNDARIES.md](BOUNDARIES.md)
 
