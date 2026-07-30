@@ -77,9 +77,22 @@ intervened = simulate_scm(scm_do, U)
 
 ## Integrations
 
-- **TMLE.jl** — identify adjustment sets, then estimate effects on tables (`prepare_for_tmle`)
-- **RxInfer / GraphPPL** — optional extension (`using RxInfer`) for variational backdoor heads
-- **DAGMakie.jl** — optional extension for DAG figures
+- **[TMLE.jl](https://github.com/TARGENE/TMLE.jl)** — identify adjustment sets, then estimate CM / ATE / AIE on tables (`prepare_for_tmle`)
+- **[RxInfer](https://github.com/ReactiveBayes/RxInfer.jl) / [GraphPPL](https://github.com/ReactiveBayes/GraphPPL.jl)** — optional extension (`using RxInfer`) for variational backdoor heads
+- **[DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl)** — optional extension for DAG figures
+
+## Related packages (Julia causal ecosystem)
+
+CausalDynamics is the **graph / identification / CDM** layer. Estimation is deliberately
+elsewhere:
+
+| Package | Role |
+|---------|------|
+| [TMLE.jl](https://github.com/TARGENE/TMLE.jl) | Point-treatment TMLE / OSE / C-TMLE (CM, ATE, AIE); primary partner for tabular ATE |
+| [CausalTargeted.jl](https://github.com/SimonAB/CausalTargeted.jl) | Continuous MTP / LMTP and interventional mediation grids |
+| [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl) | Publication-ready DAG figures |
+| [CausalTables.jl](https://github.com/salbalkus/CausalTables.jl) | SCM-aware tables; used with TMLE.jl |
+| [CausalInference.jl](https://github.com/mschauer/CausalInference.jl) | Structure learning and classical graphical criteria |
 
 See the [documentation](https://simonab.github.io/CausalDynamics.jl/dev/) (including
 [References](https://simonab.github.io/CausalDynamics.jl/dev/references/) with DOIs) and the
