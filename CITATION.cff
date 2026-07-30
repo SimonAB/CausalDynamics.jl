@@ -5,6 +5,6 @@ authors:
   given-names: "Simon A."
   orcid: "https://orcid.org/0000-0002-4949-1117"
 title: "CausalDynamics.jl"
-version: 0.3.4
+version: 0.3.5
 url: "https://github.com/SimonAB/CausalDynamics.jl"
 license: MIT
