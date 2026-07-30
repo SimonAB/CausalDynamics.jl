@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Babayan"
+  given-names: "Simon A."
+  orcid: "https://orcid.org/0000-0002-4949-1117"
+title: "CausalDynamics.jl"
+version: 0.3.4
+url: "https://github.com/SimonAB/CausalDynamics.jl"
+license: MIT

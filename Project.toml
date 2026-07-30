@@ -1,8 +1,8 @@
 name = "CausalDynamics"
 uuid = "823b1367-efac-4af0-bbfc-73ee462bce07"
 license = "MIT"
-version = "0.3.4"
 authors = ["Simon A. Babayan <simon.babayan@glasgow.ac.uk>"]
+version = "0.3.4"
 repo = "https://github.com/SimonAB/CausalDynamics.jl.git"
 
 [deps]
@@ -35,6 +35,11 @@ OrdinaryDiffEq = "6, 7"
 Random = "1"
 RxInfer = "4, 5"
 julia = "1.12"
+
+[[author_details]]
+name = "Simon A. Babayan"
+orcid = "0000-0002-4949-1117"
+email = "simon.babayan@glasgow.ac.uk"
 
 [extras]
 Associations = "614afb3a-e278-4863-8805-9959372b9ec2"

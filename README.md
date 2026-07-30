@@ -7,6 +7,7 @@ Causal graph operations and identification for **Causal Dynamical Models (CDMs)*
 > **Registration in progress.** Until CausalDynamics appears on General, install from GitHub (see [REGISTRATION.md](REGISTRATION.md)). Requires Julia **1.12+**.
 
 [![Build Status](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/SimonAB/CausalDynamics.jl/actions/workflows/CI.yml)
+[![DOI](https://zenodo.org/badge/latestdoi/1130550372.svg)](https://zenodo.org/badge/latestdoi/1130550372)
 [![Docs](https://img.shields.io/badge/docs-dev-blue)](https://simonab.github.io/CausalDynamics.jl/dev/)
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 

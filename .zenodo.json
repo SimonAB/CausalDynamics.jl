@@ -1,0 +1,29 @@
+{
+    "title": "CausalDynamics.jl",
+    "description": "Causal graph operations and identification for Causal Dynamical Models (CDMs): d-separation, adjustment criteria, SCM simulation, do(·) interventions, and counterfactuals.",
+    "upload_type": "software",
+    "creators": [
+        {
+            "name": "Babayan, Simon A.",
+            "orcid": "0000-0002-4949-1117",
+            "affiliation": "University of Glasgow"
+        }
+    ],
+    "access_right": "open",
+    "license": "MIT",
+    "related_identifiers": [
+        {
+            "scheme": "url",
+            "identifier": "https://github.com/SimonAB/CausalDynamics.jl",
+            "relation": "isSupplementTo"
+        }
+    ],
+    "keywords": [
+        "julia",
+        "causal inference",
+        "structural causal models",
+        "identification",
+        "dynamical systems",
+        "causal dynamical models"
+    ]
+}

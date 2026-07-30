@@ -38,6 +38,10 @@ CI runs an **optional DAGMakie extension job** (develop from GitHub if not on Ge
 4. `@JuliaRegistrator register` on issue #1 or the release commit
 5. After AutoMerge: README `Pkg.add("CausalDynamics")`; bump CDCS Manifest; enable `DAGMakieCausalDynamicsExt` in a DAGMakie patch
 
+## Zenodo DOI
+
+Deposit metadata is in `.zenodo.json` and `CITATION.cff`. Enable GitHub–Zenodo integration and create a release to mint a DOI; then run `julia --project=. --threads=auto scripts/update_package_zenodo_dois.jl` from the CDCS repo. See [packages/ZENODO.md](../ZENODO.md).
+
 ## After AutoMerge
 
 - Update README installation to `Pkg.add("CausalDynamics")`
