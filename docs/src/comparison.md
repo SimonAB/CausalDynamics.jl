@@ -32,4 +32,4 @@ Full causal discovery implementations, differential-equation solvers, and full s
 Discovery runs in Associations.jl; identification and trajectories stay here. See [Scope](scope.md).
 
 The [CDCS book](https://simonab.github.io/causal-dynamics-book/) is the long-form
-narrative showcase for these APIs.
+narrative companion for these APIs.

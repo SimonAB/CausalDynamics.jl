@@ -1,18 +1,15 @@
 """
-    CausalDynamics.jl
+    CausalDynamics
 
-Causal graph operations and identification for **Causal Dynamical Models (CDMs)**,
-with a lightweight SCM layer and discrete-time trajectory simulation.
+Provide causal graph operations and identification for structural and
+discrete-time dynamical models (CDMs), including a lightweight SCM layer.
 
-This package provides:
-
-- Causal graph operations (d-separation, paths, sets)
-- Identification algorithms (backdoor, frontdoor, instruments, adjustment)
-- Structural Causal Model (`GraphSCM`) simulation and `do(·)` interventions
-- Discrete-time CDMs (`DiscreteTimeCDM`, `DoSequence`, shared-`U` `counterfactual`)
-- Optional plotting via [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl)
-- Identification façades over [CausalInference.jl](https://github.com/SimonAB/CausalInference.jl)
-- Optional RxInfer / GraphPPL backdoor inference extension
+Core exports cover d-separation and paths; backdoor, frontdoor, and
+instrumental-variable criteria; `GraphSCM` simulation with `do(·)`; and
+`DiscreteTimeCDM` trajectories with shared-`U` counterfactuals. Identification
+façades wrap [CausalInference.jl](https://github.com/SimonAB/CausalInference.jl).
+Optional extensions load [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl)
+plotting and RxInfer / GraphPPL backdoor inference.
 
 Experimental (exported but outside the `identify` pipeline): `Hypergraph` for
 higher-order edges; `SymbolicSCM` as a ModelingToolkit placeholder.
@@ -23,16 +20,12 @@ higher-order edges; `SymbolicSCM` as a ModelingToolkit placeholder.
 using CausalDynamics
 using Graphs
 
-# Create a causal graph
 g = DiGraph(4)
 add_edge!(g, 1, 2)  # X → Y
 add_edge!(g, 3, 1)  # Z → X
 add_edge!(g, 3, 2)  # Z → Y
 
-# Check d-separation
 d_separated(g, 1, 2, [3])  # true (Z blocks the path)
-
-# Find backdoor adjustment set
 backdoor_adjustment_set(g, 1, 2)  # [3]
 ```
 

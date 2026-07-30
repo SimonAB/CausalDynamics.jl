@@ -1,8 +1,13 @@
 # Scope and architecture
 
-CausalDynamics.jl is the reference Julia package for **Causal Dynamical Models (CDMs)**: Pearl-style identification and executable structural models, with a growing first-class API for **time-indexed** simulation, `do(·)`, and shared-`U` counterfactual trajectories.
+CausalDynamics.jl implements Pearl-style identification and executable structural
+models for **Causal Dynamical Models (CDMs)**, including time-indexed simulation,
+`do(·)`, and shared-`U` counterfactual trajectories.
 
-The [CDCS book](https://simonab.github.io/causal-dynamics-book/) is the primary **showcase**: chapter chunks call this package’s exported APIs. Process/Whitehead gloss lives in the book ([Concept Reference Table 8](https://simonab.github.io/causal-dynamics-book/concept-reference-tables.html)); package names stay Pearl/SciML-facing.
+The [CDCS book](https://simonab.github.io/causal-dynamics-book/) uses these
+exported APIs in narrative chapters. Process/Whitehead gloss lives in the book
+([Concept Reference Table 8](https://simonab.github.io/causal-dynamics-book/concept-reference-tables.html));
+package names stay Pearl/SciML-facing.
 
 ## What is in core (v0.1–v0.2)
 
@@ -49,7 +54,7 @@ The [CDCS book](https://simonab.github.io/causal-dynamics-book/) is the primary 
 ## Version narrative
 
 - **0.1** — static graphs, identification façades, `GraphSCM`
-- **0.2** — `DiscreteTimeCDM` trajectories (book Ch. 28 showcase); time-indexed unrolling
+- **0.2** — `DiscreteTimeCDM` trajectories (book Ch. 28); time-indexed unrolling
 - **0.3** — Associations.jl discovery bridge; `prepare_from_discovery`, OCE → `TemporalDAGSpec`
 
 ## See also

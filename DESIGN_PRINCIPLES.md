@@ -4,7 +4,7 @@ Shared guidance for **owned** packages in this ecosystem (`CausalDynamics.jl`, `
 
 Each package repository also carries a copy of this file as `DESIGN_PRINCIPLES.md` so GitHub README links work outside the CDCS monorepo.
 
-See also this package's [DESIGN.md](DESIGN.md).
+See also per-package notes: [CausalDynamics.jl/DESIGN.md](CausalDynamics.jl/DESIGN.md), [CausalTargeted.jl/DESIGN.md](CausalTargeted.jl/DESIGN.md), [DAGMakie.jl/DESIGN.md](DAGMakie.jl/DESIGN.md).
 
 ## 1. Julia first
 
@@ -48,6 +48,16 @@ See also this package's [DESIGN.md](DESIGN.md).
 - **Warn or fail** when backdoor sets are missing; do not silently proceed without documenting the assumption breach.
 - **Run metadata** (learners, folds, engine, package version) attaches to estimation outputs for reproducibility.
 - **Docstrings** on every export: arguments, returns, and a minimal example.
+
+### Documentation tone
+
+Documenter pages and README prose follow the [Julia Language manual](https://docs.julialang.org/en/v1/) voice:
+
+- **Define first, then show code.** Lead with what the package or API *is*; put examples immediately after.
+- **Calm and precise.** Avoid marketing (“publication-ready”, “showcase”, “start here”) and schoolbook framing (“this guide will help you”, “your first …”).
+- **Adult-to-adult.** Capability language (`You can…`) is fine; prefer factual section titles over tutorial cheerleading.
+- **Docstrings** use an imperative one-liner after the signature (`Return…`, `Compute…`), per the [Julia documentation conventions](https://docs.julialang.org/en/v1/manual/documentation/).
+- **British spelling** in prose and docstrings (see §7).
 
 ## 7. Testable by construction
 

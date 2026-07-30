@@ -8,21 +8,17 @@ CurrentModule = CausalDynamics
 CausalDynamics
 ```
 
-A Julia package for causal graph operations and identification for **Causal Dynamical Models (CDMs)**. APIs use standard Pearl names (`d_separated`, `backdoor_adjustment_set`, `do_intervention`, `DiscreteTimeCDM`, …). See [Scope](scope.md) for what is in core vs deferred.
+CausalDynamics provides causal graph operations and identification for structural
+and discrete-time dynamical models (CDMs). Names follow Pearl-style conventions
+(`d_separated`, `backdoor_adjustment_set`, `do_intervention`, `DiscreteTimeCDM`, …).
+See [Scope](scope.md) for what is in core versus deferred.
 
-## Features
-
-- **Causal graph operations**: d-separation, path finding, ancestral/descendant sets, Markov boundary
-- **Identification**: backdoor, frontdoor, instrumental variables, adjustment sets
-- **Static SCM**: `GraphSCM` simulation, `do(·)` interventions, counterfactuals with shared `U`
-- **Discrete-time CDMs**: trajectory simulation, `DoSequence`, shared-`U` counterfactual paths
-- **Soft interventions and g-computation**: `Policy`, `g_computation`
-- **Time-indexed identification**: `unroll_temporal_dag`, `temporal_backdoor_adjustment_set`
-- **Optional DAGMakie plotting**: `plot_causal_graph`, `plot_backdoor_paths`, …
-- **Optional RxInfer / GraphPPL**: variational backdoor inference extension
-- **Optional Associations.jl**: PC / OCE discovery bridge to identification
-
-The [CDCS book](https://simonab.github.io/causal-dynamics-book/) showcases these APIs in full narrative form.
+The package covers d-separation and path finding; backdoor, frontdoor, and
+instrumental-variable criteria; static `GraphSCM` simulation with `do(·)` and
+shared-`U` counterfactuals; discrete-time CDMs (`DoSequence`, trajectory
+simulation); soft interventions and g-computation; and time-indexed identification
+via unrolled lag DAGs. Optional extensions load DAGMakie plotting, RxInfer /
+GraphPPL backdoor inference, and Associations.jl discovery bridges.
 
 ## Quick start
 
@@ -42,7 +38,7 @@ fig = plot_backdoor_paths(g, 2, 3; node_labels = ["Z", "X", "Y"])
 fig
 ```
 
-Publication-style DAG figures use [DAGMakie.jl](https://simonab.github.io/DAGMakie.jl/dev/);
+DAG figures use [DAGMakie.jl](https://simonab.github.io/DAGMakie.jl/dev/);
 CausalDynamics supplies the identification sets that the plot helpers consume.
 
 ## Installation
@@ -66,6 +62,5 @@ See [REGISTRATION.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/REG
 
 - [Scope](scope.md) · [Getting Started](getting-started.md) · [API](api/graphs.md)
 - [References](references.md) — Pearl, g-methods, discovery, temporal ID (DOIs / BibTeX keys)
-- Estimation layer citations: [CausalTargeted.jl references](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/references.md)
-
-See the [Getting Started](getting-started.md) and [API Reference](api/graphs.md) pages. For conceptual background, see the [CDCS Book](https://simonab.github.io/causal-dynamics-book/).
+- Estimation layer: [CausalTargeted.jl references](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/references.md)
+- Narrative companion: [CDCS Book](https://simonab.github.io/causal-dynamics-book/)

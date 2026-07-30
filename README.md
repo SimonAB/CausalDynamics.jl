@@ -6,11 +6,11 @@
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Causal graph operations and identification for **Causal Dynamical Models (CDMs)**:
-d-separation, backdoor / frontdoor / IV criteria, `GraphSCM` simulation, `do(·)`
-interventions, and counterfactuals. Optional DAG figures via
-[DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl); optional variational
-backdoor inference via RxInfer / GraphPPL.
+CausalDynamics provides causal graph operations and identification for structural
+and discrete-time dynamical models (CDMs): d-separation, backdoor / frontdoor /
+IV criteria, `GraphSCM` simulation, `do(·)` interventions, and counterfactuals.
+Optional DAG figures via [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl);
+optional variational backdoor inference via RxInfer / GraphPPL.
 
 **Design principles:** [DESIGN.md](DESIGN.md) · [BOUNDARIES.md](BOUNDARIES.md) ·
 [ecosystem](DESIGN_PRINCIPLES.md)
@@ -82,13 +82,13 @@ factual = simulate_scm(scm, U)
 intervened = simulate_scm(apply_intervention(scm, do_intervention(2, 10.0)), U)
 ```
 
-## Role in the stack
+## Ecosystem
 
 | Package | Role |
 |---------|------|
 | **CausalDynamics** | Graphs, identification, `GraphSCM` / discrete-time CDMs |
 | [CausalTargeted.jl](https://github.com/SimonAB/CausalTargeted.jl) | Cross-fitted LMTP / interventional mediation |
-| [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl) | Publication DAG figures (optional) |
+| [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl) | DAG figures (optional) |
 | Application repos | Cohort data, registries, concordance (thin) |
 
 ## Integrations
@@ -104,7 +104,7 @@ intervened = simulate_scm(apply_intervention(scm, do_intervention(2, 10.0)), U)
 |---------|------|
 | [TMLE.jl](https://github.com/TARGENE/TMLE.jl) | Point-treatment TMLE / OSE / C-TMLE (CM, ATE, AIE) |
 | [CausalTargeted.jl](https://github.com/SimonAB/CausalTargeted.jl) | Continuous MTP / LMTP and interventional mediation |
-| [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl) | Publication-ready DAG figures |
+| [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl) | DAG figures for causal diagrams |
 | [CausalTables.jl](https://github.com/salbalkus/CausalTables.jl) | SCM-aware tables; often paired with TMLE.jl |
 | [CausalInference.jl](https://github.com/mschauer/CausalInference.jl) | Structure learning and classical graphical criteria |
 
@@ -112,7 +112,7 @@ intervened = simulate_scm(apply_intervention(scm, do_intervention(2, 10.0)), U)
 
 - [Documenter site](https://simonab.github.io/CausalDynamics.jl/dev/) (API, examples, live DAGMakie figures)
 - [References](https://simonab.github.io/CausalDynamics.jl/dev/references/) — DOIs / BibTeX keys
-- [CDCS book](https://simonab.github.io/causal-dynamics-book/) — narrative showcase
+- [CDCS book](https://simonab.github.io/causal-dynamics-book/) — narrative companion
 
 Estimation-layer citations live in
 [CausalTargeted.jl](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/references.md).
