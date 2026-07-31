@@ -77,19 +77,17 @@ end
 """
     residualise_backdoor(y, x, confounder_cols) -> (y_res, x_res)
 
-Partial out confounders from outcome and treatment (Frisch–Waugh), for a conjugate
-RxInfer head on the residualised pair.
+Partial out an intercept and any confounders from outcome and treatment (Frisch–Waugh),
+so a conjugate no-intercept RxInfer head on the residualised pair identifies the slope `τ`.
+With an empty confounder list this still demeans `(y, x)`.
 """
 function residualise_backdoor(y::AbstractVector{<:Real}, x::AbstractVector{<:Real},
-    confounder_cols::Vector{<:AbstractVector{<:Real}})
+    confounder_cols)
     y = Vector{Float64}(y)
     x = Vector{Float64}(x)
-    if isempty(confounder_cols)
-        return y, x
-    end
     n = length(y)
-    Z = hcat(confounder_cols...)
-    design = hcat(ones(n), Z)
+    cols = collect(AbstractVector{<:Real}, confounder_cols)
+    design = isempty(cols) ? ones(n, 1) : hcat(ones(n), cols...)
     β_y = design \ y
     β_x = design \ x
     return y .- design * β_y, x .- design * β_x
@@ -98,8 +96,8 @@ end
 """
     ppl_data_from_spec(spec; residualise=true) -> NamedTuple
 
-Build RxInfer data from `prepare_for_rxinfer` output. By default, confounders are
-partialled out in Julia; the GraphPPL head estimates `τ` on residualised `(y, x)`.
+Build RxInfer data from `prepare_for_rxinfer` output. By default, an intercept and any
+confounders are partialled out in Julia; the GraphPPL head estimates `τ` on residualised `(y, x)`.
 """
 function ppl_data_from_spec(spec; residualise::Bool=true)
     data = spec.data
@@ -108,7 +106,7 @@ function ppl_data_from_spec(spec; residualise::Bool=true)
     x = _column(data, spec.treatment)
     n = length(y)
     conf_cols = [_column(data, c) for c in spec.confounders]
-    if residualise && !isempty(conf_cols)
+    if residualise
         y, x = residualise_backdoor(y, x, conf_cols)
     end
     return (y=y, x=x, n_conf=length(conf_cols), n_obs=n)

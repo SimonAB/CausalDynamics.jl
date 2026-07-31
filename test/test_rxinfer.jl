@@ -43,6 +43,20 @@ using Test
         @test 0.5 < result.τ_mean < 2.5
         @test result.τ_mean ≈ CausalDynamics.posterior_mean_τ(result.τ_posterior)
 
+        # Empty adjustment set: demeaning still identifies the slope (no-intercept head)
+        g0 = DiGraph(2)
+        add_edge!(g0, 1, 2)
+        Random.seed!(3)
+        n0 = 120
+        x0 = randn(n0)
+        y0 = 2.0 .* x0 .+ 0.25 .* randn(n0)
+        r0 = CausalDynamics.infer_backdoor_effect(
+            g0, DataFrame(X = x0, Y = y0), 1, 2;
+            node_names = Dict(1 => :X, 2 => :Y), iterations = 20,
+        )
+        @test isempty(r0.confounders)
+        @test 1.5 < r0.τ_mean < 2.5
+
         spec = CausalDynamics.prepare_for_rxinfer(g, 2, 3; node_names=names, data=data)
         ppl_data = CausalDynamics.ppl_data_from_spec(spec)
         @test length(ppl_data.y) == n
