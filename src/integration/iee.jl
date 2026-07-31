@@ -196,6 +196,8 @@ Compute IEE from cause series `x` to effect series `y` (IntDC ranking score).
 - `mi`: mutual-information estimator — `:auto` (Associations KSG1 when loaded,
   else reference), `:associations` (requires `using Associations`), or
   `:reference` (MATLAB-faithful `MIknn` port for concordance tests)
+- `backend`: deprecated alias for `mi` (kept for notebook sessions that still
+  expect the old keyword)
 
 # References
 - Shi et al. (2026), *The Innovation*; arXiv:2407.01621
@@ -208,14 +210,16 @@ function interventional_embedding_entropy(
     k::Integer = 2,
     theiler::Union{Nothing, Integer} = nothing,
     n_delta::Integer = 10,
-    mi::Symbol = :auto,
+    mi::Union{Nothing, Symbol} = nothing,
+    backend::Union{Nothing, Symbol} = nothing,
 )
     p < 1 && throw(ArgumentError("p must be ≥ 1"))
     k < 2 && throw(ArgumentError("k must be ≥ 2"))
     Thei = theiler === nothing ? p : Int(theiler)
     Thei < p && throw(ArgumentError("theiler half-width must be ≥ p"))
 
-    mi_fn = _iee_mi_estimator(mi, k)
+    est = _resolve_iee_mi(mi, backend)
+    mi_fn = _iee_mi_estimator(est, k)
 
     X = delay_embed_cause(x, p)
     Y = delay_embed_effect(y, p)
@@ -239,6 +243,23 @@ function interventional_embedding_entropy(
         scores[i] = mi_fn(Xp, Yp)
     end
     return sum(scores) / N
+end
+
+"""
+    _resolve_iee_mi(mi, backend) -> Symbol
+
+Resolve the IEE estimator keyword (`mi` preferred; `backend` is a deprecated alias).
+"""
+function _resolve_iee_mi(
+    mi::Union{Nothing, Symbol},
+    backend::Union{Nothing, Symbol},
+)
+    if mi !== nothing && backend !== nothing && mi !== backend
+        throw(ArgumentError("conflicting mi=:$mi and backend=:$backend"))
+    end
+    mi !== nothing && return mi
+    backend !== nothing && return backend
+    return :auto
 end
 
 """
