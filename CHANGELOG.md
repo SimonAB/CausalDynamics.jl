@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.11] - 2026-07-31
+
+### Changed
+
+- Prefer ordinary dynamical language in APIs: `infer_invariant_parents`,
+  `InvariantParentRanking`, `invariant_ranking_to_continuous_spec` (was
+  `infer_kinetic_parents` / `KineticParentRanking` / …). “Kinetic” remains only
+  as a Peters / CausalKinetiX citation gloss.
+
 ## [0.3.10] - 2026-07-31
 
 ### Changed

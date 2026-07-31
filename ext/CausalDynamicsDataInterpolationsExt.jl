@@ -1,7 +1,7 @@
 """
     CausalDynamicsDataInterpolationsExt
 
-Cubic-spline differentiation for invariant kinetic parent discovery via
+Cubic-spline differentiation for invariant parent discovery via
 [DataInterpolations.jl](https://docs.sciml.ai/DataInterpolations/stable/).
 """
 module CausalDynamicsDataInterpolationsExt

@@ -2,7 +2,7 @@
     CausalDynamicsSciMLExt
 
 Optional SciML integration for continuous-time CDMs: `ODEProblem` construction,
-causal-kinetic `do(·)` via RHS wrapping, and SciML-native pin callbacks
+continuous-CDM `do(·)` via RHS wrapping, and SciML-native pin callbacks
 (`DiscreteCallback` / `CallbackSet` from OrdinaryDiffEq).
 """
 module CausalDynamicsSciMLExt

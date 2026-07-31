@@ -75,15 +75,15 @@ iee_to_temporal_spec
 infer_iee_temporal_spec
 ```
 
-## Invariant kinetic parent discovery
+## Invariant parent discovery
 
-Leave-one-environment ranking for ODE parent sets (CausalKinetiX reference method).
-Load `DataInterpolations` for cubic-spline derivatives.
+Leave-one-environment ranking for continuous-CDM parent sets (CausalKinetiX
+reference method). Load `DataInterpolations` for cubic-spline derivatives.
 
 ```@docs
-KineticParentRanking
-infer_kinetic_parents
-score_kinetic_parent_sets
-kinetic_ranking_to_continuous_spec
+InvariantParentRanking
+infer_invariant_parents
+score_invariant_parent_sets
+invariant_ranking_to_continuous_spec
 candidate_parent_sets
 ```

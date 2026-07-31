@@ -9,7 +9,7 @@ Causal structure and `do(·)` semantics stay in CausalDynamics; integration live
     ContinuousCDMSpec
 
 Named continuous-time CDM: maps endogenous symbols to state-vector indices, with
-optional parent sets for each coordinate (causal kinetic graph).
+optional parent sets for each coordinate (ODE / continuous causal graph).
 
 Use with [`ode_problem_cdm`](@ref) and [`solve_cdm`](@ref) when the mechanism is an ODE
 rather than a [`DiscreteTimeCDM`](@ref).
@@ -189,7 +189,7 @@ end
 """
     interventional_rhs(rhs!, spec::ContinuousCDMSpec, intervention)
 
-Wrap a continuous RHS for a causal kinetic intervention.
+Wrap a continuous RHS for a continuous-CDM intervention.
 Requires `using OrdinaryDiffEq`.
 """
 function interventional_rhs(args...)

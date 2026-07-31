@@ -98,8 +98,8 @@ Intervention types share [`AbstractCausalIntervention`](@ref):
 
 Hard pins use SciML `DiscreteCallback` to reassert the value after accepted steps
 (no in-RHS mutation of `u`). Soft force and RHS replacement modify `du` only.
-Optional `parents` on [`ContinuousCDMSpec`](@ref) record the causal kinetic graph
-([`continuous_cdm_graph`](@ref)).
+Optional `parents` on [`ContinuousCDMSpec`](@ref) record the continuous causal
+parent graph ([`continuous_cdm_graph`](@ref)).
 Executable recipe: `examples/sciml_cdm_recipe.jl`.
 
 ## UniversalDiffEq
@@ -108,11 +108,10 @@ Use CausalDynamics for **adjustment / `do` semantics**; use
 [UniversalDiffEq.jl](https://github.com/Jack-H-Buckner/UniversalDiffEq.jl) to
 learn `f` from series. Do not expect UDE training inside CausalDynamics core.
 
-Invariant kinetic parent ranking across experiments
-([`infer_kinetic_parents`](@ref); CausalKinetiX reference method
+Invariant parent ranking across experiments
+([`infer_invariant_parents`](@ref); CausalKinetiX reference method
 [@pfister2019causalkinetix]) is documented in [Methods adoption](METHODS_ADOPTION.md)
-and bridges into [`ContinuousCDMSpec`](@ref) via [`kinetic_ranking_to_continuous_spec`](@ref).
-and is not yet implemented.
+and bridges into [`ContinuousCDMSpec`](@ref) via [`invariant_ranking_to_continuous_spec`](@ref).
 
 ## Version note
 

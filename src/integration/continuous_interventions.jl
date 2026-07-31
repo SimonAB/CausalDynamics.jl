@@ -1,7 +1,8 @@
 """
     AbstractContinuousIntervention
 
-Continuous-time interventions for [`solve_cdm`](@ref) (causal kinetic taxonomy).
+Continuous-time interventions for [`solve_cdm`](@ref) (Peters-style continuous
+CDM taxonomy: pin, IC, soft force, RHS replacement).
 See also [`AbstractCausalIntervention`](@ref).
 """
 
@@ -24,7 +25,7 @@ end
 
 Set only the initial value of `variable` to `value` (leave the RHS unchanged).
 
-Corresponds to `do(x₀ᵏ := ξ)` in causal kinetic models.
+Corresponds to `do(x₀ᵏ := ξ)` in continuous-time CDMs [@peters2022causal].
 """
 struct DoInitialCondition <: AbstractContinuousIntervention
     variable::Symbol
