@@ -112,5 +112,16 @@ function plot_identification_result(g::AbstractGraph, result::IdentificationResu
     return ext.plot_identification_result(g, result; node_names = node_names, kwargs...)
 end
 
+"""
+    dagplot_temporal(unrolling; kwargs...) -> Figure, Axis, plot
+
+Plot a [`TemporalUnrolling`](@ref) with DAGMakie time-indexed layout and
+`var[t]` labels. Requires `using DAGMakie`.
+"""
+function dagplot_temporal(unrolling; kwargs...)
+    ext = _require_dagmakie!(:dagplot_temporal)
+    return ext.dagplot_temporal(unrolling; kwargs...)
+end
+
 export has_dagmakie, plot_causal_graph, plot_with_adjustment_set, plot_backdoor_paths
-export plot_identification_result
+export plot_identification_result, dagplot_temporal

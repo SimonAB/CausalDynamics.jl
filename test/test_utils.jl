@@ -57,6 +57,11 @@ using Test
             @test fig2 !== nothing
             fig3 = plot_backdoor_paths(g, 2, 3; node_labels = labels)
             @test fig3 !== nothing
+
+            spec = TemporalDAGSpec([:x, :y], [(:x, :y, 1)])
+            u = unroll_temporal_dag(spec, 3)
+            fig_t, ax_t, p_t = dagplot_temporal(u; figure_size = (500, 280))
+            @test fig_t !== nothing
         else
             @test_throws ErrorException plot_causal_graph(g)
             try

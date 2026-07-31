@@ -12,7 +12,9 @@ using CausalDynamics: CausalDynamics,
     d_separated,
     IdentificationResult,
     TotalEffectQuery,
-    MediationQuery
+    MediationQuery,
+    TemporalUnrolling,
+    temporal_node_label
 using DAGMakie
 using Graphs: nv, has_edge
 
@@ -175,6 +177,33 @@ function plot_identification_result(g::AbstractGraph, result::IdentificationResu
         node_labels = labels,
         highlight_nodes = Set(highlight_nodes),
         title = title,
+        kwargs...,
+    )
+end
+
+"""
+    dagplot_temporal(unrolling; dx=2.0, dy=1.5, kwargs...)
+
+Plot a [`TemporalUnrolling`](@ref) with time left→right and variables as rows.
+
+Labels use [`temporal_node_label`](@ref). Layout matches
+[`DAGMakie.dagplot_time_indexed`](@ref) / CausalDynamics `unroll_temporal_dag` order.
+"""
+function dagplot_temporal(
+    unrolling::TemporalUnrolling;
+    dx::Real = 2.0,
+    dy::Real = 1.5,
+    kwargs...,
+)
+    n_variables = length(unrolling.spec.variables)
+    labels = [temporal_node_label(unrolling, i) for i in 1:nv(unrolling.graph)]
+    return dagplot_time_indexed(
+        unrolling.graph,
+        n_variables,
+        unrolling.T;
+        nlabels = labels,
+        dx = dx,
+        dy = dy,
         kwargs...,
     )
 end
