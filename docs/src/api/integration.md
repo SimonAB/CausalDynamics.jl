@@ -46,7 +46,6 @@ The types and façade functions below are always exported from core.
 
 ```@docs
 AbstractCausalIntervention
-AbstractIntervention
 AbstractContinuousIntervention
 ContinuousCDMSpec
 continuous_cdm_graph
