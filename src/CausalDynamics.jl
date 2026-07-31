@@ -44,6 +44,9 @@ using Random
 import Graphs: DiGraph, SimpleDiGraph, inneighbors, outneighbors, vertices, add_edge!, has_edge
 export DiGraph, SimpleDiGraph
 
+# Shared intervention hierarchy (SCM / discrete CDM / continuous CDM)
+include("interventions/abstract.jl")
+
 # Graph operations (order matters - d_separation needs sets, paths needs d_separation)
 include("graphs/validation.jl")
 include("graphs/sets.jl")
@@ -84,6 +87,8 @@ include("integration/tmle.jl")
 include("integration/ppl.jl")
 include("integration/rxinfer.jl")
 include("integration/discovery.jl")
+include("integration/iee.jl")
+include("integration/kinetic_discovery.jl")
 include("integration/sciml.jl")
 
 end # module

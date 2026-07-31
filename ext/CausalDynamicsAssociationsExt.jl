@@ -8,7 +8,8 @@ CausalDynamics identification APIs.
 module CausalDynamicsAssociationsExt
 
 using Associations: Associations, PC, OCE, infer_graph, CorrTest,
-    SurrogateAssociationTest, LocalPermutationTest, PearsonCorrelation, PartialCorrelation
+    SurrogateAssociationTest, LocalPermutationTest, PearsonCorrelation, PartialCorrelation,
+    association, KSG1, MIShannon, StateSpaceSet
 using CausalDynamics: CausalDynamics,
     digraph_with_names,
     oce_parents_to_temporal_spec,
@@ -23,7 +24,8 @@ export infer_pc_digraph,
     infer_pc_graph,
     infer_oce_parents,
     infer_oce_temporal_spec,
-    discover_and_prepare
+    discover_and_prepare,
+    iee_mi_associations
 
 """
     default_pc_algorithm(; α=0.05) -> PC
@@ -163,6 +165,37 @@ function discover_and_prepare(
         throw(ArgumentError("method must be :pc or :oce, got $method"))
     end
     return metadata ? (confounders, identifiable, meta) : (confounders, identifiable)
+end
+
+"""
+    iee_mi_associations(Xp, Yp; k=2) -> Float64
+
+Mutual information of neighbour residuals for IEE via Associations `KSG1`
+(Chebyshev / Kraskov). Rows of `Xp` / `Yp` are residual vectors.
+"""
+function iee_mi_associations(
+    Xp::AbstractMatrix{<:Real},
+    Yp::AbstractMatrix{<:Real};
+    k::Integer = 2,
+)
+    size(Xp, 1) == size(Yp, 1) || throw(ArgumentError("Xp/Yp row mismatch"))
+    n = size(Xp, 1)
+    n < k + 1 && return 0.0
+    # Deduplicate joint rows (match reference IEE behaviour)
+    seen = Dict{Vector{Float64}, Int}()
+    keep = Int[]
+    @inbounds for i in 1:n
+        key = vcat(Float64.(Xp[i, :]), Float64.(Yp[i, :]))
+        if !haskey(seen, key)
+            seen[key] = i
+            push!(keep, i)
+        end
+    end
+    length(keep) < k + 1 && return 0.0
+    Xset = StateSpaceSet([Xp[i, :] for i in keep])
+    Yset = StateSpaceSet([Yp[i, :] for i in keep])
+    mi = association(KSG1(MIShannon(); k = k), Xset, Yset)
+    return abs(Float64(mi))
 end
 
 end # module

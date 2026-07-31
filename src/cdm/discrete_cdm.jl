@@ -13,14 +13,7 @@ Abstract type for Causal Dynamical Models (time-indexed structural models).
 """
 abstract type AbstractCDM end
 
-"""
-    AbstractIntervention
-
-Supertype for interventions applied during [`simulate`](@ref) and
-[`counterfactual`](@ref): [`DoSequence`](@ref) (atomic, time-indexed) and
-[`Policy`](@ref) (state-dependent assignment rules).
-"""
-abstract type AbstractIntervention end
+# AbstractIntervention is defined in interventions/abstract.jl
 
 """
     AbstractDoAssignment

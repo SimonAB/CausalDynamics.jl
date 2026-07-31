@@ -51,10 +51,92 @@ using Test
                 return nothing
             end
             p = (r = 1.0, α = 0.1, β = 0.02, δ = 0.5)
-            do_pred = do_intervention(:predator, 5.0)
+            do_pred = do_pin(:predator, 5.0)
+            @test do_pred isa DoPin
+            @test do_pred isa AbstractContinuousIntervention
+            @test do_pred isa AbstractCausalIntervention
             sol = solve_cdm(spec, lotka!, [40.0, 9.0], (0.0, 5.0), p; intervention = do_pred)
             term = terminal_state(spec, sol)
             @test term.predator ≈ 5.0 atol = 1e-6
+            # Pin must not rely on mutating u inside the RHS alone: series stays flat
+            series = state_series(spec, sol)
+            @test all(x -> abs(x - 5.0) < 1e-5, series.predator)
+        end
+
+        @testset "intervention hierarchy" begin
+            @test DoSequence(Dict(:x => 1.0)) isa AbstractIntervention
+            @test DoSequence(Dict(:x => 1.0)) isa AbstractCausalIntervention
+            @test do_intervention(:x, 1.0) isa AbstractCausalIntervention
+            @test !(do_pin(:x, 1.0) isa AbstractIntervention)
+        end
+
+        @testset "ContinuousCDMSpec parent sets" begin
+            spec = ContinuousCDMSpec(
+                [:prey, :predator];
+                parents = Dict(
+                    :prey => [:prey, :predator],
+                    :predator => [:prey, :predator],
+                ),
+            )
+            @test spec.parents[:prey] == [:prey, :predator]
+            g = continuous_cdm_graph(spec)
+            @test Graphs.nv(g) == 2
+            @test Graphs.has_edge(g, 1, 2)  # prey → predator
+            @test Graphs.has_edge(g, 2, 1)  # predator → prey
+            spec2 = with_parents(spec, Dict(:prey => [:predator], :predator => [:prey]))
+            @test spec2.parents[:prey] == [:predator]
+        end
+
+        @testset "do_ic changes initial prey" begin
+            spec = ContinuousCDMSpec([:prey, :predator])
+            function lotka!(du, u, p, t)
+                X, Y = u
+                du[1] = p.r * X - p.α * X * Y
+                du[2] = p.β * X * Y - p.δ * Y
+                return nothing
+            end
+            p = (r = 1.0, α = 0.1, β = 0.02, δ = 0.5)
+            sol = solve_cdm(
+                spec, lotka!, [40.0, 9.0], (0.0, 0.0), p;
+                intervention = do_ic(:prey, 55.0),
+            )
+            @test sol.u[1][1] ≈ 55.0
+        end
+
+        @testset "forward sensitivity extension" begin
+            using SciMLSensitivity
+            if has_sciml_sensitivity()
+                spec = ContinuousCDMSpec([:prey, :predator])
+                function lotka!(du, u, p, t)
+                    X, Y = u
+                    du[1] = p.r * X - p.α * X * Y
+                    du[2] = p.β * X * Y - p.δ * Y
+                    return nothing
+                end
+                p = (r = 1.0, α = 0.1, β = 0.02, δ = 0.5)
+                sol = forward_sensitivity_cdm(spec, lotka!, [40.0, 9.0], (0.0, 2.0), p)
+                @test length(sol.u) ≥ 2
+                @test sol.u[end][1] > 0
+            else
+                @warn "Sensitivity extension not loaded; skipping"
+            end
+        end
+
+        @testset "do_force pulls toward target" begin
+            spec = ContinuousCDMSpec([:x, :y])
+            # Idle observational dynamics; soft force should dominate.
+            function idle!(du, u, p, t)
+                du[1] = 0.0
+                du[2] = 0.0
+                return nothing
+            end
+            sol = solve_cdm(
+                spec, idle!, [0.0, 0.0], (0.0, 5.0), ();
+                intervention = do_force(:x, 1.0; κ = 2.0),
+            )
+            term = terminal_state(spec, sol)
+            @test term.x ≈ 1.0 atol = 1e-2
+            @test term.y ≈ 0.0 atol = 1e-8
         end
     end
 end

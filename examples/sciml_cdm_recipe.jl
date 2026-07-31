@@ -50,6 +50,12 @@ function main()
         sol = solve_cdm(spec, lotka!, [40.0, 9.0], (0.0, 10.0), p)
         term = terminal_state(spec, sol)
         println("ODE terminal prey: ", round(term.prey; digits = 2))
+
+        sol_pin = solve_cdm(
+            spec, lotka!, [40.0, 9.0], (0.0, 5.0), p;
+            intervention = do_pin(:predator, 5.0),
+        )
+        println("Pinned predator: ", round(terminal_state(spec, sol_pin).predator; digits = 3))
     else
         println("OrdinaryDiffEq not loaded — skipping ODE demo (install in your env).")
     end

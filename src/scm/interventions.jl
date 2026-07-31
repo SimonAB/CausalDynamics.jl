@@ -4,6 +4,9 @@
 Represents a `do(·)` intervention on a single variable, fixing it to a definite value
 (the mechanism is imposed, not merely observed).
 
+For static [`GraphSCM`](@ref) this replaces the structural assignment. For continuous
+CDMs it is accepted as a hard pin (prefer [`DoPin`](@ref) / [`do_pin`](@ref)).
+
 # Fields
 - `variable::Union{Int, Symbol}`: Variable to intervene on (node index or symbol)
 - `value::Any`: Value to set the variable to
@@ -12,7 +15,7 @@ Represents a `do(·)` intervention on a single variable, fixing it to a definite
 - For `GraphSCM`, use integer node indices; symbol resolution is reserved for future
   `SymbolicSCM` / `CausalGraph` name maps.
 """
-struct DoIntervention
+struct DoIntervention <: AbstractCausalIntervention
     variable::Union{Int, Symbol}
     value::Any
 end
