@@ -29,6 +29,7 @@ makedocs(
             "SciML recipes" => "SCIML_INTEGRATION.md",
             "RxInfer / GraphPPL" => "RXINFER_INTEGRATION.md",
             "Associations.jl" => "ASSOCIATIONS_INTEGRATION.md",
+            "Methods adoption" => "METHODS_ADOPTION.md",
             "API" => "api/integration.md",
         ],
         "API Reference" => [

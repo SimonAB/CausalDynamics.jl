@@ -45,6 +45,9 @@ Requires `using OrdinaryDiffEq` to load `CausalDynamicsSciMLExt` for `solve_cdm`
 The types and façade functions below are always exported from core.
 
 ```@docs
+AbstractCausalIntervention
+AbstractIntervention
+AbstractContinuousIntervention
 ContinuousCDMSpec
 continuous_cdm_graph
 with_parents
@@ -55,6 +58,11 @@ solve_cdm
 terminal_state
 state_series
 interventional_rhs
+intervention_callback
+DoPin
+DoInitialCondition
+DoForce
+DoRhs
 do_pin
 do_ic
 do_force
@@ -86,4 +94,5 @@ infer_ode_parents
 score_ode_parent_sets
 ode_parent_ranking_to_continuous_spec
 candidate_parent_sets
+finite_difference_derivative
 ```
