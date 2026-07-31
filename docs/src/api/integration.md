@@ -46,10 +46,44 @@ The types and façade functions below are always exported from core.
 
 ```@docs
 ContinuousCDMSpec
+continuous_cdm_graph
+with_parents
+ranked_variables_to_parents
 has_sciml
 ode_problem_cdm
 solve_cdm
 terminal_state
 state_series
 interventional_rhs
+do_pin
+do_ic
+do_force
+do_rhs
+forward_sensitivity_cdm
+```
+
+## Interventional Embedding Entropy (IEE)
+
+Julia port of the smsxiaomayi/IEE reference algorithm (Shi et al.). Prefer
+`mi = :auto` (Associations KSG1 when loaded); use `:reference` for MATLAB
+concordance.
+
+```@docs
+interventional_embedding_entropy
+iee_score_matrix
+iee_to_temporal_spec
+infer_iee_temporal_spec
+```
+
+## Invariant kinetic parent discovery
+
+Leave-one-environment ranking for ODE parent sets (CausalKinetiX reference method).
+Load `DataInterpolations` for cubic-spline derivatives.
+
+```@docs
+KineticParentRanking
+infer_kinetic_parents
+score_kinetic_parent_sets
+kinetic_ranking_to_continuous_spec
+candidate_parent_sets
 ```

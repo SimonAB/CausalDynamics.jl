@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.10] - 2026-07-31
+
+### Changed
+
+- Renamed kinetic discovery API to CDCS conventions (CausalKinetiX remains a
+  literature reference only):
+  - `infer_kinetic_parents` / `KineticParentRanking` /
+    `kinetic_ranking_to_continuous_spec` / `score_kinetic_parent_sets`
+  - Extension `CausalDynamicsDataInterpolationsExt` (was `…CausalKinetiXExt`)
+- IEE keyword `backend` → `mi` (`:auto`, `:associations`, `:reference`)
+
+## [0.3.9] - 2026-07-31
+
+### Added
+
+- `with_parents` / `ranked_variables_to_parents` for kinetic parent maps on
+  [`ContinuousCDMSpec`](@ref).
+- Associations-backed IEE (`backend = :associations` / `:auto`) via KSG1;
+  keep `backend = :reference` for MATLAB concordance.
+- CausalKinetiX v0: leave-one-environment OLS derivative scores, variable
+  ranking, `causalkinetix_to_continuous_spec` (DataInterpolations extension for
+  cubic-spline derivatives).
+- `forward_sensitivity_cdm` via SciMLSensitivity package extension.
+
+## [0.3.8] - 2026-07-31
+
+### Added
+
+- `ContinuousCDMSpec` optional `parents` and `continuous_cdm_graph` for causal
+  kinetic parent sets on continuous CDMs.
+- Interventional Embedding Entropy (IEE) Julia port with concordance tests
+  against the smsxiaomayi/IEE MATLAB reference (`test/reference_iee_matlab.jl`).
+- Unified continuous interventions: `do_pin`, `do_ic`, `do_force`, `do_rhs`
+  with SciML-native hard-pin callbacks.
+
+### Changed
+
+- Documentation: `METHODS_ADOPTION.md`, SciML/Associations notes for Peters /
+  Shi / CausalKinetiX adoption map.
+
 ## [0.3.4] - 2026-07-29
 
 ### Fixed

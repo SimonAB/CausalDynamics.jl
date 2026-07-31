@@ -63,6 +63,22 @@ confounders, ok = discover_and_prepare(
 - PC, OCE, CCM, transfer entropy, and related tests
 - FCI, GES, PCMCI (use other tools or future Associations releases)
 
+## IEE (Associations-backed; reference port retained)
+
+Interventional Embedding Entropy [@shi2026interventional] ranks IntDC edges from
+observational series. With Associations loaded, `mi = :auto` uses KSG1; use
+`mi = :reference` for the MATLAB-faithful port:
+
+```julia
+using CausalDynamics, Associations, DataFrames
+
+scores = iee_score_matrix([x, y]; p = 2, k = 2)  # mi=:auto
+spec = iee_to_temporal_spec(scores, [:x, :y]; threshold = 0.05, lag = 1)
+u = unroll_temporal_dag(spec, 5)
+```
+
+See [Methods adoption](METHODS_ADOPTION.md) for invariant kinetic parents and sensitivity.
+
 ## What stays in CausalDynamics
 
 - `backdoor_adjustment_set`, `d_separated`, frontdoor, IV

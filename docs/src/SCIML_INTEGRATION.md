@@ -80,13 +80,26 @@ p = (λ_z = -0.1, α = -0.2, β = 0.3, γ = -0.1, δ = 0.5, ε = 0.2)
 sol = solve_cdm(spec, cdm_dynamics!, [1.0, 0.5, 0.2], (0.0, 10.0), p)
 terminal_state(spec, sol)  # NamedTuple(:Z, :X, :Y)
 
-# Static do(·): pin X while other equations run
-do_x = do_intervention(:X, 1.0)
+# Static do(·): SciML-native hard pin (IC + du=0 + DiscreteCallback)
+do_x = do_pin(:X, 1.0)
 sol_do = solve_cdm(spec, cdm_dynamics!, [1.0, 0.5, 0.2], (0.0, 10.0), p; intervention = do_x)
 ```
 
 Helpers: [`ContinuousCDMSpec`](@ref), [`ode_problem_cdm`](@ref), [`solve_cdm`](@ref),
-[`terminal_state`](@ref), [`state_series`](@ref), [`interventional_rhs`](@ref).
+[`terminal_state`](@ref), [`state_series`](@ref), [`interventional_rhs`](@ref),
+[`intervention_callback`](@ref), [`do_pin`](@ref), [`do_ic`](@ref), [`do_force`](@ref),
+[`do_rhs`](@ref).
+
+Intervention types share [`AbstractCausalIntervention`](@ref):
+
+- discrete CDM: [`AbstractIntervention`](@ref) (`DoSequence`, `Policy`)
+- continuous CDM: [`AbstractContinuousIntervention`](@ref) (`DoPin`, `DoInitialCondition`, …)
+- static SCM: [`DoIntervention`](@ref)
+
+Hard pins use SciML `DiscreteCallback` to reassert the value after accepted steps
+(no in-RHS mutation of `u`). Soft force and RHS replacement modify `du` only.
+Optional `parents` on [`ContinuousCDMSpec`](@ref) record the causal kinetic graph
+([`continuous_cdm_graph`](@ref)).
 Executable recipe: `examples/sciml_cdm_recipe.jl`.
 
 ## UniversalDiffEq
@@ -95,7 +108,14 @@ Use CausalDynamics for **adjustment / `do` semantics**; use
 [UniversalDiffEq.jl](https://github.com/Jack-H-Buckner/UniversalDiffEq.jl) to
 learn `f` from series. Do not expect UDE training inside CausalDynamics core.
 
+Invariant kinetic parent ranking across experiments
+([`infer_kinetic_parents`](@ref); CausalKinetiX reference method
+[@pfister2019causalkinetix]) is documented in [Methods adoption](METHODS_ADOPTION.md)
+and bridges into [`ContinuousCDMSpec`](@ref) via [`kinetic_ranking_to_continuous_spec`](@ref).
+and is not yet implemented.
+
 ## Version note
 
 - **0.2** — `DiscreteTimeCDM`, time-indexed unrolling helpers
 - **0.3** — `CausalDynamicsSciMLExt` weakdep (`ContinuousCDMSpec`, `solve_cdm`, `do(·)` RHS wrapper)
+- **0.3.x** — unified [`AbstractCausalIntervention`](@ref); SciML-native `DoPin` (`DiscreteCallback`); IEE → `TemporalDAGSpec`
