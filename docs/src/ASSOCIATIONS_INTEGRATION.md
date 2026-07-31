@@ -77,7 +77,7 @@ spec = iee_to_temporal_spec(scores, [:x, :y]; threshold = 0.05, lag = 1)
 u = unroll_temporal_dag(spec, 5)
 ```
 
-See [Methods adoption](METHODS_ADOPTION.md) for invariant parents and sensitivity.
+See [Methods adoption](METHODS_ADOPTION.md) for ODE parent ranking and sensitivity.
 
 ## What stays in CausalDynamics
 

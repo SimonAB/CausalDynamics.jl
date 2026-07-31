@@ -1,24 +1,25 @@
 """
-    Invariant parent discovery for continuous CDMs
+    ODE parent discovery for continuous CDMs
 
 Rank candidate parent sets for a target continuous-CDM coordinate by
-leave-one-environment non-invariance of linear-in-parameters mechanisms
+leave-one-environment stability of linear-in-parameters mechanisms
 ``Ẏ = f(X_S)``. The reference method is CausalKinetiX
-[@pfister2019causalkinetix]; the API uses ordinary dynamical language
-(invariant parents / continuous CDM), not “kinetic” as standing jargon.
+[@pfister2019causalkinetix]. The API uses ordinary dynamical language
+(ODE parents / continuous CDM); reserve “invariant” for prose that glosses
+cross-environment mechanism stability, not as the standing name.
 
 Differentiation defaults to finite differences; load `DataInterpolations` for
 cubic-spline derivatives via the package extension.
 """
 
 """
-    InvariantParentRanking
+    ODEParentRanking
 
-Result of [`infer_invariant_parents`](@ref): candidate parent-index sets, their
-non-invariance scores (lower is better), per-variable inclusion scores, and a
-variable ranking (best first).
+Result of [`infer_ode_parents`](@ref): candidate parent-index sets, their
+cross-environment instability scores (lower is better), per-variable inclusion
+scores, and a variable ranking (best first).
 """
-struct InvariantParentRanking
+struct ODEParentRanking
     models::Vector{Vector{Int}}
     model_scores::Vector{Float64}
     variable_scores::Vector{Float64}
@@ -120,8 +121,9 @@ end
 """
     _loo_env_derivative_score(X_by_env, dY_by_env) -> Float64
 
-Leave-one-environment-out non-invariance score
-``T = mean_e ‖dY_e - X_e β_{-e}‖² / ‖dY_e - mean(dY_e)‖²``.
+Leave-one-environment-out instability score
+``T = mean_e ‖dY_e - X_e β_{-e}‖² / ‖dY_e - mean(dY_e)‖²``
+(lower means more stable prediction across held-out environments).
 """
 function _loo_env_derivative_score(
     X_by_env::Vector{<:AbstractMatrix{<:Real}},
@@ -181,7 +183,7 @@ function aggregate_parent_inclusion(
 end
 
 """
-    score_invariant_parent_sets(times, trajectories, env, target, models; differentiate=nothing)
+    score_ode_parent_sets(times, trajectories, env, target, models; differentiate=nothing)
 
 Score each candidate parent-index set for target coordinate `target`.
 
@@ -193,7 +195,7 @@ Score each candidate parent-index set for target coordinate `target`.
 - `models`: candidate parent-index sets
 - `differentiate`: `(t, y) -> dy` (defaults to [`finite_difference_derivative`](@ref))
 """
-function score_invariant_parent_sets(
+function score_ode_parent_sets(
     times::AbstractVector{<:Real},
     trajectories::AbstractVector{<:AbstractMatrix{<:Real}},
     env::AbstractVector{<:Integer},
@@ -242,14 +244,14 @@ function score_invariant_parent_sets(
 end
 
 """
-    infer_invariant_parents(times, trajectories, env, target; max_size=2, K=nothing)
+    infer_ode_parents(times, trajectories, env, target; max_size=2, K=nothing)
 
-Infer an [`InvariantParentRanking`](@ref) for main-effect parent sets of `target`.
+Infer an [`ODEParentRanking`](@ref) for main-effect parent sets of `target`.
 
 Uses cubic-spline derivatives when DataInterpolations is loaded; otherwise finite
 differences. Reference method: CausalKinetiX [@pfister2019causalkinetix].
 """
-function infer_invariant_parents(
+function infer_ode_parents(
     times::AbstractVector{<:Real},
     trajectories::AbstractVector{<:AbstractMatrix{<:Real}},
     env::AbstractVector{<:Integer},
@@ -263,31 +265,31 @@ function infer_invariant_parents(
         if !(length(m) == 1 && only(m) == target)
     ]
     differentiate = if has_data_interpolations()
-        _require_data_interpolations!(:infer_invariant_parents).spline_derivative
+        _require_data_interpolations!(:infer_ode_parents).spline_derivative
     else
         nothing
     end
-    scores = score_invariant_parent_sets(
+    scores = score_ode_parent_sets(
         times, trajectories, env, target, models;
         differentiate = differentiate,
     )
     vs, ranking = aggregate_parent_inclusion(models, scores; K = K, n_variables = d)
-    return InvariantParentRanking(models, scores, vs, ranking, Int(target))
+    return ODEParentRanking(models, scores, vs, ranking, Int(target))
 end
 
 """
-    invariant_ranking_to_continuous_spec(result, variables; max_parents=2) -> ContinuousCDMSpec
+    ode_parent_ranking_to_continuous_spec(result, variables; max_parents=2) -> ContinuousCDMSpec
 
-Map an [`InvariantParentRanking`](@ref) onto a [`ContinuousCDMSpec`](@ref) parent map
+Map an [`ODEParentRanking`](@ref) onto a [`ContinuousCDMSpec`](@ref) parent map
 for the ranked target.
 """
-function invariant_ranking_to_continuous_spec(
-    result::InvariantParentRanking,
+function ode_parent_ranking_to_continuous_spec(
+    result::ODEParentRanking,
     variables::AbstractVector{Symbol};
     max_parents::Integer = 2,
 )
     length(variables) == length(result.variable_scores) || throw(ArgumentError(
-        "variables length must match invariant ranking dimension",
+        "variables length must match ODE parent ranking dimension",
     ))
     target = variables[result.target]
     ranks = similar(result.ranking)
@@ -300,11 +302,11 @@ function invariant_ranking_to_continuous_spec(
     return ContinuousCDMSpec(variables; parents = parents)
 end
 
-export InvariantParentRanking,
+export ODEParentRanking,
     has_data_interpolations,
     candidate_parent_sets,
     finite_difference_derivative,
-    score_invariant_parent_sets,
-    infer_invariant_parents,
-    invariant_ranking_to_continuous_spec,
+    score_ode_parent_sets,
+    infer_ode_parents,
+    ode_parent_ranking_to_continuous_spec,
     aggregate_parent_inclusion

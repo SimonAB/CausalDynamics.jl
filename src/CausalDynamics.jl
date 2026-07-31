@@ -88,7 +88,7 @@ include("integration/ppl.jl")
 include("integration/rxinfer.jl")
 include("integration/discovery.jl")
 include("integration/iee.jl")
-include("integration/invariant_parents.jl")
+include("integration/ode_parents.jl")
 include("integration/sciml.jl")
 
 end # module

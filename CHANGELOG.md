@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.12] - 2026-07-31
+
+### Changed
+
+- Rename parent-discovery APIs to ODE language: `infer_ode_parents`,
+  `ODEParentRanking`, `ode_parent_ranking_to_continuous_spec`,
+  `score_ode_parent_sets` (was `infer_invariant_parents` / …). Cross-environment
+  mechanism stability is described in prose/docstrings, not in the API stem.
+
 ## [0.3.11] - 2026-07-31
 
 ### Changed

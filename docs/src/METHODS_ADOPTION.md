@@ -14,7 +14,7 @@ Working notes for expanding CausalDynamics toward methods from:
 | Continuous `do` taxonomy (pin / IC / soft force / RHS) | **Implemented** | SciML ext + continuous interventions |
 | Continuous parent sets / ODE parent graph | **Implemented** | `ContinuousCDMSpec(; parents)`, `continuous_cdm_graph`, `with_parents` |
 | IEE → `TemporalDAGSpec` | **Implemented** | `iee.jl`; Associations KSG1 via `mi=:auto` |
-| Invariant parent ranking across environments | **Implemented (v0)** | `invariant_parents.jl` + DataInterpolations ext |
+| ODE parent ranking across environments | **Implemented (v0)** | `ode_parents.jl` + DataInterpolations ext |
 | Forward local sensitivity | **Implemented** | `forward_sensitivity_cdm` |
 | Conditional IEE (cIEE) / PC pruning | Deferred | Shi outlook |
 | Full constrained-spline CausalKinetiX scoring | Deferred | Derivative-space LOO score for now |
@@ -31,23 +31,23 @@ s = interventional_embedding_entropy(x, y; p = 2, k = 2, mi = :auto)
 s_ref = interventional_embedding_entropy(x, y; p = 2, k = 2, mi = :reference)
 ```
 
-## Invariant parents (CausalKinetiX reference)
+## ODE parents across environments (CausalKinetiX reference)
 
-The Julia API is [`infer_invariant_parents`](@ref) / [`invariant_ranking_to_continuous_spec`](@ref).
+The Julia API is [`infer_ode_parents`](@ref) / [`ode_parent_ranking_to_continuous_spec`](@ref).
 It implements the **derivative-space** leave-one-environment OLS score from the
 CausalKinetiX papers (without constrained QP smoothers):
 
 1. Differentiate trajectories ([`finite_difference_derivative`](@ref), or
    cubic splines via DataInterpolations)
-2. Score each candidate parent set by LOO non-invariance of ``Ẏ ∼ X_S``
+2. Score each candidate parent set by LOO stability of ``Ẏ ∼ X_S`` across environments
 3. Aggregate inclusion among top-`K` models
 4. Bridge into [`ContinuousCDMSpec`](@ref) parents
 
 ```julia
 using CausalDynamics, DataInterpolations
 
-ranking = infer_invariant_parents(times, trajectories, env, target; max_size = 2)
-spec = invariant_ranking_to_continuous_spec(ranking, [:Y, :X1, :X2]; max_parents = 2)
+ranking = infer_ode_parents(times, trajectories, env, target; max_size = 2)
+spec = ode_parent_ranking_to_continuous_spec(ranking, [:Y, :X1, :X2]; max_parents = 2)
 ```
 
 ## Forward sensitivity
@@ -63,4 +63,5 @@ sol = forward_sensitivity_cdm(spec, lotka!, u0, tspan, p)
 - Estimation grids stay in CausalTargeted.
 - Prefer Associations.jl when upstreaming IEE.
 - Prefer ordinary dynamical / continuous-CDM language in APIs; reserve “kinetic”
-  for Peters/CausalKinetiX citations.
+  for Peters/CausalKinetiX citations, and “invariant” for explicit ICP glosses
+  (mechanism stable across environments), not as standing API names.

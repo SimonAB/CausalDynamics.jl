@@ -108,10 +108,10 @@ Use CausalDynamics for **adjustment / `do` semantics**; use
 [UniversalDiffEq.jl](https://github.com/Jack-H-Buckner/UniversalDiffEq.jl) to
 learn `f` from series. Do not expect UDE training inside CausalDynamics core.
 
-Invariant parent ranking across experiments
-([`infer_invariant_parents`](@ref); CausalKinetiX reference method
+ODE parent ranking across environments
+([`infer_ode_parents`](@ref); CausalKinetiX reference method
 [@pfister2019causalkinetix]) is documented in [Methods adoption](METHODS_ADOPTION.md)
-and bridges into [`ContinuousCDMSpec`](@ref) via [`invariant_ranking_to_continuous_spec`](@ref).
+and bridges into [`ContinuousCDMSpec`](@ref) via [`ode_parent_ranking_to_continuous_spec`](@ref).
 
 ## Version note
 
