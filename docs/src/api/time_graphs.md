@@ -16,6 +16,25 @@ temporal_backdoor_adjustment_set
 temporal_backdoor_adjustment_nodes
 ```
 
+## Plotting an unrolling
+
+With [DAGMakie.jl](https://simonab.github.io/DAGMakie.jl) loaded,
+[`dagplot_temporal`](@ref) places occasions left→right and variables as rows
+(same grid as `DAGMakie.dagplot_time_indexed`):
+
+```@example time-graphs-plot
+using CausalDynamics, DAGMakie, CairoMakie
+
+spec = TemporalDAGSpec(
+    [:x, :y],
+    [(:x, :x, 1), (:y, :y, 1), (:x, :y, 1)],
+)
+u = unroll_temporal_dag(spec, 3)
+
+fig, ax, p = dagplot_temporal(u; figure_size = (520, 260))
+fig
+```
+
 ## Confounded treatment (book Ch. 28)
 
 ```julia
@@ -36,4 +55,5 @@ adj = temporal_backdoor_adjustment_nodes(u, :a, 2, :x, 2)
 # Set containing (:c, 1)
 ```
 
-See also [Discrete-time CDMs](cdm.md) and the [CDCS book Ch. 28](https://simonab.github.io/causal-dynamics-book/part-observable/28-cdms-unified.html).
+See also [Utilities](utils.md), [Discrete-time CDMs](cdm.md), and the
+[CDCS book Ch. 28](https://simonab.github.io/causal-dynamics-book/part-observable/28-cdms-unified.html).

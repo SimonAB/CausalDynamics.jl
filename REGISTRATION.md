@@ -4,7 +4,7 @@ CausalDynamics.jl **v0.3.4** is ready to submit to the Julia General registry.
 
 ## Prerequisites (met)
 
-1. **DAGMakie on General** — weakdep UUID registered (`Pkg.add("DAGMakie")` resolves; prefer ≥ 0.1.1).
+1. **DAGMakie on General** — done (`Pkg.add("DAGMakie")`; current series is 0.1.x).
 2. **CausalInference on General** — hard dep; local CDCS fork is optional for development.
 3. **Core tests pass without DAGMakie** in default `[targets] test`.
 4. **No `[sources]`** in `Project.toml` (path deps are CDCS-only).
@@ -17,7 +17,7 @@ CausalDynamics.jl **v0.3.4** is ready to submit to the Julia General registry.
 |------|--------|--------|
 | CausalDynamics General registration | Pending | Install [JuliaRegistrator](https://github.com/JuliaRegistries/Registrator.jl) on `SimonAB/CausalDynamics.jl`; comment `@JuliaRegistrator register` on [issue #1](https://github.com/SimonAB/CausalDynamics.jl/issues/1) after tagging `v0.3.4` |
 | CausalInference GraphMakie 0.6 compat | Open | [mschauer/CausalInference.jl#179](https://github.com/mschauer/CausalInference.jl/pull/179) — when merged, restore DAGMakie/CairoMakie to default `Pkg.test` target |
-| DAGMakie 0.1.1+ on General | Submitted / track | CDCS `scripts/update_dagmakie_from_registry.jl` drops path sources when ≥ 0.1.1 |
+| DAGMakie on General | Done | Use `Pkg.add("DAGMakie")`; CDCS may still develop from `packages/DAGMakie.jl` |
 | `DAGMakieCausalDynamicsExt` | Deferred | Re-enable in DAGMakie `[extensions]` only after CausalDynamics AutoMerge |
 
 CI runs an **optional DAGMakie extension job** (develop from GitHub if not on General).

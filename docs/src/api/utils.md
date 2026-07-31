@@ -10,6 +10,7 @@ plot_causal_graph
 plot_with_adjustment_set
 plot_backdoor_paths
 plot_identification_result
+dagplot_temporal
 ```
 
 ## Live example
@@ -28,3 +29,18 @@ fig = plot_causal_graph(g;
 )
 fig
 ```
+
+## Temporal unrolling
+
+```@example api-utils-temporal
+using CausalDynamics, DAGMakie, CairoMakie
+
+spec = TemporalDAGSpec([:a, :y], [(:a, :y, 0), (:a, :a, 1), (:y, :y, 1)])
+u = unroll_temporal_dag(spec, 4)
+fig, ax, p = dagplot_temporal(u; figure_size = (560, 240))
+fig
+```
+
+For raw Graphs without a `TemporalUnrolling`, use
+`DAGMakie.dagplot_time_indexed` (see the
+[DAGMakie skeletons & time guide](https://simonab.github.io/DAGMakie.jl/dev/guide/skeletons_and_time/)).

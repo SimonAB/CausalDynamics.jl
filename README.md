@@ -38,7 +38,7 @@ From the CDCS monorepo:
 Pkg.develop(path="packages/CausalDynamics.jl")
 ```
 
-Optional DAG plots (prefer DAGMakie **0.1.1+**):
+Optional DAG plots ([DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl) on General):
 
 ```julia
 Pkg.add("DAGMakie")
