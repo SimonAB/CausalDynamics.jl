@@ -2,14 +2,12 @@
 
 ## Installation
 
-Until CausalDynamics.jl is on the General registry:
-
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/SimonAB/CausalDynamics.jl.git")
+Pkg.add("CausalDynamics")
 ```
 
-Afterwards, `Pkg.add("CausalDynamics")` will suffice. Julia **1.12+** is required.
+Julia **1.12+** is required. For the tip of `main` before a new version is on General, use `Pkg.add(url="https://github.com/SimonAB/CausalDynamics.jl.git")`.
 
 ## Causal graphs
 

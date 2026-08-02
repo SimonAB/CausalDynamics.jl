@@ -15,21 +15,21 @@ optional variational backdoor inference via RxInfer / GraphPPL.
 **Design principles:** [DESIGN.md](DESIGN.md) · [BOUNDARIES.md](BOUNDARIES.md) ·
 [ecosystem](DESIGN_PRINCIPLES.md)
 
-> **Registration in progress.** Until CausalDynamics appears on General, install
-> from GitHub (see [REGISTRATION.md](REGISTRATION.md)). Requires Julia **1.12+**.
+> On the Julia **General** registry (`Pkg.add("CausalDynamics")`). Requires Julia **1.12+**.
+> Registry tracking: [REGISTRATION.md](REGISTRATION.md).
 
 ## Installation
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/SimonAB/CausalDynamics.jl.git")
+Pkg.add("CausalDynamics")
 using CausalDynamics
 ```
 
-After registry publication:
+Development tip of `main` (before a new version hits General):
 
 ```julia
-Pkg.add("CausalDynamics")
+Pkg.add(url="https://github.com/SimonAB/CausalDynamics.jl.git")
 ```
 
 From the CDCS monorepo:
