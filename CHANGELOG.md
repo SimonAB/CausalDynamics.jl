@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.16] - 2026-08-04
+
+### Changed
+
+- `find_minimal_mediator_sets` returns `MinimalMediatorSets` with
+  `.sets` and `.status` (`:ok`, `:no_path`, `:uncuttable_direct_edge`,
+  `:uncuttable`) instead of a bare `Vector{Set}`. Sets are sorted stably by
+  `(length, sorted members)`. The result iterates over `.sets`.
+
+### Added
+
+- `intercepts_all_directed_paths(g, treatment, outcome, S)`: predicate for the
+  same path-cut criterion used by `find_minimal_mediator_sets`.
+
 ## [0.3.15] - 2026-08-04
 
 ### Added
