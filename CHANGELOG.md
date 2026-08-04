@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.15] - 2026-08-04
+
+### Added
+
+- `find_minimal_mediator_sets(g, treatment, outcome)`: inclusion-minimal mediator
+  sets that intercept every directed treatment→outcome path. See issue #4.
+
 ## [0.3.14] - 2026-08-04
 
 ### Added

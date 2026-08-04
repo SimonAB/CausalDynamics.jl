@@ -276,4 +276,78 @@ using Test
 
         @test_throws ArgumentError find_path_mediators(g, 1, 99)
     end
+
+    @testset "Minimal mediator sets (issue #4)" begin
+        # Sequential: A → M1 → M2 → Y  (1→2→3→4)
+        g_seq = DiGraph(4)
+        add_edge!(g_seq, 1, 2)
+        add_edge!(g_seq, 2, 3)
+        add_edge!(g_seq, 3, 4)
+        seq = find_minimal_mediator_sets(g_seq, 1, 4)
+        @test Set(seq) == Set([Set([2]), Set([3])])
+
+        # Parallel: A → M1 → Y, A → M2 → Y  (1→2→4, 1→3→4)
+        g_par = DiGraph(4)
+        add_edge!(g_par, 1, 2)
+        add_edge!(g_par, 2, 4)
+        add_edge!(g_par, 1, 3)
+        add_edge!(g_par, 3, 4)
+        par = find_minimal_mediator_sets(g_par, 1, 4)
+        @test Set(par) == Set([Set([2, 3])])
+
+        # Mixed: A → M1 → M3 → Y, A → M2 → M3 → Y
+        # 1=A, 2=M1, 3=M2, 4=M3, 5=Y
+        g_mix = DiGraph(5)
+        add_edge!(g_mix, 1, 2)
+        add_edge!(g_mix, 2, 4)
+        add_edge!(g_mix, 4, 5)
+        add_edge!(g_mix, 1, 3)
+        add_edge!(g_mix, 3, 4)
+        mix = find_minimal_mediator_sets(g_mix, 1, 5)
+        @test Set(mix) == Set([Set([4]), Set([2, 3])])
+
+        # Direct edge: no mediator set can intercept
+        g_direct = DiGraph(2)
+        add_edge!(g_direct, 1, 2)
+        @test find_minimal_mediator_sets(g_direct, 1, 2) == Set{Int}[]
+
+        # Direct edge plus a mediated path: still impossible to cut all paths
+        g_both = DiGraph(3)
+        add_edge!(g_both, 1, 2)
+        add_edge!(g_both, 2, 3)
+        add_edge!(g_both, 1, 3)
+        @test find_minimal_mediator_sets(g_both, 1, 3) == Set{Int}[]
+
+        # No directed path
+        g_none = DiGraph(3)
+        add_edge!(g_none, 1, 2)
+        @test find_minimal_mediator_sets(g_none, 1, 3) == Set{Int}[]
+
+        # Confounder is not a mediator; issue #3 graph mediators only
+        g = DiGraph(7)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 2, 3)
+        add_edge!(g, 3, 5)
+        add_edge!(g, 1, 4)
+        add_edge!(g, 4, 5)
+        add_edge!(g, 6, 1)
+        add_edge!(g, 6, 5)
+        add_edge!(g, 1, 7)
+        sets = find_minimal_mediator_sets(g, 1, 5)
+        @test all(S -> isdisjoint(S, Set([1, 5, 6, 7])), sets)
+        # Paths A-M1-M2-Y and A-M3-Y: minimal are {M2,M3}, {M1,M3}, {M1,M2}? 
+        # {M3, M2}: hits both. {M3, M1}: hits both. {M2, M1}: hits first path via M1/M2, second needs M3 — NO
+        # Single {M3} does not hit A-M1-M2-Y. Single {M1} misses A-M3-Y. Single {M2} misses A-M3-Y.
+        # So minimal: {M1, M3}, {M2, M3}
+        @test Set(sets) == Set([Set([2, 4]), Set([3, 4])])
+
+        names = Dict(1 => :A, 2 => :M1, 3 => :M2, 4 => :M3, 5 => :Y)
+        named = find_minimal_mediator_sets(g_mix, :A, :Y; node_names = names)
+        @test Set(named) == Set([Set([:M3]), Set([:M1, :M2])])
+
+        @test_throws ArgumentError find_minimal_mediator_sets(g_seq, 1, 99)
+        @test_throws ArgumentError find_minimal_mediator_sets(
+            g_seq, 1, 4; max_candidates = 0,
+        )
+    end
 end

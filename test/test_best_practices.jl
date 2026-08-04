@@ -25,6 +25,8 @@ using Test
         @test hasmethod(CausalDynamics.has_path, (AbstractGraph, Int, Int))
         @test hasmethod(frontdoor_adjustment_set, (AbstractGraph, Int, Int, Any))
         @test hasmethod(find_frontdoor_mediators, (AbstractGraph, Int, Int))
+        @test hasmethod(find_path_mediators, (AbstractGraph, Int, Int))
+        @test hasmethod(find_minimal_mediator_sets, (AbstractGraph, Int, Int))
         @test hasmethod(find_all_adjustment_sets, (AbstractGraph, Int, Int))
         @test hasmethod(is_valid_adjustment_set, (AbstractGraph, Int, Int, Set))
         @test hasmethod(minimal_adjustment_set, (AbstractGraph, Int, Int))
