@@ -91,8 +91,18 @@ intervened = simulate_scm(apply_intervention(scm, do_intervention(2, 10.0)), U)
 | [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl) | DAG figures (optional) |
 | Application repos | Cohort data, registries, concordance (thin) |
 
-Julia vs R/Python feature matrices (integration as the product):
-[ECOSYSTEM_COMPARISON.md](ECOSYSTEM_COMPARISON.md) ·
+### Compared with R and Python
+
+| Need | This package | Familiar elsewhere |
+|------|--------------|--------------------|
+| d-separation / backdoor / frontdoor / IV | Yes | dagitty, DoWhy |
+| Typed `identify` → certificate | **Unique** (`IdentificationResult`) | Partial |
+| Discrete-time CDM + shared-`U` trajectories | **Unique** | Rare |
+| Temporal unroll / SciML continuous CDM | **Unique** | Partial / custom |
+
+**Choose this** when you want identification and dynamical simulation to share types with Julia estimation and Makie figures. **Prefer dagitty / DoWhy** for GUI-first or existing Python four-step pipelines.
+
+Full matrices: [ECOSYSTEM_COMPARISON.md](ECOSYSTEM_COMPARISON.md) ·
 [Documenter comparison](https://simonab.github.io/CausalDynamics.jl/dev/comparison/).
 
 ## Integrations

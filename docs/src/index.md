@@ -20,6 +20,20 @@ simulation); soft interventions and g-computation; and time-indexed identificati
 via unrolled lag DAGs. Optional extensions load DAGMakie plotting, RxInfer /
 GraphPPL backdoor inference, and Associations.jl discovery bridges.
 
+## Compared with R and Python
+
+| Need | CausalDynamics | Familiar elsewhere |
+|------|----------------|--------------------|
+| d-separation / backdoor / frontdoor / IV | Yes | dagitty, DoWhy, causal-learn |
+| Typed `identify` → certificate | **Unique** | Partial |
+| Discrete-time CDM + shared-`U` CF | **Unique** | Rare |
+| Temporal unroll / SciML continuous CDM | **Unique** | Partial / custom |
+
+**Choose CausalDynamics** when certificates and trajectories should feed Julia
+estimation and plotting. **Prefer dagitty / DoWhy** for GUI-first or existing
+Python four-step workflows. Details: [Comparison](comparison.md) ·
+[ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/ECOSYSTEM_COMPARISON.md).
+
 ## Quick start
 
 ```@example home
@@ -60,4 +74,4 @@ See [REGISTRATION.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/REG
 - Narrative companion: [CDCS Book](https://simonab.github.io/causal-dynamics-book/)
 
 Compared with R/Python graph tools and the rest of this Julia stack: see [Comparison](comparison.md)
-and [ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/ECOSYSTEM_COMPARISON.md).
+(summary above) and [ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/ECOSYSTEM_COMPARISON.md).
