@@ -66,6 +66,7 @@ include("identification/instruments.jl")
 include("identification/adjustment.jl")
 include("identification/do_calculus.jl")
 include("identification/identify.jl")
+include("identification/path_mediators.jl")
 include("identification/report.jl")
 
 # SCM framework

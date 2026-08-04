@@ -248,4 +248,32 @@ using Test
         @test_throws ErrorException CausalDynamics.is_identifiable(g, :query)
         @test_throws ErrorException CausalDynamics.identify_formula(g, :query)
     end
+
+    @testset "Path mediators (issue #3)" begin
+        # A → M1 → M2 → Y
+        # A → M3 → Y
+        # C → A, C → Y
+        # A → D
+        # 1=A, 2=M1, 3=M2, 4=M3, 5=Y, 6=C, 7=D
+        g = DiGraph(7)
+        add_edge!(g, 1, 2)  # A → M1
+        add_edge!(g, 2, 3)  # M1 → M2
+        add_edge!(g, 3, 5)  # M2 → Y
+        add_edge!(g, 1, 4)  # A → M3
+        add_edge!(g, 4, 5)  # M3 → Y
+        add_edge!(g, 6, 1)  # C → A
+        add_edge!(g, 6, 5)  # C → Y
+        add_edge!(g, 1, 7)  # A → D
+
+        meds = find_path_mediators(g, 1, 5)
+        @test meds == Set([2, 3, 4])
+        @test !(6 in meds)  # confounder C
+        @test !(7 in meds)  # non-mediating descendant D
+        @test !(1 in meds) && !(5 in meds)
+
+        names = Dict(1 => :A, 2 => :M1, 3 => :M2, 4 => :M3, 5 => :Y, 6 => :C, 7 => :D)
+        @test find_path_mediators(g, :A, :Y; node_names = names) == Set([:M1, :M2, :M3])
+
+        @test_throws ArgumentError find_path_mediators(g, 1, 99)
+    end
 end

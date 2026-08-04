@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.14] - 2026-08-04
+
+### Added
+
+- `find_path_mediators(g, treatment, outcome)`: structural mediator candidates
+  (nodes on a proper directed treatment→outcome path). Distinct from
+  `find_frontdoor_mediators` (frontdoor criterion). See issue #3.
+
 ## [0.3.13] - 2026-07-31
 
 ### Added
