@@ -91,6 +91,10 @@ intervened = simulate_scm(apply_intervention(scm, do_intervention(2, 10.0)), U)
 | [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl) | DAG figures (optional) |
 | Application repos | Cohort data, registries, concordance (thin) |
 
+Julia vs R/Python feature matrices (integration as the product):
+[ECOSYSTEM_COMPARISON.md](ECOSYSTEM_COMPARISON.md) ·
+[Documenter comparison](https://simonab.github.io/CausalDynamics.jl/dev/comparison/).
+
 ## Integrations
 
 - **[TMLE.jl](https://github.com/TARGENE/TMLE.jl)** — identify adjustment sets, then estimate CM / ATE / AIE (`prepare_for_tmle`)

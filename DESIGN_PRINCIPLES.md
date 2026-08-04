@@ -38,6 +38,7 @@ See also per-package notes: [CausalDynamics.jl/DESIGN.md](CausalDynamics.jl/DESI
 
 - **Pipeline-shaped APIs:** `graph → identify(query) → IdentificationResult → plan/execute estimand → certificate/metadata`.
 - **Small, testable functions** composed in user code and in higher-level drivers—not monolithic “run everything” entry points in core packages (those belong in applications or thin orchestration layers).
+- **Feature comparison** (Julia vs typical R/Python analogues, with Unique marks for integration): see [ECOSYSTEM_COMPARISON.md](ECOSYSTEM_COMPARISON.md) at the monorepo `packages/` root and each owned package’s copy.
 - **Stable intermediate objects:** `IdentificationResult`, `MTPPlan`, `IdentificationCertificate` carry assumptions and hashes so downstream steps do not re-derive silently.
 - **Column resolvers and node maps** bridge graphs to data without baking dataset column names into package code.
 - **Plotting is optional.** CausalDynamics must work without Makie; DAGMakie must work without loading estimation code.
