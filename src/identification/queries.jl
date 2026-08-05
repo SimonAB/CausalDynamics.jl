@@ -19,18 +19,35 @@ struct TotalEffectQuery{T} <: CausalQuery
 end
 
 """
-    MediationQuery(treatment, outcome, mediators)
+    MediationQuery(treatment, outcome, mediators; moc=T[], effect_kind=:interventional)
 
-Interventional mediation decomposition (NDE / NIE / TE) via mediators on directed paths.
+Mediation decomposition (NDE / NIE / TE or path-specific) via mediators on
+directed paths. `moc` lists intermediate confounders (affected by treatment and
+affecting mediators/outcome). `effect_kind` is one of `:natural`,
+`:interventional`, `:organic`, `:recanting_twin`.
 """
 struct MediationQuery{T} <: CausalQuery
     treatment::T
     outcome::T
     mediators::Vector{T}
+    moc::Vector{T}
+    effect_kind::Symbol
 end
 
-MediationQuery(treatment, outcome, mediators::AbstractVector) =
-    MediationQuery(treatment, outcome, collect(mediators))
+function MediationQuery(
+    treatment,
+    outcome,
+    mediators::AbstractVector;
+    moc::AbstractVector = similar(collect(mediators), 0),
+    effect_kind::Symbol = :interventional,
+)
+    effect_kind in (:natural, :interventional, :organic, :recanting_twin) || throw(ArgumentError(
+        "effect_kind must be :natural, :interventional, :organic, or :recanting_twin; got :$effect_kind",
+    ))
+    return MediationQuery(
+        treatment, outcome, collect(mediators), collect(moc), effect_kind,
+    )
+end
 
 """
     TemporalEffectQuery(treatment, outcome, t_treat, t_outcome)

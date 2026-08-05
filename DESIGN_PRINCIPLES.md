@@ -1,10 +1,17 @@
 # CDCS package design principles
 
-Shared guidance for **owned** packages in this ecosystem (`CausalDynamics.jl`, `CausalTargeted.jl`, `DAGMakie.jl`). Application repositories (e.g. manuscript reproduction code) follow the same spirit but may trade leanness for parity with reference implementations.
+Shared guidance for **owned** packages in this ecosystem (`CausalDynamics.jl`,
+`CausalTargeted.jl`, `CausalMediation.jl`, `DAGMakie.jl`). Application repositories
+(e.g. manuscript reproduction code) follow the same spirit but may trade leanness
+for parity with reference implementations.
 
-Each package repository also carries a copy of this file as `DESIGN_PRINCIPLES.md` so GitHub README links work outside the CDCS monorepo.
+**Canonical copy in the CDCS monorepo:** this file under `packages/`.
+Each owned package keeps an identical `DESIGN_PRINCIPLES.md` so GitHub README
+links work outside the monorepo. After editing here, run:
 
-See also per-package notes: [CausalDynamics.jl/DESIGN.md](CausalDynamics.jl/DESIGN.md), [CausalTargeted.jl/DESIGN.md](CausalTargeted.jl/DESIGN.md), [DAGMakie.jl/DESIGN.md](DAGMakie.jl/DESIGN.md).
+`julia --project=. --threads=auto scripts/sync_shared_package_docs.jl`
+
+See also per-package notes: [CausalDynamics.jl/DESIGN.md](CausalDynamics.jl/DESIGN.md), [CausalTargeted.jl/DESIGN.md](CausalTargeted.jl/DESIGN.md), [CausalMediation.jl/DESIGN.md](CausalMediation.jl/DESIGN.md), [DAGMakie.jl/DESIGN.md](DAGMakie.jl/DESIGN.md).
 
 ## 1. Julia first
 
@@ -32,7 +39,7 @@ See also per-package notes: [CausalDynamics.jl/DESIGN.md](CausalDynamics.jl/DESI
 - **Small, intentional dependency sets.** Hard dependencies are for always-on core functionality; everything else is a **weak dependency** loaded via package extensions.
 - **No “kitchen sink” modules.** If a feature needs a heavy optional stack (PPL, discovery, TMLE.jl), expose it as an integration façade, not a required import.
 - **Reject scope creep at the package boundary.** When in doubt, read `BOUNDARIES.md` for the package you are editing.
-- **One clear owner per concern:** graphs/ID → CausalDynamics; targeted estimation → CausalTargeted; DAG figures → DAGMakie; cohort/registry → application repo.
+- **One clear owner per concern:** graphs/ID → CausalDynamics; LMTP / SL → CausalTargeted; mediation EIF → CausalMediation; DAG figures → DAGMakie; cohort/registry → application repo.
 
 ## 5. Composable
 
@@ -72,7 +79,8 @@ Documenter pages and README prose follow the [Julia Language manual](https://doc
 | Question | If yes → | If no → |
 |----------|----------|---------|
 | Is it graph structure, ID, or CDM simulation? | CausalDynamics | — |
-| Is it cross-fitted LMTP/mediation estimation? | CausalTargeted | — |
+| Is it cross-fitted LMTP estimation? | CausalTargeted | — |
+| Is it mediation (RI / natural / RT / moc)? | CausalMediation | — |
 | Is it DAG layout or styling? | DAGMakie | — |
 | Is it cohort-specific, registry TOML, or R parity? | Application repo | — |
 | Does it need a new heavy dependency? | Weakdep + extension | Or application layer |

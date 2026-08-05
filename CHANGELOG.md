@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-05
+
+### Breaking
+
+- `IdentificationResult` gains a `moc` field (intermediate confounders) between
+  `mediators` and `strategy`. Positional constructors must pass `moc` (use
+  `Vector{T}()` when unused). The keyword constructor defaults `moc` to empty.
+
+### Added
+
+- `MediationQuery` fields `moc` and `effect_kind` (`:natural`, `:interventional`,
+  `:organic`, `:recanting_twin`).
+- `identify` for mediation: natural effects throw `IdentificationError` under
+  recanting / intermediate confounding; interventional / organic / RT return
+  adjustment, mediators, and suggested `moc`.
+- `IdentificationError` exception type.
+
 ## [0.3.16] - 2026-08-04
 
 ### Changed

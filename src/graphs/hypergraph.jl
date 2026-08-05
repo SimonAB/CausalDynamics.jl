@@ -1,5 +1,5 @@
-# Hypergraph implementation for higher-order interactions (experimental; not on identify path).
-
+# Hypergraph — experimental higher-order edges (Ch. 15 / collective interventions).
+# Not on the identify / GraphSCM / DiscreteTimeCDM path; prefer SimpleDiGraph there.
 export Hypergraph, HyperedgeData
 export add_hyperedge!, rem_hyperedge!, hyperedge_vertices, incident_hyperedges
 export num_hyperedges, num_vertices, hyperedges, to_simple_graph

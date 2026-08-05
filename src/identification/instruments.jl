@@ -37,11 +37,7 @@ instruments = find_instruments(g, 2, 3)  # [1]
 """
 function find_instruments(g::AbstractGraph, X::Int, Y::Int)
     validate_causal_graph(g)
-    
-    # Validate node indices
-    if X < 1 || X > nv(g) || Y < 1 || Y > nv(g)
-        throw(ArgumentError("Node indices X=$X and Y=$Y must be in range [1, $(nv(g))]. Graph has $(nv(g)) nodes."))
-    end
+    check_node_indices!(g, X, Y)
     
     instruments = Vector{Int}()  # Pre-allocate for type stability
     
@@ -112,10 +108,7 @@ is_valid_instrument(g2, 1, 2, 3)  # false
 - Angrist, J. D., & Pischke, J. S. (2009). *Mostly Harmless Econometrics*, Chapter 4
 """
 function is_valid_instrument(g::AbstractGraph, Z::Int, X::Int, Y::Int)
-    # Validate node indices
-    if Z < 1 || Z > nv(g) || X < 1 || X > nv(g) || Y < 1 || Y > nv(g)
-        throw(ArgumentError("Node indices Z=$Z, X=$X, Y=$Y must be in range [1, $(nv(g))]. Graph has $(nv(g)) nodes."))
-    end
+    check_node_indices!(g, Z, X, Y; names = ("Z", "X", "Y"))
     
     # Condition 1: Z has a causal effect on X (there's a directed path Z → X)
     if !has_path(g, Z, X)
@@ -177,9 +170,7 @@ has_path(g, 3, 1)  # false (no reverse path)
 - Uses BFS reachability (not path enumeration)
 """
 function has_path(g::AbstractGraph, source::Int, target::Int)
-    if source < 1 || source > nv(g) || target < 1 || target > nv(g)
-        throw(ArgumentError("Node indices must be in range [1, $(nv(g))]."))
-    end
+    check_node_indices!(g, source, target; names = ("source", "target"))
     return _has_directed_path(g, source, target)
 end
 

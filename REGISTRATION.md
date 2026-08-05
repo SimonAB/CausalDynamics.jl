@@ -6,27 +6,16 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 
 | Version | Status |
 |---------|--------|
-| **0.3.4** | On General ([#162687](https://github.com/JuliaRegistries/General/pull/162687)) |
-| **0.3.13** | On General ([#163196](https://github.com/JuliaRegistries/General/pull/163196)) |
-| **0.3.14** | On General ([#163580](https://github.com/JuliaRegistries/General/pull/163580), merged 2026-08-05) |
-| **0.3.15** | On General ([#163608](https://github.com/JuliaRegistries/General/pull/163608), merged 2026-08-05) |
-| **0.3.16** | On General ([#163619](https://github.com/JuliaRegistries/General/pull/163619), merged 2026-08-05) — tip matches `main` |
+| **0.3.16** | On General ([#163619](https://github.com/JuliaRegistries/General/pull/163619)) |
+| **0.4.0** | Pending Registrator — mediation ID (`moc`, `effect_kind`, `IdentificationError`) |
 
-Local `main` is at **0.3.16**. Register **incrementally** (no version skips) so AutoMerge stays happy.
+Local `main` targets **0.4.0**. Register **incrementally** (no version skips).
 
-## Incremental register plan
+## 0.4.0 register steps
 
-| Step | Version | Commit | Feature |
-|------|---------|--------|---------|
-| 1 | `0.3.14` | `a8c0a30` | `find_path_mediators` |
-| 2 | `0.3.15` | `7e36403` | `find_minimal_mediator_sets` |
-| 3 | `0.3.16` | `2922acc` | `MinimalMediatorSets`, `intercepts_all_directed_paths` |
-
-For each step:
-
-1. Tag the feature commit (`git tag v0.3.N <sha>`), push the tag
-2. Comment `@JuliaRegistrator register` on that commit (or a tracking issue referencing it)
-3. Wait for the General PR to AutoMerge before registering the next version
+1. Push `main` with `version = "0.4.0"`
+2. Comment `@JuliaRegistrator register` on the release commit or tracking issue
+3. Wait for General AutoMerge; TagBot tags `v0.4.0` if needed
 
 ## Prerequisites (met)
 
@@ -34,48 +23,8 @@ For each step:
 2. **CausalInference on General** — hard dep; local CDCS fork is optional for development.
 3. **Core tests pass without DAGMakie** in default `[targets] test`.
 4. **No `[sources]`** in `Project.toml` (path deps are CDCS-only).
-5. **Weakdep `[compat]`** includes Associations, DAGMakie, DataFrames, GraphPPL,
-   OrdinaryDiffEq, RxInfer.
 
-## GraphMakie / DAGMakie resolve matrix
+## Downstream
 
-Downstream projects that want typed DAGMakie figures sometimes need GraphMakie
-**0.6** (CDCS fork / tip path). Registry CausalInference still pins its
-optional GraphMakie weakdep to **0.5**, so tip GraphMakie ≥0.6 cannot share a
-resolve with CausalDynamics today.
-
-| Combo | Result |
-|-------|--------|
-| CausalDynamics (registry) alone | OK |
-| + registry GraphMakie **0.5.x** | OK |
-| + registry DAGMakie **0.1.x** + GraphMakie **0.5.x** | OK (supported single-env) |
-| CDCS tip GraphMakie **≥0.6** + tip DAGMakie + CausalDynamics | Mutually exclusive until CausalInference widens GraphMakie compat |
-
-**Supported pattern until then:** dual environment (or identify-then-plot split).
-
-1. Identification env: CausalDynamics from General (no GraphMakie 0.6).
-2. Figure env: develop CDCS GraphMakie + DAGMakie; omit CausalDynamics from that resolve.
-
-Companion docs: [DAGMakie REGISTRATION.md](https://github.com/SimonAB/DAGMakie.jl/blob/main/REGISTRATION.md).
-Tracking issue: [#6](https://github.com/SimonAB/CausalDynamics.jl/issues/6).
-Upstream unblocker: [mschauer/CausalInference.jl#179](https://github.com/mschauer/CausalInference.jl/pull/179).
-
-## Ecosystem tracking
-
-| Item | Status | Action |
-|------|--------|--------|
-| CausalDynamics on General | Tip `0.3.16` | Incremental register for later bumps |
-| CausalInference GraphMakie 0.6 compat | Open | [mschauer/CausalInference.jl#179](https://github.com/mschauer/CausalInference.jl/pull/179) — when merged, re-test tip GraphMakie + CausalDynamics co-install; restore DAGMakie/CairoMakie to default `Pkg.test` target |
-| DAGMakie on General | Done (`0.1.6`) | Optional: restore tuple `node_size` after GraphMakie ships #259 |
-| `DAGMakieCausalDynamicsExt` | Deferred | Re-enable in DAGMakie `[extensions]` after registry GraphMakie supports needed APIs |
-
-CI runs an **optional DAGMakie extension job** (develop from GitHub if needed).
-
-## Zenodo DOI
-
-Deposit metadata is in `.zenodo.json` and `CITATION.cff`. Enable GitHub–Zenodo integration and create a release to mint a DOI; then run `julia --project=. --threads=auto scripts/update_package_zenodo_dois.jl` from the CDCS repo. See [packages/ZENODO.md](../ZENODO.md).
-
-## Follow-ups
-
-- Re-enable DAGMakie in default tests when CausalInference widens GraphMakie compat (#179)
-- Register reverse extension `DAGMakieCausalDynamicsExt` (symmetric to `CausalDynamicsDAGMakieExt`) once DAGMakie can AutoMerge against registry GraphMakie
+- **CausalMediation.jl** requires `CausalDynamics = "0.4"` (uses `moc` / mediation strategies).
+- **CausalTargeted.jl** should bump compat to `"0.4"` when adopting 0.4 certificates.

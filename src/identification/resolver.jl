@@ -56,11 +56,13 @@ function resolve_identification_columns(
     avail = Set(column_names)
     adj = resolve_columns(resolver, result.adjustment, avail)
     meds = resolve_columns(resolver, result.mediators, avail)
+    moc = resolve_columns(resolver, result.moc, avail)
     return IdentificationResult{eltype(result.adjustment)}(
         result.query,
         result.graph_hash,
         adj,
         meds,
+        moc,
         result.strategy,
         result.identifiable,
         result.assumptions,

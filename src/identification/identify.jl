@@ -1,6 +1,18 @@
 """Unified identification API: `identify(graph, query)`."""
 
 """
+    IdentificationError <: Exception
+
+Thrown when a mediation (or other) query is not identified under the stated
+effect kind and graph structure.
+"""
+struct IdentificationError <: Exception
+    msg::String
+end
+
+Base.showerror(io::IO, e::IdentificationError) = print(io, "IdentificationError: ", e.msg)
+
+"""
     _normalize_node_names(node_names, n) -> Union{Nothing, Dict{Int, Symbol}}
 
 Normalise `node_names` to `Dict{Int, Symbol}` (or `nothing`).
@@ -61,6 +73,38 @@ function _labels_from_indices(indices::Set{Int}, node_names::Union{Nothing, Dict
     return [node_names[i] for i in sorted if haskey(node_names, i)]
 end
 
+function _empty_like(adjustment)
+    return similar(adjustment, 0)
+end
+
+"""
+    _has_directed_path_simple(g, src, dst) -> Bool
+"""
+function _has_directed_path_simple(g::AbstractGraph, src::Int, dst::Int)
+    src == dst && return true
+    return dst in get_descendants(g, src)
+end
+
+"""
+    _recanting_witness_nodes(g, A, Y, mediator_idx) -> Vector{Int}
+
+Nodes Z on a recanting structure: descendants of A, ancestors of Y, and
+ancestors of at least one mediator (intermediate confounding / recanting twin).
+"""
+function _recanting_witness_nodes(g::AbstractGraph, A::Int, Y::Int, mediator_idx::Vector{Int})
+    forbidden = Set{Int}(vcat(A, Y, mediator_idx))
+    witnesses = Int[]
+    for z in 1:nv(g)
+        z in forbidden && continue
+        _has_directed_path_simple(g, A, z) || continue
+        _has_directed_path_simple(g, z, Y) || continue
+        if any(_has_directed_path_simple(g, z, m) for m in mediator_idx)
+            push!(witnesses, z)
+        end
+    end
+    return witnesses
+end
+
 """
     identify(g, query::TotalEffectQuery; node_names=nothing) -> IdentificationResult
 """
@@ -89,7 +133,8 @@ function identify(
         query,
         graph_fingerprint(g),
         adjustment,
-        similar(adjustment, 0),
+        _empty_like(adjustment),
+        _empty_like(adjustment),
         :backdoor,
         identifiable,
         [:no_unmeasured_confounding, :correct_graph],
@@ -99,24 +144,81 @@ end
 
 """
     identify(g, query::MediationQuery; node_names=nothing) -> IdentificationResult
+
+Identification for mediation queries:
+
+- `:natural` — refuses when `moc` is nonempty or the graph has a recanting
+  witness (treatment → Z → mediator and Z → outcome).
+- `:interventional` / `:organic` / `:recanting_twin` — allow intermediate
+  confounders; return adjustment, mediators, and moc in the certificate.
 """
 function identify(
     g::AbstractGraph,
     query::MediationQuery;
     node_names = nothing,
 )
+    names = _normalize_node_names(node_names, nv(g))
     te = identify(g, TotalEffectQuery(query.treatment, query.outcome); node_names = node_names)
-    meds = query.mediators
     T = eltype(te.adjustment)
-    med_vec = T === Symbol ? meds : Symbol.(meds)
+
+    A = query.treatment isa Int ?
+        _node_index(g, query.treatment) :
+        _node_index(g, query.treatment, names::Dict{Int, Symbol})
+    Y = query.outcome isa Int ?
+        _node_index(g, query.outcome) :
+        _node_index(g, query.outcome, names::Dict{Int, Symbol})
+
+    med_idx = Int[
+        m isa Int ? _node_index(g, m) : _node_index(g, Symbol(m), names::Dict{Int, Symbol})
+        for m in query.mediators
+    ]
+    moc_user_idx = Int[
+        z isa Int ? _node_index(g, z) : _node_index(g, Symbol(z), names::Dict{Int, Symbol})
+        for z in query.moc
+    ]
+
+    witnesses = _recanting_witness_nodes(g, A, Y, med_idx)
+    moc_idx = isempty(moc_user_idx) ? witnesses : moc_user_idx
+
+    med_vec = _labels_from_indices(Set(med_idx), names)
+    moc_vec = _labels_from_indices(Set(moc_idx), names)
+    # Match adjustment eltype when Int-labelled graphs
+    if T === Int || eltype(te.adjustment) === Int
+        med_vec = sort(unique(med_idx))
+        moc_vec = sort(unique(moc_idx))
+    end
+
+    ek = query.effect_kind
+    if ek === :natural
+        if !isempty(query.moc) || !isempty(witnesses)
+            throw(IdentificationError(
+                "Natural mediation effects are not identified under intermediate confounding " *
+                "(moc=$(query.moc), graph witnesses=$(witnesses)). " *
+                "Use effect_kind=:interventional or :recanting_twin.",
+            ))
+        end
+        strategy = :mediation_natural
+        assumptions = vcat(te.assumptions, :no_interference, :no_intermediate_confounding)
+    elseif ek === :recanting_twin
+        strategy = :mediation_recanting_twin
+        assumptions = vcat(te.assumptions, :no_interference, :recanting_twin)
+    elseif ek === :organic
+        strategy = :mediation_organic
+        assumptions = vcat(te.assumptions, :no_interference, :organic_effect)
+    else
+        strategy = :mediation_interventional
+        assumptions = vcat(te.assumptions, :no_interference, :interventional_mediator_law)
+    end
+
     return IdentificationResult{T}(
         query,
         te.graph_hash,
         te.adjustment,
-        med_vec,
-        :mediation_backdoor,
+        convert(Vector{T}, med_vec),
+        convert(Vector{T}, moc_vec),
+        strategy,
         te.identifiable,
-        vcat(te.assumptions, :no_interference),
+        assumptions,
         te.temporal_nodes,
     )
 end
@@ -137,6 +239,7 @@ function identify(
         te.graph_hash,
         te.adjustment,
         te.mediators,
+        te.moc,
         :interventional_policy,
         te.identifiable,
         te.assumptions,
@@ -163,6 +266,7 @@ function identify(unrolling::TemporalUnrolling, query::TemporalEffectQuery)
         graph_fingerprint(g),
         adj_syms,
         Symbol[],
+        Symbol[],
         :temporal_backdoor,
         identifiable,
         [:no_unmeasured_confounding, :correct_lag_structure],
@@ -176,4 +280,4 @@ end
 identify(g::AbstractGraph, query::CausalQuery; kwargs...) =
     error("identify not implemented for $(typeof(query)) on $(typeof(g))")
 
-export identify
+export identify, IdentificationError

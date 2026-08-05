@@ -10,6 +10,7 @@ struct IdentificationResult{T}
     graph_hash::UInt64
     adjustment::Vector{T}
     mediators::Vector{T}
+    moc::Vector{T}
     strategy::Symbol
     identifiable::Bool
     assumptions::Vector{Symbol}
@@ -21,13 +22,14 @@ function IdentificationResult(;
     graph_hash::UInt64,
     adjustment::Vector{T},
     mediators::Vector{T} = Vector{T}(),
+    moc::Vector{T} = Vector{T}(),
     strategy::Symbol,
     identifiable::Bool,
     assumptions::Vector{Symbol} = Symbol[],
     temporal_nodes::Vector{Tuple{T, Int}} = Tuple{T, Int}[],
 ) where {T}
     return IdentificationResult{T}(
-        query, graph_hash, adjustment, mediators,
+        query, graph_hash, adjustment, mediators, moc,
         strategy, identifiable, assumptions, temporal_nodes,
     )
 end
@@ -51,6 +53,7 @@ function certificate_dict(result::IdentificationResult)
         :graph_hash => result.graph_hash,
         :adjustment => result.adjustment,
         :mediators => result.mediators,
+        :moc => result.moc,
         :strategy => result.strategy,
         :identifiable => result.identifiable,
         :assumptions => result.assumptions,

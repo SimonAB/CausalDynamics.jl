@@ -16,10 +16,7 @@ no valid set exists (`false` from CausalInference).
 """
 function backdoor_adjustment_set(g::AbstractGraph, X::Int, Y::Int)
     validate_causal_graph(g)
-
-    if X < 1 || X > nv(g) || Y < 1 || Y > nv(g)
-        throw(ArgumentError("Node indices X=$X and Y=$Y must be in range [1, $(nv(g))]. Graph has $(nv(g)) nodes."))
-    end
+    check_node_indices!(g, X, Y)
 
     adj = CausalInference.find_min_backdoor_adjustment(g, X, Y)
     adj === false && return nothing

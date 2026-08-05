@@ -99,4 +99,47 @@ function validate_causal_graph(g::AbstractGraph)
     return true
 end
 
+"""
+    check_node_indices!(g, idxs...; names=("X", "Y"))
+
+Throw `ArgumentError` unless every index lies in `1:nv(g)`.
+`names` labels the indices in the error message (cycled if shorter than `idxs`).
+"""
+function check_node_indices!(
+    g::AbstractGraph,
+    idxs::Integer...;
+    names::Tuple = ("X", "Y"),
+)
+    n = nv(g)
+    bad = false
+    for idx in idxs
+        if idx < 1 || idx > n
+            bad = true
+            break
+        end
+    end
+    bad || return nothing
+    parts = String[]
+    for (i, idx) in enumerate(idxs)
+        lab = names[mod1(i, length(names))]
+        push!(parts, "$lab=$idx")
+    end
+    throw(ArgumentError(
+        "Node indices $(join(parts, ", ")) must be in range [1, $n]. Graph has $n nodes.",
+    ))
+end
+
+"""
+    check_node_index!(g, idx; label="node")
+
+Throw if a single node index is out of range.
+"""
+function check_node_index!(g::AbstractGraph, idx::Integer; label::AbstractString = "node")
+    n = nv(g)
+    if idx < 1 || idx > n
+        throw(ArgumentError("$(label) index $idx out of range [1, $n]"))
+    end
+    return nothing
+end
+
 export is_dag, validate_causal_graph

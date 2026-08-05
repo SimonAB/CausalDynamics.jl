@@ -39,15 +39,10 @@ Endpoints are never forbidden. Same criterion used by
 """
 function intercepts_all_directed_paths(g::AbstractGraph, treatment::Int, outcome::Int, S)
     validate_causal_graph(g)
-    n = nv(g)
-    if treatment < 1 || treatment > n || outcome < 1 || outcome > n
-        throw(ArgumentError(
-            "Node indices treatment=$treatment and outcome=$outcome must be in range [1, $n].",
-        ))
-    end
+    check_node_indices!(g, treatment, outcome; names = ("treatment", "outcome"))
     S_set = S isa Set{Int} ? S : Set{Int}(S)
     for m in S_set
-        (m < 1 || m > n) && throw(ArgumentError("Mediator index $m out of range [1, $n]"))
+        check_node_index!(g, m; label = "Mediator")
     end
     treatment == outcome && return true
     return !_has_directed_path(g, treatment, outcome; forbidden = S_set)
@@ -96,12 +91,7 @@ find_path_mediators(g, 1, 5)  # Set([2, 3, 4]) == {M1, M2, M3}
 function find_path_mediators(g::AbstractGraph, treatment::Int, outcome::Int)
     validate_causal_graph(g)
 
-    n = nv(g)
-    if treatment < 1 || treatment > n || outcome < 1 || outcome > n
-        throw(ArgumentError(
-            "Node indices treatment=$treatment and outcome=$outcome must be in range [1, $n].",
-        ))
-    end
+    check_node_indices!(g, treatment, outcome; names = ("treatment", "outcome"))
 
     # Equivalent to nodes_on_directed_paths without endpoints.
     return intersect(get_descendants(g, treatment), get_ancestors(g, outcome))
@@ -191,12 +181,7 @@ function find_minimal_mediator_sets(
 )
     validate_causal_graph(g)
 
-    n = nv(g)
-    if treatment < 1 || treatment > n || outcome < 1 || outcome > n
-        throw(ArgumentError(
-            "Node indices treatment=$treatment and outcome=$outcome must be in range [1, $n].",
-        ))
-    end
+    check_node_indices!(g, treatment, outcome; names = ("treatment", "outcome"))
     max_candidates < 0 && throw(ArgumentError("max_candidates must be non-negative"))
 
     treatment == outcome && return MinimalMediatorSets{Int}(Set{Int}[], :no_path)

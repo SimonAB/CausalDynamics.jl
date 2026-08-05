@@ -5,10 +5,7 @@ List valid backdoor adjustment sets via `CausalInference.list_backdoor_adjustmen
 """
 function find_all_adjustment_sets(g::AbstractGraph, X::Int, Y::Int)
     validate_causal_graph(g)
-
-    if X < 1 || X > nv(g) || Y < 1 || Y > nv(g)
-        throw(ArgumentError("Node indices X=$X and Y=$Y must be in range [1, $(nv(g))]. Graph has $(nv(g)) nodes."))
-    end
+    check_node_indices!(g, X, Y)
 
     return [Set{Int}(z) for z in CausalInference.list_backdoor_adjustment(g, X, Y)]
 end
@@ -19,9 +16,7 @@ end
 Check if `Z` is a valid backdoor adjustment set via CausalInference.
 """
 function is_valid_adjustment_set(g::AbstractGraph, X::Int, Y::Int, Z::Set)
-    if X < 1 || X > nv(g) || Y < 1 || Y > nv(g)
-        throw(ArgumentError("Node indices X=$X and Y=$Y must be in range [1, $(nv(g))]. Graph has $(nv(g)) nodes."))
-    end
+    check_node_indices!(g, X, Y)
 
     descendants_X = get_descendants(g, X)
     if X ∈ Z || Y ∈ Z || !isempty(intersect(Z, descendants_X))

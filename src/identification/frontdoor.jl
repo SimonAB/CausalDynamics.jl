@@ -21,14 +21,11 @@ Uses reachability (BFS), not path enumeration — safe on dense DAGs.
 """
 function frontdoor_adjustment_set(g::AbstractGraph, X::Int, Y::Int, M)
     validate_causal_graph(g)
-
-    if X < 1 || X > nv(g) || Y < 1 || Y > nv(g)
-        throw(ArgumentError("Node indices X=$X and Y=$Y must be in range [1, $(nv(g))]. Graph has $(nv(g)) nodes."))
-    end
+    check_node_indices!(g, X, Y)
 
     M_set = M isa AbstractVector ? Set{Int}(M) : Set{Int}([M])
     for m in M_set
-        (m < 1 || m > nv(g)) && throw(ArgumentError("Mediator index $m out of range [1, $(nv(g))]"))
+        check_node_index!(g, m; label = "Mediator")
     end
 
     # Condition 1: M intercepts every directed path X → Y
@@ -86,10 +83,7 @@ checked with [`frontdoor_adjustment_set`](@ref). Avoids enumerating all simple p
 """
 function find_frontdoor_mediators(g::AbstractGraph, X::Int, Y::Int)
     validate_causal_graph(g)
-
-    if X < 1 || X > nv(g) || Y < 1 || Y > nv(g)
-        throw(ArgumentError("Node indices X=$X and Y=$Y must be in range [1, $(nv(g))]. Graph has $(nv(g)) nodes."))
-    end
+    check_node_indices!(g, X, Y)
 
     mediators = Vector{Set{Int}}()
     nodes_on_paths = nodes_on_directed_paths(g, X, Y)

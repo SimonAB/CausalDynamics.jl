@@ -20,10 +20,19 @@ using Test
     @test ok
     @test conf == [:Z]
 
-    med = MediationQuery(:X, :Y, [:M])
-    res_m = identify(g, med; node_names = names)
-    @test res_m.strategy == :mediation_backdoor
-    @test res_m.mediators == [:M]
+    # Interventional mediation certificate (mediators optional on this tiny graph)
+    res_m = identify(
+        g, MediationQuery(:X, :Y, Symbol[]; effect_kind = :interventional); node_names = names,
+    )
+    @test res_m.strategy == :mediation_interventional
+    @test isempty(res_m.mediators)
+
+    # Natural with no recanting witness
+    g2 = SimpleDiGraph(4)
+    add_edge!(g2, 1, 2); add_edge!(g2, 2, 3); add_edge!(g2, 4, 1); add_edge!(g2, 4, 3)
+    names2 = Dict(1 => :A, 2 => :M, 3 => :Y, 4 => :W)
+    res_n = identify(g2, MediationQuery(:A, :Y, [:M]; effect_kind = :natural); node_names = names2)
+    @test res_n.strategy == :mediation_natural
 
     spec = TemporalDAGSpec([:a, :x], [(:a, :x, 1)])
     u = unroll_temporal_dag(spec, 3)
