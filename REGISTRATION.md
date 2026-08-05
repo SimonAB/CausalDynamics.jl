@@ -10,7 +10,7 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 | **0.3.13** | On General ([#163196](https://github.com/JuliaRegistries/General/pull/163196)) |
 | **0.3.14** | On General ([#163580](https://github.com/JuliaRegistries/General/pull/163580), merged 2026-08-05) |
 | **0.3.15** | On General ([#163608](https://github.com/JuliaRegistries/General/pull/163608), merged 2026-08-05) |
-| **0.3.16** | Open: [General#163619](https://github.com/JuliaRegistries/General/pull/163619) — tag `v0.3.16` at `2922acc` |
+| **0.3.16** | On General ([#163619](https://github.com/JuliaRegistries/General/pull/163619), merged 2026-08-05) — tip matches `main` |
 
 Local `main` is at **0.3.16**. Register **incrementally** (no version skips) so AutoMerge stays happy.
 
