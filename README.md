@@ -45,6 +45,11 @@ Pkg.add("DAGMakie")
 using DAGMakie, CairoMakie
 ```
 
+Registry CausalDynamics + DAGMakie resolve together with GraphMakie **0.5.x**.
+Tip GraphMakie **≥0.6** (CDCS fork) needs a separate figure environment until
+CausalInference widens its GraphMakie weakdep — see
+[REGISTRATION.md](REGISTRATION.md#graphmakie--dagmakie-resolve-matrix).
+
 ## Quick start
 
 Confounding graph $Z \to X$, $Z \to Y$, $X \to Y$; adjust for $Z$:

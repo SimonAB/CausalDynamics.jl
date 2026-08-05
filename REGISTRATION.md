@@ -37,12 +37,35 @@ For each step:
 5. **Weakdep `[compat]`** includes Associations, DAGMakie, DataFrames, GraphPPL,
    OrdinaryDiffEq, RxInfer.
 
+## GraphMakie / DAGMakie resolve matrix
+
+Downstream projects that want typed DAGMakie figures sometimes need GraphMakie
+**0.6** (CDCS fork / tip path). Registry CausalInference still pins its
+optional GraphMakie weakdep to **0.5**, so tip GraphMakie ≥0.6 cannot share a
+resolve with CausalDynamics today.
+
+| Combo | Result |
+|-------|--------|
+| CausalDynamics (registry) alone | OK |
+| + registry GraphMakie **0.5.x** | OK |
+| + registry DAGMakie **0.1.x** + GraphMakie **0.5.x** | OK (supported single-env) |
+| CDCS tip GraphMakie **≥0.6** + tip DAGMakie + CausalDynamics | Mutually exclusive until CausalInference widens GraphMakie compat |
+
+**Supported pattern until then:** dual environment (or identify-then-plot split).
+
+1. Identification env: CausalDynamics from General (no GraphMakie 0.6).
+2. Figure env: develop CDCS GraphMakie + DAGMakie; omit CausalDynamics from that resolve.
+
+Companion docs: [DAGMakie REGISTRATION.md](https://github.com/SimonAB/DAGMakie.jl/blob/main/REGISTRATION.md).
+Tracking issue: [#6](https://github.com/SimonAB/CausalDynamics.jl/issues/6).
+Upstream unblocker: [mschauer/CausalInference.jl#179](https://github.com/mschauer/CausalInference.jl/pull/179).
+
 ## Ecosystem tracking
 
 | Item | Status | Action |
 |------|--------|--------|
-| CausalDynamics on General | Tip `0.3.13`; registering through `0.3.16` | Follow incremental plan above |
-| CausalInference GraphMakie 0.6 compat | Open | [mschauer/CausalInference.jl#179](https://github.com/mschauer/CausalInference.jl/pull/179) — when merged, restore DAGMakie/CairoMakie to default `Pkg.test` target |
+| CausalDynamics on General | Tip `0.3.16` | Incremental register for later bumps |
+| CausalInference GraphMakie 0.6 compat | Open | [mschauer/CausalInference.jl#179](https://github.com/mschauer/CausalInference.jl/pull/179) — when merged, re-test tip GraphMakie + CausalDynamics co-install; restore DAGMakie/CairoMakie to default `Pkg.test` target |
 | DAGMakie on General | Done (`0.1.6`) | Optional: restore tuple `node_size` after GraphMakie ships #259 |
 | `DAGMakieCausalDynamicsExt` | Deferred | Re-enable in DAGMakie `[extensions]` after registry GraphMakie supports needed APIs |
 
