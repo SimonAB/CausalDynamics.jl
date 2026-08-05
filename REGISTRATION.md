@@ -9,8 +9,8 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 | **0.3.4** | On General ([#162687](https://github.com/JuliaRegistries/General/pull/162687)) |
 | **0.3.13** | On General ([#163196](https://github.com/JuliaRegistries/General/pull/163196)) |
 | **0.3.14** | On General ([#163580](https://github.com/JuliaRegistries/General/pull/163580), merged 2026-08-05) |
-| **0.3.15** | Open: [General#163608](https://github.com/JuliaRegistries/General/pull/163608) — tag `v0.3.15` at `7e36403` |
-| **0.3.16** | Queued — tag after 0.3.15 merges (`MinimalMediatorSets` / status API) |
+| **0.3.15** | On General ([#163608](https://github.com/JuliaRegistries/General/pull/163608), merged 2026-08-05) |
+| **0.3.16** | Open: [General#163619](https://github.com/JuliaRegistries/General/pull/163619) — tag `v0.3.16` at `2922acc` |
 
 Local `main` is at **0.3.16**. Register **incrementally** (no version skips) so AutoMerge stays happy.
 
