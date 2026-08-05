@@ -8,7 +8,7 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 |---------|--------|
 | **0.3.4** | On General ([#162687](https://github.com/JuliaRegistries/General/pull/162687)) |
 | **0.3.13** | On General ([#163196](https://github.com/JuliaRegistries/General/pull/163196)) |
-| **0.3.14** | Registering — tag `v0.3.14` at `a8c0a30` (`find_path_mediators`) |
+| **0.3.14** | Open: [General#163580](https://github.com/JuliaRegistries/General/pull/163580) — tag `v0.3.14` at `a8c0a30` |
 | **0.3.15** | Queued — tag after 0.3.14 merges (`find_minimal_mediator_sets`) |
 | **0.3.16** | Queued — tag after 0.3.15 merges (`MinimalMediatorSets` / status API) |
 
