@@ -4,6 +4,23 @@
 CurrentModule = CausalDynamics
 ```
 
+## Queries and certificates
+
+```@docs
+CausalQuery
+TotalEffectQuery
+MediationQuery
+TemporalEffectQuery
+InterventionalPolicyQuery
+identify
+IdentificationResult
+certificate_dict
+graph_fingerprint
+identification_report
+```
+
+## Adjustment and instruments
+
 ```@docs
 backdoor_adjustment_set
 is_backdoor_adjustable
@@ -18,4 +35,16 @@ is_valid_instrument
 find_all_adjustment_sets
 CausalDynamics.is_valid_adjustment_set
 minimal_adjustment_set
+```
+
+## Column resolvers
+
+Map graph node labels to data columns after identification.
+
+```@docs
+ColumnResolver
+IdentityColumnResolver
+DictColumnResolver
+resolve_columns
+resolve_identification_columns
 ```

@@ -44,9 +44,8 @@ makedocs(
         "References" => "references.md",
     ],
     checkdocs = :exports,
-    # Cross-references are strict; `missing_docs` stays a warning while
-    # unexported internals are progressively added to @docs blocks.
-    warnonly = [:missing_docs],
+    # Fail on broken `@ref` / missing `@docs` coverage for documented exports.
+    warnonly = false,
 )
 
 if get(ENV, "CI", nothing) == "true"

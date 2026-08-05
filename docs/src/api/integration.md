@@ -35,8 +35,16 @@ cpdag_to_dag
 oce_parents_to_temporal_spec
 digraph_with_names
 infer_pc_graph
+infer_pc_digraph
+infer_oce_parents
 infer_oce_temporal_spec
 discover_and_prepare
+DiscoveryGraphMetadata
+delay_embed_cause
+delay_embed_effect
+aggregate_parent_inclusion
+posterior_mean_τ
+state_index_map
 ```
 
 ## SciML / OrdinaryDiffEq (optional)
@@ -52,12 +60,17 @@ continuous_cdm_graph
 with_parents
 ranked_variables_to_parents
 has_sciml
+has_sciml_sensitivity
+has_data_interpolations
 ode_problem_cdm
 solve_cdm
 terminal_state
 state_series
 interventional_rhs
 intervention_callback
+apply_initial_conditions!
+continuous_interventions
+ContinuousInterventionSet
 DoPin
 DoInitialCondition
 DoForce
