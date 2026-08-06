@@ -8,14 +8,15 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 |---------|--------|
 | **0.3.16** | On General ([#163619](https://github.com/JuliaRegistries/General/pull/163619)) |
 | **0.4.0** | On General ([#163649](https://github.com/JuliaRegistries/General/pull/163649), merged 2026-08-05) |
+| **0.4.1** | Pending Registrator — panel API + Documenter fix |
 
-Local `main` targets **0.4.0**. Register **incrementally** (no version skips).
+Local `main` targets **0.4.1**. Register **incrementally** (no version skips).
 
-## 0.4.0 register steps
+## 0.4.1 register steps
 
-1. Push `main` with `version = "0.4.0"`
+1. Push `main` with `version = "0.4.1"`
 2. Comment `@JuliaRegistrator register` on the release commit or tracking issue
-3. Wait for General AutoMerge; TagBot tags `v0.4.0` if needed
+3. Wait for General AutoMerge; TagBot tags `v0.4.1` if needed
 
 ## Prerequisites (met)
 
@@ -27,4 +28,5 @@ Local `main` targets **0.4.0**. Register **incrementally** (no version skips).
 ## Downstream
 
 - **CausalMediation.jl** requires `CausalDynamics = "0.4"` (uses `moc` / mediation strategies).
-- **CausalTargeted.jl** should bump compat to `"0.4"` when adopting 0.4 certificates.
+- **CausalTargeted.jl** sequential panel bridge needs **0.4.1+** for `simulate_panel` /
+  `panel_column_name` on General (compat already `"0.4"`).

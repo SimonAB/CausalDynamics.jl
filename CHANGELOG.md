@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-08-06
+
+### Added
+
+- `CDMPanel`, `panel_column_name`, `trajectory_wide_row`, and `simulate_panel`
+  for wide observational panels (baseline / timed / terminal columns) for
+  hand-off to CausalTargeted sequential LMTP.
+- Observation bridge helpers in `src/cdm/observation.jl`.
+- `TransportQuery` identification hooks and SciML / DataFrames extension touch-ups.
+
+### Fixed
+
+- Documenter: include `IdentificationError` in the identification API page
+  (`checkdocs = :exports`).
+
 ## [0.4.0] - 2026-08-05
 
 ### Breaking

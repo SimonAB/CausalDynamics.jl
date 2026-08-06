@@ -15,6 +15,7 @@ InterventionalPolicyQuery
 TransportQuery
 identify
 IdentificationResult
+IdentificationError
 certificate_dict
 graph_fingerprint
 identification_report
