@@ -8,15 +8,15 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 |---------|--------|
 | **0.3.16** | On General ([#163619](https://github.com/JuliaRegistries/General/pull/163619)) |
 | **0.4.0** | On General ([#163649](https://github.com/JuliaRegistries/General/pull/163649), merged 2026-08-05) |
-| **0.4.1** | [General#163720](https://github.com/JuliaRegistries/General/pull/163720) — pending AutoMerge |
+| **0.4.1** | On General ([#163720](https://github.com/JuliaRegistries/General/pull/163720), merged 2026-08-06) |
 
 Local `main` targets **0.4.1**. Register **incrementally** (no version skips).
 
 ## 0.4.1 register steps
 
-1. Push `main` with `version = "0.4.1"`
-2. Comment `@JuliaRegistrator register` on the release commit or tracking issue
-3. Wait for General AutoMerge; TagBot tags `v0.4.1` if needed
+1. Push `main` with `version = "0.4.1"` — done (`01f7c38`)
+2. Comment `@JuliaRegistrator register` — done ([issue #7](https://github.com/SimonAB/CausalDynamics.jl/issues/7))
+3. General AutoMerge — **merged** ([#163720](https://github.com/JuliaRegistries/General/pull/163720)); TagBot tagged `v0.4.1`
 
 ## Prerequisites (met)
 
