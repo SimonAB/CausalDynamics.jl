@@ -8,7 +8,7 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 |---------|--------|
 | **0.3.16** | On General ([#163619](https://github.com/JuliaRegistries/General/pull/163619)) |
 | **0.4.0** | On General ([#163649](https://github.com/JuliaRegistries/General/pull/163649), merged 2026-08-05) |
-| **0.4.1** | Pending Registrator — panel API + Documenter fix |
+| **0.4.1** | [General#163720](https://github.com/JuliaRegistries/General/pull/163720) — pending AutoMerge |
 
 Local `main` targets **0.4.1**. Register **incrementally** (no version skips).
 
