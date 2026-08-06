@@ -20,7 +20,7 @@ Stack overview (integration as the product):
 flowchart LR
   subgraph juliaStack [Julia_typed_pipeline]
     G[Graph_CDM] --> ID[identify_certificate]
-    ID --> SIM[simulate_counterfactual]
+    ID --> SIM[simulate_panel_CF]
     ID --> EST[LMTP_mediation]
     ID --> PLOT[DAGMakie]
     SIM --> EST

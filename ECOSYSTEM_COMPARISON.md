@@ -22,12 +22,17 @@ typical R or Python workflows.
 flowchart LR
   subgraph juliaStack [Julia_typed_pipeline]
     G[Graph_CDM] --> ID[identify_certificate]
-    ID --> SIM[simulate_counterfactual]
+    ID --> SIM[simulate_panel_CF]
     ID --> EST[LMTP_mediation]
     ID --> PLOT[DAGMakie]
     SIM --> EST
   end
 ```
+
+Discrete-time hand-off: `simulate_panel` → wide `CDMPanel` / `DataFrame` →
+`sequential_spec_from_identification` / `plan_sequential` → `execute_estimand`
+(`SequentialPolicy`). Point-treatment LMTP and mediation keep the existing
+tabular certificate bridges.
 
 ## Typical routes by ecosystem
 
@@ -55,13 +60,19 @@ flowchart LR
 | d-separation / backdoor / frontdoor / IV | Yes (CausalDynamics) | Yes (dagitty) | Yes (DoWhy / causal-learn) | |
 | Typed ID certificate | Unique | Partial | Partial | `IdentificationResult` |
 | Discrete-time CDM + shared-`U` CF | Unique | — / Partial | Partial | Trajectories, not only scalar outcomes |
+| Observational panel from CDM | Unique | Partial | Partial | `simulate_panel` → wide table |
+| Latent → observed panel bridge | Unique | Partial | Partial | `ObservationBridge` (no filter in core) |
 | Temporal unroll + time-indexed ID | Unique | Partial | Partial | |
 | Continuous CDM + SciML `do` | Unique | — | Partial | Same structural layer as graphs |
+| Continuous MC functionals | Unique | — | Partial | `ContinuousEffectFunctional` + `g_computation` |
+| Transport ID (domain in adjustment) | Yes | Partial | Partial | `TransportQuery` |
+| Policy choice over estimands | Yes (CausalTargeted) | Partial | Partial | `choose_policy` |
 | LMTP / MTP δ-grids | Yes (CausalTargeted) | Yes (lmtp) | Yes (Ananke) | Conceptual parity |
+| Sequential LMTP from temporal ID + panel | Unique | Partial | Partial | `plan_sequential` / `execute_estimand` |
 | Interventional mediation (TE/NDE/NIE) | Yes (CausalMediation) | Yes (crumble / tmle3) | Partial (Ananke) | |
 | Intermediate confounding (`moc`) + continuous MTP EIF | Yes (CausalMediation) | Yes (crumble / medoutcon) | Partial | |
 | Recanting-twin / path-specific + target-trial API | Unique (CausalMediation) | Partial (crumble RT / medRCT) | — | Typed ID + EIF in one pipeline |
-| Consumes upstream ID certificate | Unique | Partial | Partial | `plan_mtp` / `plan_mediation` / `execute_estimand` |
+| Consumes upstream ID certificate | Unique | Partial | Partial | `plan_mtp` / `plan_mediation` / `plan_sequential` / `execute_estimand` |
 | Layered causal DAG + bidirected | Yes (DAGMakie) | Yes (ggdag) | Partial | |
 | Time-indexed / SWIG / DiD grammar | Unique | Partial (custom ggplot) | Partial (custom) | |
 | Same Makie stack as SciML figures | Unique | — | — | Publication pipeline |
@@ -80,7 +91,7 @@ owns the glue between packages.
 
 - [CausalDynamics comparison](https://simonab.github.io/CausalDynamics.jl/dev/comparison/)
 - [CausalTargeted comparison](https://simonab.github.io/CausalTargeted.jl/dev/comparison/)
-- [CausalMediation](https://github.com/SimonAB/CausalMediation.jl) (mediation layer; Documenter TBD)
+- [CausalMediation comparison](https://simonab.github.io/CausalMediation.jl/dev/comparison/)
 - [DAGMakie comparison](https://simonab.github.io/DAGMakie.jl/dev/comparison/)
 
 Narrative companion: [CDCS book](https://simonab.github.io/causal-dynamics-book/).

@@ -11,12 +11,12 @@ This package is the **structural and dynamical core**: graphs, identification, S
 ```
 Graph / CDM spec  →  identify(query)  →  IdentificationResult
                               ↓
-              simulate · counterfactual · g-computation
+     simulate · simulate_panel · counterfactual · g-computation
                               ↓
-        optional: TMLE.jl · RxInfer · DAGMakie · Associations
+        optional: CausalTargeted sequential LMTP · TMLE.jl · RxInfer · DAGMakie
 ```
 
-CausalDynamics answers **what is identifiable and how state evolves**; it does not run SuperLearner grids or cohort pipelines.
+CausalDynamics answers **what is identifiable and how state evolves**; it does not run SuperLearner grids or cohort pipelines. Wide observational panels from `simulate_panel` use baseline / timed (`:a1`, `:a2`, …) / terminal column roles for hand-off to CausalTargeted `SequentialPolicy`.
 
 ## Package-specific principles
 
@@ -42,10 +42,13 @@ New integrations follow the same pattern: narrow API in `src/integration/`, impl
 ### Composable dynamical semantics
 
 - **Static:** `GraphSCM`, `DoIntervention`, shared-`U` counterfactuals.
-- **Discrete-time:** `DiscreteTimeCDM`, typed `DoSequence` assignments, `Policy`, trajectory simulation.
+- **Discrete-time:** `DiscreteTimeCDM`, typed `DoSequence` assignments, `Policy`, trajectory simulation, `CDMPanel` / `simulate_panel`.
+- **Observable bridge:** `ObservationBridge` maps latent/filter series to estimation columns (no filter algorithms in core).
+- **Continuous functionals:** `ContinuousEffectFunctional` + SciML `g_computation` (weakdep).
+- **Transport ID:** `TransportQuery` unions domain covariates into backdoor adjustment.
 - **Time-indexed ID:** unroll lag structure, then apply backdoor on the unrolled graph.
 
-Keep simulation and identification **orthogonal**: the same `IdentificationResult` should feed TMLE, RxInfer, or custom estimators.
+Keep simulation and identification **orthogonal**: the same `IdentificationResult` should feed sequential LMTP, TMLE, RxInfer, or custom estimators.
 
 ### Julia native types
 

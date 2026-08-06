@@ -77,5 +77,29 @@ end
 InterventionalPolicyQuery(treatment, outcome; shift = nothing) =
     InterventionalPolicyQuery(treatment, outcome, shift)
 
+"""
+    TransportQuery(treatment, outcome, domain; source=nothing, target=nothing)
+
+Transport a treatment effect across domains marked by `domain` covariates.
+"""
+struct TransportQuery{T} <: CausalQuery
+    treatment::T
+    outcome::T
+    domain::Vector{T}
+    source::Union{Nothing, Symbol}
+    target::Union{Nothing, Symbol}
+end
+
+function TransportQuery(
+    treatment,
+    outcome,
+    domain::AbstractVector;
+    source::Union{Nothing, Symbol} = nothing,
+    target::Union{Nothing, Symbol} = nothing,
+)
+    return TransportQuery(treatment, outcome, collect(domain), source, target)
+end
+
 export CausalQuery
 export TotalEffectQuery, MediationQuery, TemporalEffectQuery, InterventionalPolicyQuery
+export TransportQuery

@@ -66,6 +66,7 @@ include("identification/instruments.jl")
 include("identification/adjustment.jl")
 include("identification/do_calculus.jl")
 include("identification/identify.jl")
+include("identification/transport.jl")
 include("identification/path_mediators.jl")
 include("identification/report.jl")
 
@@ -77,6 +78,8 @@ include("scm/counterfactuals.jl")
 
 # Discrete-time Causal Dynamical Models
 include("cdm/discrete_cdm.jl")
+include("cdm/panel.jl")
+include("cdm/observation.jl")
 
 # Utilities
 include("utils/graph_utils.jl")

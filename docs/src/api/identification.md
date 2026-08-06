@@ -12,6 +12,7 @@ TotalEffectQuery
 MediationQuery
 TemporalEffectQuery
 InterventionalPolicyQuery
+TransportQuery
 identify
 IdentificationResult
 certificate_dict

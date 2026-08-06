@@ -5,7 +5,9 @@
 ## CausalDynamics.jl (this package)
 
 - Causal graphs, d-separation, identification (`identify`, `IdentificationResult`)
-- SCMs, CDMs, temporal unrolling
+- SCMs, CDMs, temporal unrolling, observational panels (`simulate_panel` / `CDMPanel`)
+- Latent→observed bridges (`ObservationBridge`); continuous functionals (SciML ext)
+- Transport identification (`TransportQuery`); not domain-cohort registries
 - Integration **façades** (TMLE.jl, RxInfer, DAGMakie) via package extensions
 
 ### Experimental (exported; outside the main pipeline)

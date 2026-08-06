@@ -66,6 +66,8 @@ ode_problem_cdm
 solve_cdm
 terminal_state
 state_series
+ContinuousEffectFunctional
+evaluate_functional
 interventional_rhs
 intervention_callback
 apply_initial_conditions!

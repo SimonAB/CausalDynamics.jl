@@ -238,4 +238,43 @@ end
             intervention = do_sequence(:a, [1.0]),
         )
     end
+
+    @testset "simulate_panel wide layout" begin
+        cdm = DiscreteTimeCDM(
+            [:w, :a, :l, :y];
+            initialise = (rng) -> (w = randn(rng), a = 0.0, l = 0.0, y = 0.0),
+            sample_noise = (rng, state, t) -> (
+                u_a = randn(rng), u_l = randn(rng), u_y = randn(rng),
+            ),
+            step = (state, t, noise, intervention) -> begin
+                a = intervention_value(intervention, :a, t, 0.5 * state.w + noise.u_a)
+                l = 0.3 * a + noise.u_l
+                y = 0.5 * a + 0.2 * state.w + noise.u_y
+                (w = state.w, a = a, l = l, y = y)
+            end,
+        )
+        panel = simulate_panel(
+            cdm, 12, 2;
+            rng = Random.Xoshiro(7),
+            baseline = [:w],
+            timed = [:a, :l],
+            terminal = [:y],
+        )
+        @test panel isa CDMPanel
+        @test panel.n == 12
+        @test panel.T == 2
+        @test panel.column_order == [:w, :a1, :l1, :a2, :l2, :y]
+        @test panel_column_name(:a, 2) === :a2
+        nt = NamedTuple(panel)
+        @test keys(nt) == (:w, :a1, :l1, :a2, :l2, :y)
+        @test length(nt.w) == 12
+
+        using DataFrames
+        df = DataFrame(panel)
+        @test names(df) == ["w", "a1", "l1", "a2", "l2", "y"]
+        @test nrow(df) == 12
+
+        @test_throws ArgumentError simulate_panel(cdm, 0, 2)
+        @test_throws ArgumentError simulate_panel(cdm, 2, 2; baseline = [:z])
+    end
 end

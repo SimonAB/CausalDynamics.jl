@@ -1,5 +1,6 @@
 using CausalDynamics
 using Test
+using Random
 
 @testset "SciML extension" begin
     @test !has_sciml()
@@ -137,6 +138,40 @@ using Test
             term = terminal_state(spec, sol)
             @test term.x ≈ 1.0 atol = 1e-2
             @test term.y ≈ 0.0 atol = 1e-8
+        end
+
+        @testset "continuous g_computation functionals" begin
+            spec = ContinuousCDMSpec([:x, :y])
+            function drift!(du, u, p, t)
+                du[1] = 0.0
+                du[2] = u[1]  # ẏ = x
+                return nothing
+            end
+            u0_sampler = rng -> [1.0, 0.0]
+            fun_term = ContinuousEffectFunctional(:y; kind = :terminal)
+            g_pin = g_computation(
+                spec, drift!, u0_sampler, (0.0, 2.0), ();
+                intervention = do_pin(:x, 1.0),
+                functional = fun_term,
+                n = 20,
+                rng = Random.Xoshiro(11),
+            )
+            @test g_pin isa GComputationResult
+            # With x pinned at 1, y(t)=t → terminal ≈ 2
+            @test g_pin.mean ≈ 2.0 atol = 1e-2
+
+            sol = solve_cdm(spec, drift!, [1.0, 0.0], (0.0, 2.0), (); intervention = do_pin(:x, 1.0))
+            @test evaluate_functional(spec, sol, ContinuousEffectFunctional(:y; kind = :mean)) > 0
+            @test evaluate_functional(spec, sol, ContinuousEffectFunctional(:y; kind = :integral)) ≈ 2.0 atol = 0.1
+
+            g_out = g_computation(
+                spec, drift!, u0_sampler, (0.0, 1.0), ();
+                intervention = do_pin(:x, 0.5),
+                outcome = :y,
+                n = 10,
+                rng = Random.Xoshiro(12),
+            )
+            @test g_out.mean ≈ 0.5 atol = 5e-2
         end
     end
 end

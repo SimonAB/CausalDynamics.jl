@@ -53,7 +53,23 @@ under_policy = g_computation(cdm, 100, :y; intervention = π, n = 500)
 ```
 
 For **observational** data (not simulation), use the TMLE or RxInfer bridges with
-adjustment sets from identification.
+adjustment sets from identification. Discrete panels use `simulate_panel`;
+inferred latents use `ObservationBridge` / `panel_from_latent_series`.
+
+Continuous CDMs support the same Monte Carlo idea via
+[`ContinuousEffectFunctional`](@ref) (`:terminal`, `:mean`, `:integral`):
+
+```julia
+using OrdinaryDiffEq
+spec = ContinuousCDMSpec([:x, :y])
+# … define rhs! …
+g_do = g_computation(
+    spec, rhs!, rng -> [1.0, 0.0], (0.0, 5.0), p;
+    intervention = do_pin(:x, 1.0),
+    functional = ContinuousEffectFunctional(:y; kind = :terminal),
+    n = 200,
+)
+```
 
 ## Bridge to ODEs (application code)
 

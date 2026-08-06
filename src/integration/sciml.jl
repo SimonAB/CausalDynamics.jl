@@ -251,6 +251,53 @@ function state_series(args...)
 end
 
 """
+    ContinuousEffectFunctional(outcome; kind=:terminal)
+
+Functional of a continuous CDM solution used by continuous [`g_computation`](@ref).
+
+`kind` is one of `:terminal` (final state), `:mean` (time-average), or `:integral`
+(trapezoidal integral over the solution time grid).
+"""
+struct ContinuousEffectFunctional
+    outcome::Symbol
+    kind::Symbol
+end
+
+ContinuousEffectFunctional(outcome::Symbol; kind::Symbol = :terminal) =
+    ContinuousEffectFunctional(outcome, kind)
+
+"""
+    evaluate_functional(spec, sol, functional) -> Float64
+
+Evaluate a [`ContinuousEffectFunctional`](@ref) on a SciML solution.
+Requires `using OrdinaryDiffEq`.
+"""
+function evaluate_functional(args...)
+    ext = _require_sciml!(:evaluate_functional)
+    return ext.evaluate_functional(args...)
+end
+
+"""
+    g_computation(spec, rhs!, u0_sampler, tspan, p; intervention, functional, n, rng, kwargs...)
+
+Monte Carlo interventional mean of a continuous CDM functional.
+
+`u0_sampler(rng) -> AbstractVector` draws initial conditions. Returns a
+[`GComputationResult`](@ref). Requires `using OrdinaryDiffEq`.
+"""
+function g_computation(
+    spec::ContinuousCDMSpec,
+    rhs!,
+    u0_sampler,
+    tspan,
+    p;
+    kwargs...,
+)
+    ext = _require_sciml!(:g_computation)
+    return ext.g_computation(spec, rhs!, u0_sampler, tspan, p; kwargs...)
+end
+
+"""
     has_sciml_sensitivity() -> Bool
 
 Return `true` when the SciMLSensitivity extension is loaded.
@@ -293,4 +340,6 @@ export ContinuousCDMSpec,
     solve_cdm,
     terminal_state,
     state_series,
+    ContinuousEffectFunctional,
+    evaluate_functional,
     forward_sensitivity_cdm

@@ -17,9 +17,13 @@ package names stay Pearl/SciML-facing.
 | Identification | Criteria for adjustment / instruments | `d_separated`, `backdoor_adjustment_set`, frontdoor, IV |
 | Static SCM | One-shot settlement given `U` | `GraphSCM`, `DoIntervention`, `simulate_scm`, `compute_counterfactual` |
 | Discrete-time CDM | Trajectories over occasions | `DiscreteTimeCDM`, `DoSequence`, `simulate`, `counterfactual` |
+| Observational panels | Wide tables for sequential estimation | `CDMPanel`, `simulate_panel`, `panel_column_name` |
+| Latent → observed bridge | Filter/smoother outputs → panel columns | `ObservationBridge`, `panel_from_latent_series`, `simulate_observed_panel` |
 | Soft interventions | State-dependent treatment rules | `Policy`, `policy` |
-| Interventional means | Monte Carlo g-computation | `g_computation` |
+| Interventional means | Monte Carlo g-computation (discrete) | `g_computation` on `DiscreteTimeCDM` |
+| Continuous functionals | Monte Carlo g-computation (SciML) | `ContinuousEffectFunctional`, `g_computation` on `ContinuousCDMSpec` |
 | Time-indexed ID | Unrolled lag DAGs | `TemporalDAGSpec`, `unroll_temporal_dag`, `temporal_backdoor_adjustment_set` |
+| Transport ID | Domain covariates in adjustment | `TransportQuery` → `:transport_backdoor` |
 
 **Hard dependencies** stay lean: `Graphs` and `CausalInference` (d-separation and minimal backdoor algorithms). Frontdoor, IV, path enumeration, SCM/CDM simulation, and estimation bridges are owned here.
 
@@ -27,8 +31,9 @@ package names stay Pearl/SciML-facing.
 
 - **DAGMakie.jl** — weakdep plotting (`plot_causal_graph`, …)
 - **Associations.jl** — weakdep discovery bridge (PC, OCE → identification); see [Associations integration](ASSOCIATIONS_INTEGRATION.md)
-- **RxInfer / GraphPPL / DataFrames** — weakdep variational backdoor head (narrow residualised ATE; see [RxInfer integration](RXINFER_INTEGRATION.md))
+- **RxInfer / GraphPPL / DataFrames** — weakdep variational backdoor head (narrow residualised ATE; see [RxInfer integration](RXINFER_INTEGRATION.md)); `DataFrame(::CDMPanel)` via `CausalDynamicsDataFramesExt`
 - **TMLE.jl** — workflow helpers when the package is loaded (`prepare_for_tmle`)
+- **CausalTargeted.jl** — sequential LMTP consumes `simulate_panel` wide tables + temporal `IdentificationResult` (`plan_sequential` / `sequential_spec_from_identification`)
 
 ## What is *not* in core
 

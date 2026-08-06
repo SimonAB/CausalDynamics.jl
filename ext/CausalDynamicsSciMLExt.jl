@@ -9,6 +9,8 @@ module CausalDynamicsSciMLExt
 
 using CausalDynamics: CausalDynamics,
     ContinuousCDMSpec,
+    ContinuousEffectFunctional,
+    GComputationResult,
     AbstractCausalIntervention,
     DoIntervention,
     DoPin,
@@ -18,13 +20,16 @@ using CausalDynamics: CausalDynamics,
     ContinuousInterventionSet,
     apply_initial_conditions!
 using OrdinaryDiffEq: ODEProblem, solve, DiscreteCallback, CallbackSet
+using Random
 
 export interventional_rhs,
     intervention_callback,
     ode_problem_cdm,
     solve_cdm,
     terminal_state,
-    state_series
+    state_series,
+    evaluate_functional,
+    g_computation
 
 function _validate_u0!(spec::ContinuousCDMSpec, u0)
     length(u0) == length(spec.variables) || throw(ArgumentError(
@@ -248,6 +253,77 @@ function state_series(spec::ContinuousCDMSpec, sol)
         end
     end
     return NamedTuple{Tuple(spec.variables)}(Tuple(mats[i] for i in 1:nvar))
+end
+
+"""
+    evaluate_functional(spec, sol, functional) -> Float64
+"""
+function evaluate_functional(
+    spec::ContinuousCDMSpec,
+    sol,
+    functional::ContinuousEffectFunctional,
+)
+    haskey(spec.index, functional.outcome) || throw(ArgumentError(
+        "outcome :$(functional.outcome) not in spec.variables=$(spec.variables)",
+    ))
+    series = state_series(spec, sol)
+    y = series[functional.outcome]
+    kind = functional.kind
+    if kind === :terminal
+        return Float64(y[end])
+    elseif kind === :mean
+        return Float64(sum(y) / length(y))
+    elseif kind === :integral
+        t = sol.t
+        length(t) == length(y) || throw(ArgumentError("sol.t / series length mismatch"))
+        length(t) < 2 && return 0.0
+        acc = 0.0
+        for i in 1:(length(t) - 1)
+            acc += 0.5 * (y[i] + y[i + 1]) * (t[i + 1] - t[i])
+        end
+        return Float64(acc)
+    else
+        throw(ArgumentError(
+            "ContinuousEffectFunctional.kind must be :terminal, :mean, or :integral; got :$kind",
+        ))
+    end
+end
+
+"""
+    g_computation(spec, rhs!, u0_sampler, tspan, p; intervention, functional, n, rng, kwargs...)
+"""
+function g_computation(
+    spec::ContinuousCDMSpec,
+    rhs!,
+    u0_sampler,
+    tspan,
+    p;
+    intervention = nothing,
+    outcome::Union{Nothing, Symbol} = nothing,
+    functional::Union{Nothing, ContinuousEffectFunctional} = nothing,
+    n::Integer = 1000,
+    rng::Random.AbstractRNG = Random.default_rng(),
+    kwargs...,
+)
+    n = Int(n)
+    n < 1 && throw(ArgumentError("n must be ≥ 1, got $n"))
+    fun = if functional !== nothing
+        functional
+    elseif outcome !== nothing
+        ContinuousEffectFunctional(outcome; kind = :terminal)
+    else
+        throw(ArgumentError("provide `functional` or `outcome`"))
+    end
+
+    samples = Vector{Float64}(undef, n)
+    for i in 1:n
+        u0 = u0_sampler(rng)
+        sol = solve_cdm(spec, rhs!, u0, tspan, p; intervention = intervention, kwargs...)
+        samples[i] = evaluate_functional(spec, sol, fun)
+    end
+    m = sum(samples) / n
+    s = n > 1 ? sqrt(sum(abs2, samples .- m) / (n - 1)) : 0.0
+    return GComputationResult(m, s, n, samples)
 end
 
 end # module
