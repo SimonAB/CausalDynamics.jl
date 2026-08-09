@@ -28,5 +28,4 @@ Local `main` targets **0.4.1**. Register **incrementally** (no version skips).
 ## Downstream
 
 - **CausalMediation.jl** **0.1.0** is on General ([#163653](https://github.com/JuliaRegistries/General/pull/163653)); requires `CausalDynamics = "0.4"` (uses `moc` / mediation strategies).
-- **CausalTargeted.jl** sequential panel bridge needs **0.4.1+** for `simulate_panel` /
-  `panel_column_name` on General (compat already `"0.4"`).
+- **CausalTargeted.jl** **0.3.4** is on General ([#163904](https://github.com/JuliaRegistries/General/pull/163904)); sequential panel bridge needs CausalDynamics **0.4.1+** for `simulate_panel` / `panel_column_name` (compat already `"0.4"`).
