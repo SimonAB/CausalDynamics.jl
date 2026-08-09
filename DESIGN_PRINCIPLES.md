@@ -88,8 +88,10 @@ Documenter pages and README prose follow the [Julia Language manual](https://doc
 ## 9. Versioning and compatibility
 
 - **Semver** for public API changes; document breaking identification or estimand types in release notes.
+- **Latest compatible versions.** `[compat]` should allow the newest General releases the package actually supports. Widen bounds when upstream ships a new minor or major we can test; do not leave stale upper bounds that block `Pkg.update()`.
 - **Compat sections** use major-bound constraints (`"0.3"`, `"1"`) unless a pin is documented in `AGENTS.md` (e.g. GraphMakie/Makie/Agents for the book).
-- **Book and CI** may lag; packages should remain usable standalone via `Pkg.test()`.
+- **Vendored checkouts** (CDCS `[sources]`): refresh to the latest upstream tag when bumping, then re-apply any remaining local patches. Drop the vendor once upstream includes those patches.
+- **Book and CI** may lag a Manifest resolve; packages should remain usable standalone via `Pkg.test()`.
 
 ## 10. Review checklist (before merging)
 
