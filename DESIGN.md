@@ -29,7 +29,8 @@ CausalDynamics answers **what is identifiable and how state evolves**; it does n
 ### Façade where upstream is authoritative
 
 - **CausalInference.jl** owns minimal backdoor listing and `dsep`; wrap, do not reimplement.
-- **Own** frontdoor, instruments, path enumeration, ancestral algorithms, SCM/CDM simulation, and temporal unrolling.
+- **Façades over CausalInference:** `d_separated` → `dsep`; backdoor adjustment → `find_*_backdoor_adjustment` ([van der Zander et al., 2019](https://arxiv.org/abs/1803.00116)); frontdoor adjustment → `find_frontdoor_adjustment` ([Wienöbst et al., 2024](https://arxiv.org/abs/2211.16468)); both via `gensearch`.
+- **Own** instruments, path enumeration, ancestral algorithms, SCM/CDM simulation, and temporal unrolling.
 
 ### Lean core, extensions for weight
 

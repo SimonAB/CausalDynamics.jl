@@ -25,7 +25,7 @@ package names stay Pearl/SciML-facing.
 | Time-indexed ID | Unrolled lag DAGs | `TemporalDAGSpec`, `unroll_temporal_dag`, `temporal_backdoor_adjustment_set` |
 | Transport ID | Domain covariates in adjustment | `TransportQuery` → `:transport_backdoor` |
 
-**Hard dependencies** stay lean: `Graphs` and `CausalInference` (d-separation and minimal backdoor algorithms). Frontdoor, IV, path enumeration, SCM/CDM simulation, and estimation bridges are owned here.
+**Hard dependencies** stay lean: `Graphs` and `CausalInference` (d-separation, backdoor, and frontdoor adjustment via `gensearch`). IV, path enumeration, SCM/CDM simulation, and estimation bridges are owned here.
 
 ## What is optional
 
@@ -53,8 +53,8 @@ package names stay Pearl/SciML-facing.
 
 ## Façade vs own code
 
-- **Façades over CausalInference:** `d_separated` → `dsep`; `backdoor_adjustment_set` / adjustment listing → CausalInference backdoor helpers.
-- **Own code:** frontdoor, instruments, path finding, ancestral sets, `GraphSCM`, `DiscreteTimeCDM`, TMLE/RxInfer/DAGMakie/Associations bridges.
+- **Façades over CausalInference:** `d_separated` → `dsep`; backdoor adjustment → CausalInference `gensearch` ([van der Zander et al., 2019](https://arxiv.org/abs/1803.00116)); frontdoor adjustment → `find_frontdoor_adjustment` ([Wienöbst et al., 2024](https://arxiv.org/abs/2211.16468)).
+- **Own code:** instruments, path finding, ancestral sets, `GraphSCM`, `DiscreteTimeCDM`, TMLE/RxInfer/DAGMakie/Associations bridges.
 
 ## Version narrative
 

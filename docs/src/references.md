@@ -5,6 +5,20 @@ Literature underpinning CausalDynamics.jl. BibTeX keys match the CDCS book
 where possible. For estimation (LMTP, mediation TMLE, Super Learner), see also
 [CausalTargeted.jl references](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/references.md).
 
+## Adjustment-set algorithms (CausalInference / gensearch)
+
+CausalDynamics delegates backdoor and frontdoor adjustment to
+[CausalInference.jl](https://github.com/mschauer/CausalInference.jl) `gensearch`.
+Literature underpinning those algorithms:
+
+- Shpitser, I., VanderWeele, T., & Robins, J. M. (2010). On the validity of covariate adjustment for estimating causal effects. In *UAI*. — key `shpitser2010validity` ([arXiv:1203.3515](https://arxiv.org/abs/1203.3515))
+
+- van der Zander, B., Liśkiewicz, M., & Textor, J. (2019). Separators and adjustment sets in causal graphs: complete criteria and an algorithmic framework. *Artificial Intelligence*, *270*, 1–40. — key `vanderzander2019separators` ([arXiv:1803.00116](https://arxiv.org/abs/1803.00116))
+
+- Wienöbst, M., van der Zander, B., & Liśkiewicz, M. (2024). Linear-time algorithms for front-door adjustment in causal graphs. In *AAAI*. — key `wienoebst2024lineartimefrontdoor` ([arXiv:2211.16468](https://arxiv.org/abs/2211.16468))
+
+Shared BibTeX keys also appear in the [CDCS book `references.bib`](https://github.com/SimonAB/causal-dynamics-book/blob/main/references.bib).
+
 ## Structural causality and identification
 
 - Pearl, J. (2009). *Causality: Models, Reasoning, and Inference* (2nd ed.). Cambridge University Press. — key `pearl2009causality`

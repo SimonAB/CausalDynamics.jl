@@ -111,7 +111,7 @@ using Test
         meds = find_frontdoor_mediators(g_dense, 1, n)
         elapsed = time() - t0
         @test meds isa Vector{Set{Int}}
-        @test elapsed < 5.0
+        @test elapsed < 2.0
         @test nodes_on_directed_paths(g_dense, 1, n) isa Set{Int}
     end
     

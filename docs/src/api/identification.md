@@ -4,6 +4,17 @@
 CurrentModule = CausalDynamics
 ```
 
+Backdoor and frontdoor adjustment criteria delegate to
+[CausalInference.jl](https://github.com/mschauer/CausalInference.jl) `gensearch`.
+Backdoor listing follows the complete adjustment framework of van der Zander,
+Liśkiewicz, and Textor (2019); frontdoor find/min/list builds on the linear-time
+criterion of Wienöbst, van der Zander, and Liśkiewicz (2024). See
+[References](../references.md#adjustment-set-algorithms-causalinference--gensearch).
+
+For singleton mediators, prefer [`find_frontdoor_mediators`](@ref) over
+[`list_frontdoor_adjustment_sets`](@ref): the latter can materialise exponentially
+many sets on dense graphs.
+
 ## Queries and certificates
 
 ```@docs
@@ -27,6 +38,9 @@ identification_report
 backdoor_adjustment_set
 is_backdoor_adjustable
 frontdoor_adjustment_set
+find_frontdoor_adjustment_set
+find_min_frontdoor_adjustment_set
+list_frontdoor_adjustment_sets
 find_frontdoor_mediators
 find_path_mediators
 find_minimal_mediator_sets

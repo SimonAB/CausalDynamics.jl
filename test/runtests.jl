@@ -5,6 +5,7 @@ using Graphs
 @testset "CausalDynamics.jl" begin
 include("test_graphs.jl")
 include("test_identification.jl")
+include("test_frontdoor_ci.jl")
 include("test_identification_api.jl")
 include("test_causal_graph.jl")
 include("test_time_indexed.jl")

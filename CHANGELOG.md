@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.4.1] - 2026-08-06
+### Changed
+
+- Frontdoor identification delegates to `CausalInference.find_frontdoor_adjustment`
+  (Wienöbst et al. 2024; CausalInference `gensearch`) instead of the prior reachability/backdoor
+  shortcut. New exports: `find_frontdoor_adjustment_set`,
+  `find_min_frontdoor_adjustment_set`, `list_frontdoor_adjustment_sets`.
+- `find_frontdoor_mediators` validates singleton candidates directly instead of
+  listing all frontdoor sets (large speedup on dense graphs).
+
 
 ### Added
 

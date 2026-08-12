@@ -1,102 +1,131 @@
 """
-    frontdoor_adjustment_set(g, X, Y, M)
+    _mediator_set(M) -> Set{Int}
 
-Check if M is a valid frontdoor adjustment set for estimating the causal effect of X on Y.
+Normalise a frontdoor candidate set `M` (scalar, vector, or set).
+"""
+function _mediator_set(M)
+    if M isa AbstractSet
+        return Set{Int}(M)
+    elseif M isa AbstractVector
+        return Set{Int}(M)
+    else
+        return Set{Int}([M])
+    end
+end
 
-The frontdoor criterion states that a set M is a valid frontdoor adjustment set if:
-1. M blocks all directed paths from X to Y
-2. There are no backdoor paths from X to M
-3. All backdoor paths from M to Y are blocked by X
+"""
+    frontdoor_adjustment_set(g, X, Y, M) -> Bool
 
-Uses reachability (BFS), not path enumeration — safe on dense DAGs.
+Return `true` when `M` is a valid frontdoor adjustment set for the effect of `X` on
+`Y`.
 
-# Arguments
-- `g`: Directed acyclic graph
-- `X`: Treatment node
-- `Y`: Outcome node
-- `M`: Potential mediator set
-
-# Returns
-- `true` if M is a valid frontdoor adjustment set, `false` otherwise
+Delegates to [`CausalInference.find_frontdoor_adjustment`](@ref) with
+``I = R = M`` (exact-set check). Uses the general frontdoor search of
+[Wienöbst et al. (2024)](https://arxiv.org/abs/2211.16468) via CausalInference
+`gensearch` (see also van der Zander et al., 2019 for backdoor listing).
 """
 function frontdoor_adjustment_set(g::AbstractGraph, X::Int, Y::Int, M)
     validate_causal_graph(g)
     check_node_indices!(g, X, Y)
 
-    M_set = M isa AbstractVector ? Set{Int}(M) : Set{Int}([M])
+    M_set = _mediator_set(M)
     for m in M_set
         check_node_index!(g, m; label = "Mediator")
     end
 
-    # Condition 1: M intercepts every directed path X → Y
-    if _has_directed_path(g, X, Y; forbidden = M_set)
-        return false
-    end
-
-    # Condition 2: no *open* backdoor from X to m (empty conditioning).
-    # Open backdoors from parents of X are directed routes parent → m avoiding X
-    # (collider-blocked undirected routes such as X←U→Y←M are ignored).
-    for m in M_set
-        _has_open_backdoor(g, X, m) && return false
-    end
-
-    # Condition 3: all backdoors m — Y are blocked by X
-    for m in M_set
-        _has_open_backdoor(g, m, Y; conditioned = Set([X])) && return false
-    end
-
-    return true
+    result = CausalInference.find_frontdoor_adjustment(
+        g,
+        Set([X]),
+        Set([Y]),
+        M_set,
+        M_set,
+    )
+    return result !== false && result == M_set
 end
 
 """
-    _has_open_backdoor(g, A, B; conditioned=Set()) -> Bool
+    find_frontdoor_adjustment_set(g, X, Y)
 
-True if there is an open backdoor path `A ← ⋯ → B` given `conditioned`.
+Find a frontdoor adjustment set for the effect of `X` on `Y`.
 
-Approximates openness by directed reachability from parents of `A` to `B`,
-forbidding `A` and `conditioned` (non-collider blocking). Sufficient for the
-usual frontdoor examples and avoids exponential path enumeration.
+Delegates to [`CausalInference.find_frontdoor_adjustment`](@ref). Returns
+`nothing` when no valid set exists (`false` from CausalInference).
 """
-function _has_open_backdoor(
-    g::AbstractGraph,
-    A::Int,
-    B::Int;
-    conditioned::Set{Int} = Set{Int}(),
-)
-    B in conditioned && return false
-    forbid = union(conditioned, Set([A]))
-    for parent in inneighbors(g, A)
-        parent in conditioned && continue
-        parent == B && return true
-        _has_directed_path(g, parent, B; forbidden = forbid) && return true
-    end
-    return false
+function find_frontdoor_adjustment_set(g::AbstractGraph, X::Int, Y::Int)
+    validate_causal_graph(g)
+    check_node_indices!(g, X, Y)
+
+    adj = CausalInference.find_frontdoor_adjustment(g, Set([X]), Set([Y]))
+    adj === false && return nothing
+    return Set{Int}(adj)
+end
+
+"""
+    find_min_frontdoor_adjustment_set(g, X, Y)
+
+Find an inclusion-minimal frontdoor adjustment set, or `nothing` if none exists.
+
+Delegates to [`CausalInference.find_min_frontdoor_adjustment`](@ref).
+"""
+function find_min_frontdoor_adjustment_set(g::AbstractGraph, X::Int, Y::Int)
+    validate_causal_graph(g)
+    check_node_indices!(g, X, Y)
+
+    adj = CausalInference.find_min_frontdoor_adjustment(g, Set([X]), Set([Y]))
+    adj === false && return nothing
+    return Set{Int}(adj)
+end
+
+"""
+    list_frontdoor_adjustment_sets(g, X, Y)
+
+List all frontdoor adjustment sets for the effect of `X` on `Y`.
+
+Delegates to [`CausalInference.list_frontdoor_adjustment`](@ref). This can
+materialise exponentially many sets on dense graphs; prefer
+[`find_frontdoor_adjustment_set`](@ref), [`find_min_frontdoor_adjustment_set`](@ref),
+or [`find_frontdoor_mediators`](@ref) when a single set or singleton mediators
+suffice.
+"""
+function list_frontdoor_adjustment_sets(g::AbstractGraph, X::Int, Y::Int)
+    validate_causal_graph(g)
+    check_node_indices!(g, X, Y)
+
+    return [
+        Set{Int}(z) for z in CausalInference.list_frontdoor_adjustment(g, Set([X]), Set([Y]))
+    ]
 end
 
 """
     find_frontdoor_mediators(g, X, Y)
 
-Find single-node frontdoor mediators between X and Y.
+Return singleton frontdoor adjustment sets between `X` and `Y`.
 
-Candidates are nodes on some directed path X → Y (`nodes_on_directed_paths`),
-checked with [`frontdoor_adjustment_set`](@ref). Avoids enumerating all simple paths.
+Each returned set has the form `Set([m])` for a node `m` that is a valid
+frontdoor adjustment set on its own (typical textbook mediator between `X`
+and `Y`). Validates each candidate with
+[`frontdoor_adjustment_set`](@ref) rather than enumerating all frontdoor sets.
 """
 function find_frontdoor_mediators(g::AbstractGraph, X::Int, Y::Int)
     validate_causal_graph(g)
     check_node_indices!(g, X, Y)
 
-    mediators = Vector{Set{Int}}()
-    nodes_on_paths = nodes_on_directed_paths(g, X, Y)
-    delete!(nodes_on_paths, X)
-    delete!(nodes_on_paths, Y)
-
-    for node in nodes_on_paths
-        if frontdoor_adjustment_set(g, X, Y, [node])
-            push!(mediators, Set([node]))
+    X_set = Set([X])
+    Y_set = Set([Y])
+    candidates = setdiff(Set(vertices(g)), union(X_set, Y_set))
+    mediators = Set{Int}[]
+    for m in candidates
+        M = Set([m])
+        result = CausalInference.find_frontdoor_adjustment(g, X_set, Y_set, M, M)
+        if result !== false && result == M
+            push!(mediators, M)
         end
     end
-
     return mediators
 end
 
-export frontdoor_adjustment_set, find_frontdoor_mediators
+export frontdoor_adjustment_set,
+    find_frontdoor_adjustment_set,
+    find_min_frontdoor_adjustment_set,
+    list_frontdoor_adjustment_sets,
+    find_frontdoor_mediators
