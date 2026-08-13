@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Docs/CI use CausalInference from General (≥0.19.4); GraphMakie 0.6 co-install
+  no longer requires the SimonAB `cdcs-fork` path.
+- Frontdoor docstrings link to CausalInference docs (plain URLs) instead of
+  unresolved Documenter `@ref`s across packages.
 - Frontdoor identification delegates to `CausalInference.find_frontdoor_adjustment`
   (Wienöbst et al. 2024; CausalInference `gensearch`) instead of the prior reachability/backdoor
   shortcut. New exports: `find_frontdoor_adjustment_set`,

@@ -28,10 +28,9 @@ jobs:
           julia --project=docs -e '
             using Pkg
             Pkg.develop(PackageSpec(path=pwd()))
-            # Fork GraphMakie 0.6 compat lives on cdcs-fork (origin/master is still registry-shaped).
-            Pkg.add(url="https://github.com/SimonAB/CausalInference.jl.git", rev="cdcs-fork")
-            # DAGMakie ≥0.1.1 falls back when GraphMakie lacks forked label-align attributes.
-            Pkg.add(url="https://github.com/SimonAB/DAGMakie.jl.git")
+            # CausalInference ≥0.19.4 (General) allows GraphMakie 0.5–0.6.
+            Pkg.add("CausalInference")
+            Pkg.add("DAGMakie")
             Pkg.instantiate()'
       - name: Build and deploy documentation
         env:

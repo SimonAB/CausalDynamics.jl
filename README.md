@@ -45,10 +45,10 @@ Pkg.add("DAGMakie")
 using DAGMakie, CairoMakie
 ```
 
-Registry CausalDynamics + DAGMakie resolve together with GraphMakie **0.5.x**.
-Tip GraphMakie **≥0.6** (CDCS fork) needs a separate figure environment until
-CausalInference widens its GraphMakie weakdep — see
-[REGISTRATION.md](REGISTRATION.md#graphmakie--dagmakie-resolve-matrix).
+Registry CausalDynamics + DAGMakie resolve together with GraphMakie **≥0.6.6**
+(CausalInference **≥0.19.4** widened the GraphMakie weakdep to `"0.5, 0.6"`).
+Book authoring may still path-develop the CDCS GraphMakie fork for extra
+features (e.g. auto-label alignment).
 
 ## Quick start
 

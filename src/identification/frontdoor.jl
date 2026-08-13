@@ -19,8 +19,9 @@ end
 Return `true` when `M` is a valid frontdoor adjustment set for the effect of `X` on
 `Y`.
 
-Delegates to [`CausalInference.find_frontdoor_adjustment`](@ref) with
-``I = R = M`` (exact-set check). Uses the general frontdoor search of
+Delegates to
+[`CausalInference.find_frontdoor_adjustment`](https://mschauer.github.io/CausalInference.jl/latest/)
+with ``I = R = M`` (exact-set check). Uses the general frontdoor search of
 [Wienöbst et al. (2024)](https://arxiv.org/abs/2211.16468) via CausalInference
 `gensearch` (see also van der Zander et al., 2019 for backdoor listing).
 """
@@ -48,8 +49,9 @@ end
 
 Find a frontdoor adjustment set for the effect of `X` on `Y`.
 
-Delegates to [`CausalInference.find_frontdoor_adjustment`](@ref). Returns
-`nothing` when no valid set exists (`false` from CausalInference).
+Delegates to
+[`CausalInference.find_frontdoor_adjustment`](https://mschauer.github.io/CausalInference.jl/latest/).
+Returns `nothing` when no valid set exists (`false` from CausalInference).
 """
 function find_frontdoor_adjustment_set(g::AbstractGraph, X::Int, Y::Int)
     validate_causal_graph(g)
@@ -65,7 +67,8 @@ end
 
 Find an inclusion-minimal frontdoor adjustment set, or `nothing` if none exists.
 
-Delegates to [`CausalInference.find_min_frontdoor_adjustment`](@ref).
+Delegates to
+[`CausalInference.find_min_frontdoor_adjustment`](https://mschauer.github.io/CausalInference.jl/latest/).
 """
 function find_min_frontdoor_adjustment_set(g::AbstractGraph, X::Int, Y::Int)
     validate_causal_graph(g)
@@ -81,8 +84,9 @@ end
 
 List all frontdoor adjustment sets for the effect of `X` on `Y`.
 
-Delegates to [`CausalInference.list_frontdoor_adjustment`](@ref). This can
-materialise exponentially many sets on dense graphs; prefer
+Delegates to
+[`CausalInference.list_frontdoor_adjustment`](https://mschauer.github.io/CausalInference.jl/latest/).
+This can materialise exponentially many sets on dense graphs; prefer
 [`find_frontdoor_adjustment_set`](@ref), [`find_min_frontdoor_adjustment_set`](@ref),
 or [`find_frontdoor_mediators`](@ref) when a single set or singleton mediators
 suffice.

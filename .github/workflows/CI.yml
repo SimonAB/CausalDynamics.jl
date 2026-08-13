@@ -34,8 +34,7 @@ jobs:
           version: ${{ matrix.version }}
       - uses: julia-actions/cache@v2
       # Optional DAGMakie extension (not in default Project.toml [targets] test).
-      # Restore default-target DAGMakie once CausalInference merges GraphMakie 0.6:
-      # https://github.com/mschauer/CausalInference.jl/pull/179
+      # CausalInference ≥0.19.4 allows GraphMakie 0.6; DAGMakie from General.
       - name: Test with optional DAGMakie
         run: |
           julia --startup-file=no --threads=auto -e '

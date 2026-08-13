@@ -3,7 +3,7 @@
 
 Check if nodes `X` and `Y` are d-separated by set `Z` in directed acyclic graph `g`.
 
-Delegates to `CausalInference.dsep` (SimonAB fork under CDCS `packages/CausalInference.jl`).
+Delegates to `CausalInference.dsep`.
 
 # Arguments
 - `g`: A directed acyclic graph (DiGraph)
