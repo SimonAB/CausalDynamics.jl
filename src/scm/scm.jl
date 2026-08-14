@@ -54,6 +54,10 @@ scm = GraphSCM(g, equations, Set([2, 4]))
 - Functions should be deterministic given parents and exogenous noise
 - Exogenous nodes must have no parents in the graph
 - One `simulate_scm` call settles all endogenous values for a fixed realisation of `U`
+- **Parent argument order:** [`simulate_scm`](@ref) passes **sorted** graph parents
+  (`sort(collect(inneighbors(g, node)))`), then the exogenous draw `U`. For
+  \$Z \\to X\$, \$Z \\to Y\$, \$X \\to Y\$ with nodes `(1=Z, 2=X, 3=Y)`, write
+  `3 => (z, x, u) -> 2x + z + u`, not `(x, z, u)`.
 """
 struct GraphSCM <: AbstractSCM
     graph::Graphs.DiGraph

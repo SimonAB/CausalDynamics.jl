@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Document GraphSCM equation parent order (`sorted(inneighbors)`); add
+  confounding-triangle regression test
+  ([#8](https://github.com/SimonAB/CausalDynamics.jl/issues/8)).
+
 ### Changed
 
 - Docs/CI use CausalInference from General (≥0.19.4); GraphMakie 0.6 co-install

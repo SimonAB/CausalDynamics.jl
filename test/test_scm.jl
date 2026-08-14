@@ -1,5 +1,6 @@
 using CausalDynamics
 using Graphs
+using Random
 using Test
 
 @testset "SCM Framework" begin
@@ -152,6 +153,44 @@ using Test
 
         # Symbol variables are not yet resolved on GraphSCM
         @test_throws ArgumentError apply_intervention(scm, do_intervention(:x, 1.0))
+    end
+
+    @testset "Confounding triangle parent order" begin
+        # Z(1) → X(2), Z(1) → Y(3), X(2) → Y(3); structural slope on X→Y is 2
+        g = DiGraph(3)
+        add_edge!(g, 1, 2)
+        add_edge!(g, 1, 3)
+        add_edge!(g, 2, 3)
+        equations = Dict{Int, Function}(
+            1 => (u,) -> u,
+            2 => (z, u) -> z + u,
+            3 => (z, x, u) -> 2x + z + u,
+        )
+        scm = GraphSCM(g, equations, Set{Int}())
+
+        rng = Random.MersenneTwister(71)
+        n = 400
+        Z = Float64[]
+        X = Float64[]
+        Y = Float64[]
+        for _ in 1:n
+            U = Dict(1 => randn(rng), 2 => 0.4 * randn(rng), 3 => 0.3 * randn(rng))
+            v = simulate_scm(scm, U)
+            push!(Z, v[1])
+            push!(X, v[2])
+            push!(Y, v[3])
+        end
+        # OLS Y ~ X + Z should recover slope on X ≈ 2
+        Xmat = hcat(ones(n), X, Z)
+        β = Xmat \ Y
+        @test β[2] ≈ 2.0 atol = 0.15
+
+        U0 = Dict(1 => 0.2, 2 => 0.1, 3 => -0.05)
+        v_fact = simulate_scm(scm, U0)
+        x_fact = v_fact[2]
+        y_fact = v_fact[3]
+        y_do = simulate_scm(apply_intervention(scm, do_intervention(2, 1.5)), U0)[3]
+        @test y_do - y_fact ≈ 2.0 * (1.5 - x_fact) atol = 1e-10
     end
 
     @testset "create_symbolic_scm (unexported placeholder)" begin
