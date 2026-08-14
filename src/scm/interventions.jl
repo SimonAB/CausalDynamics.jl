@@ -190,7 +190,8 @@ values = simulate_scm(scm, U)
 
 # Notes
 - Computes values in topological order so parent values are available
-- Each equation receives parent values followed by the exogenous value
+- Parent values are passed in **sorted `inneighbors` order**, then the exogenous draw
+- Each equation receives those parent values followed by the exogenous value
 - `exogenous_values` fixes exogenous noise `U` for this unit (creative advance held constant)
 - Returned endogenous values are the settled outcomes each node contributes to its descendants
 """

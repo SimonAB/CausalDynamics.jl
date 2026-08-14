@@ -131,6 +131,7 @@ Full matrices: [ECOSYSTEM_COMPARISON.md](ECOSYSTEM_COMPARISON.md) ·
 
 - [Documenter site](https://simonab.github.io/CausalDynamics.jl/dev/) (API, examples, live DAGMakie figures)
 - [References](https://simonab.github.io/CausalDynamics.jl/dev/references/) — DOIs / BibTeX keys
+- [Stress validation](https://github.com/SimonAB/CausalTargeted.jl/blob/main/STRESS.md) — Quarto notebook ([qmd](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/stress/stress_validation.qmd)); identify / DAG / panel bridges; [Documenter](https://simonab.github.io/CausalTargeted.jl/dev/stress_validation/)
 - [CDCS book](https://simonab.github.io/causal-dynamics-book/) — narrative companion
 
 Estimation-layer citations live in

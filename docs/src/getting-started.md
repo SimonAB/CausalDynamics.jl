@@ -53,11 +53,16 @@ fig
 
 ## SCM simulation and intervention
 
+`simulate_scm` evaluates each structural equation with **parent values in sorted
+`inneighbors` order**, followed by that node's exogenous draw `U`. When several
+parents exist, match the function argument order to ascending parent node indices
+(e.g. for $Z\\to Y$ and $X\\to Y$, use `(z, x, u) -> …`, not `(x, z, u)`).
+
 ```julia
 equations = Dict{Int, Function}(
     1 => (u,) -> u,
     2 => (z, u) -> z + u,
-    3 => (x, u) -> 2x + u,
+    3 => (z, x, u) -> 2x + z + u,
 )
 scm = GraphSCM(g, equations, Set{Int}())
 U = Dict(1 => 1.0, 2 => 0.5, 3 => -0.3)
