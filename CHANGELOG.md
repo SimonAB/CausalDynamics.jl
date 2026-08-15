@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Document GraphSCM equation parent order (`sorted(inneighbors)`); add
   confounding-triangle regression test
   ([#8](https://github.com/SimonAB/CausalDynamics.jl/issues/8)).
+- Documenter: include `IdentificationError` in the identification API page
+  (`checkdocs = :exports`).
+- Getting-started SCM math uses `\to` (not `\\to`)
+  ([#10](https://github.com/SimonAB/CausalDynamics.jl/issues/10)).
 
 ### Changed
 
@@ -26,7 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `find_frontdoor_mediators` validates singleton candidates directly instead of
   listing all frontdoor sets (large speedup on dense graphs).
 
-
 ### Added
 
 - `CDMPanel`, `panel_column_name`, `trajectory_wide_row`, and `simulate_panel`
@@ -34,11 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   hand-off to CausalTargeted sequential LMTP.
 - Observation bridge helpers in `src/cdm/observation.jl`.
 - `TransportQuery` identification hooks and SciML / DataFrames extension touch-ups.
-
-### Fixed
-
-- Documenter: include `IdentificationError` in the identification API page
-  (`checkdocs = :exports`).
 
 ## [0.4.0] - 2026-08-05
 
