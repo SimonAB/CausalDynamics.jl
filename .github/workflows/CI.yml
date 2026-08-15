@@ -28,11 +28,11 @@ jobs:
           - ubuntu-latest
           - macos-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v2
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
         with:
           version: ${{ matrix.version }}
-      - uses: julia-actions/cache@v2
+      - uses: julia-actions/cache@v3
       # Optional DAGMakie extension (not in default Project.toml [targets] test).
       # CausalInference ≥0.19.4 allows GraphMakie 0.6; DAGMakie from General.
       - name: Test with optional DAGMakie
@@ -50,7 +50,7 @@ jobs:
             Pkg.test("CausalDynamics"; coverage=true)
           '
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v7
         with:
           files: lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
