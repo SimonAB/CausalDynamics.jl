@@ -56,7 +56,7 @@ fig
 `simulate_scm` evaluates each structural equation with **parent values in sorted
 `inneighbors` order**, followed by that node's exogenous draw `U`. When several
 parents exist, match the function argument order to ascending parent node indices
-(e.g. for $Z\\to Y$ and $X\\to Y$, use `(z, x, u) -> …`, not `(x, z, u)`).
+(e.g. for $Z\to Y$ and $X\to Y$, use `(z, x, u) -> …`, not `(x, z, u)`).
 
 ```julia
 equations = Dict{Int, Function}(
