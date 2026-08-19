@@ -68,10 +68,10 @@ tabular certificate bridges.
 | Transport ID (domain in adjustment) | Yes | Partial | Partial | `TransportQuery` |
 | Policy choice over estimands | Yes (CausalTargeted) | Partial | Partial | `choose_policy` |
 | LMTP / MTP δ-grids | Yes (CausalTargeted) | Yes (lmtp) | Yes (Ananke) | Conceptual parity |
-| Categorical-treatment LMTP | Yes (CausalTargeted) | Yes (lmtp) | Partial | `run_discrete_lmtp`: Díaz–Williams 2n classification, not multinomial g |
-| Sequential LMTP from temporal ID + panel | Unique | Partial | Partial | `plan_sequential` / `execute_estimand` |
+| Categorical-treatment LMTP | Yes (CausalTargeted) | Yes (lmtp) | Partial | T=1 `run_discrete_lmtp`; multi-time `SequentialPolicy` `policies` (classification ratios; mixed A rejected) |
+| Sequential LMTP from temporal ID + panel | Unique | Partial | Partial | `plan_sequential` / `execute_estimand`; numeric shift or factor `policies`; `estimand_from_query` keeps `LongitudinalPolicy` unless `policies`+`treatments` |
 | Discrete-time survival / event-time LMTP | Thin | Yes | Partial | `SurvivalPolicy` / `run_survival_lmtp` (CR deferred) |
-| Interventional mediation (TE/NDE/NIE) | Yes (CausalMediation) | Yes (crumble / tmle3) | Partial (Ananke) | |
+| Interventional mediation (TE/NDE/NIE) | Yes (CausalMediation) | Yes (crumble / tmle3) | Partial (Ananke) | Numeric MTP or factor recode (continuous `M`; empty `moc` on the factor path) |
 | Intermediate confounding (`moc`) + continuous MTP EIF | Yes (CausalMediation) | Yes (crumble / medoutcon) | Partial | |
 | Recanting-twin / path-specific + target-trial API | Unique (CausalMediation) | Partial (crumble RT / medRCT) | — | Typed ID + EIF in one pipeline |
 | Consumes upstream ID certificate | Unique | Partial | Partial | `plan_mtp` / `plan_mediation` / `plan_sequential` / `execute_estimand` |

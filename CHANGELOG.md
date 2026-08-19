@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Integer-coded factor recode via `Policy` (`2 → 1` on `A_t`): shared-`U`
+  counterfactual mean matches the structural recode (CDMPanel stays `Float64`).
+
 ### Fixed
 
 - Document GraphSCM equation parent order (`sorted(inneighbors)`); add

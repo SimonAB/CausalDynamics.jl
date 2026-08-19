@@ -49,7 +49,7 @@ New integrations follow the same pattern: narrow API in `src/integration/`, impl
 - **Transport ID:** `TransportQuery` unions domain covariates into backdoor adjustment.
 - **Time-indexed ID:** unroll lag structure, then apply backdoor on the unrolled graph.
 
-Keep simulation and identification **orthogonal**: the same `IdentificationResult` should feed sequential LMTP, TMLE, RxInfer, or custom estimators.
+Keep simulation and identification **orthogonal**: the same `IdentificationResult` should feed sequential LMTP, TMLE, RxInfer, or custom estimators. Identification does not branch on whether `A` is a factor or a float; numeric vs recode policies live in CausalTargeted (`ShiftPolicy` / `DiscreteTreatmentPolicy`). Generative duals here are `DoSequence` and `Policy` (including integer-coded recodes such as `2 → 1` on `A_t`; do not store String treatments on `CDMPanel`).
 
 ### Julia native types
 

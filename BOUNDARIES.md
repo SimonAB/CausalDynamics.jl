@@ -5,7 +5,7 @@
 ## CausalDynamics.jl (this package)
 
 - Causal graphs, d-separation, identification (`identify`, `IdentificationResult`)
-- SCMs, CDMs, temporal unrolling, observational panels (`simulate_panel` / `CDMPanel`)
+- SCMs, CDMs, temporal unrolling, observational panels (`simulate_panel` / `CDMPanel`; `Float64` columns, including integer-coded factor recodes via `Policy`)
 - Latent→observed bridges (`ObservationBridge`); continuous functionals (SciML ext)
 - Transport identification (`TransportQuery`); not domain-cohort registries
 - Integration **façades** (TMLE.jl, RxInfer, DAGMakie) via package extensions
@@ -19,6 +19,7 @@
 ## CausalTargeted.jl
 
 - Cross-fitted nuisances, LMTP, mediation EIF, grid execution
+- Estimation policies (`ShiftPolicy`, `DiscreteTreatmentPolicy`); do not add those types here
 
 ## Application repositories
 
