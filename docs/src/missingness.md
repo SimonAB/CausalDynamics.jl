@@ -26,20 +26,25 @@ complete observation.
 
 ## Assignment form
 
-For each response column $Y_j$,
+For each substantive column $V$ (e.g. $Y$),
 
 $$
-R_j \coloneqq f_{R_j}\bigl(\mathrm{pa}_G(R_j),\, U^{R_j}\bigr), \qquad
-Y_j^{\mathrm{rec}} \coloneqq
+\begin{aligned}
+V &\coloneqq f_V\bigl(\mathrm{pa}_G(V),\, U^V\bigr), \\
+R_V &\coloneqq f_{R_V}\bigl(\mathrm{pa}_G(R_V),\, U^{R_V}\bigr), \\
+V^{\mathrm{rec}} &\coloneqq
 \begin{cases}
-Y_j & R_j = 1, \\
-\texttt{missing} & R_j = 0.
+V & R_V = 1, \\
+\texttt{missing} & R_V = 0.
 \end{cases}
+\end{aligned}
 $$
 
 Latent complete values stay in the model; Julia `missing` is only the recorded
-token. Dynamics never invents a float fill inside CDM solvers or
-[`encode_to_panel`](@ref).
+token when $R_V=0$. Figure labels may write $V^*$ for $V^{\mathrm{rec}}$;
+counterfactuals remain $V^{do(\cdot)}(\mathbf{u})$, not $V^*$. Imputed fills
+$\tilde{V}$ are Observable policies and are not new nodes on $G$. Dynamics never
+invents a float fill inside CDM solvers or [`encode_to_panel`](@ref).
 
 ## Regimes
 
