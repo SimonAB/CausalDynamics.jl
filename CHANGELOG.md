@@ -13,10 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `representation_certificate` compress high-dim inputs (spectra, images) to
   low-dim code columns for identification and estimation. No Flux/Lux hard
   dependency; encoders are user callables. Optional DataFrames method when the
-  weakdep is loaded. Phase 2 (deep mechanisms as ``f_i``) remains deferred.
+  weakdep is loaded.
   Coverage: `test/test_representation.jl` (units, edges, large-panel stress,
   Monte Carlo oracle recovery); CausalMediation
   `test/test_representation_bridge.jl` (codes → one-step mediation).
+- **Deep mechanisms (Phase 2):** `MechanismSpec` / `MechanismLibrary` with Lux
+  weakdep (`CausalDynamicsLuxExt`): parent-constrained MLP residuals,
+  `build_ode_rhs`, `graphscm_with_mechanisms`, thin `train_mechanisms!`.
+  Examples `mechanism_ude.jl` / `mechanism_scm.jl`. Image L3 abduction deferred
+  (Phase 2b).
 - Integer-coded factor recode via `Policy` (`2 → 1` on `A_t`): shared-`U`
   counterfactual mean matches the structural recode (CDMPanel stays `Float64`).
 

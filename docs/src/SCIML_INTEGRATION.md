@@ -128,6 +128,18 @@ nuisance models see low-dim codes, not raw tensors. Roles `:measurement` vs
 (``f_i`` / UDE residuals) are planned as a later weakdep phase; UniversalDiffEq
 remains an external advanced trainer (below).
 
+## Graph-constrained Lux mechanisms (Phase 2)
+
+Parent-constrained neural residuals attach via `MechanismLibrary` /
+`attach_lux_mechanism!` (requires Lux + ComponentArrays + Optimization).
+Compose with known physics using [`build_ode_rhs`](@ref), then
+[`solve_cdm`](@ref) / [`do_pin`](@ref). Thin training:
+[`train_mechanisms!`](@ref). Examples: `examples/mechanism_ude.jl`,
+`examples/mechanism_scm.jl`.
+
+Full image/tensor generative SCMs with abduction (DeepSCM) remain **Phase 2b**.
+UniversalDiffEq stays an optional advanced trainer for ecology-style UDEs.
+
 ## UniversalDiffEq
 
 Use CausalDynamics for **adjustment / `do` semantics**; use

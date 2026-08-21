@@ -7,8 +7,9 @@
 - Causal graphs, d-separation, identification (`identify`, `IdentificationResult`)
 - SCMs, CDMs, temporal unrolling, observational panels (`simulate_panel` / `CDMPanel`; `Float64` columns, including integer-coded factor recodes via `Policy`)
 - Latent→observed bridges (`ObservationBridge`); high-dim → code
-  representation (`RepresentationSpec`, `encode_to_panel`); continuous
-  functionals (SciML ext)
+  representation (`RepresentationSpec`, `encode_to_panel`); graph-constrained
+  deep mechanisms (`MechanismSpec` / `MechanismLibrary`; Lux weakdep);
+  continuous functionals (SciML ext)
 - Transport identification (`TransportQuery`); not domain-cohort registries
 - Integration **façades** (TMLE.jl, RxInfer, DAGMakie) via package extensions
 
@@ -28,3 +29,7 @@
 - Cohort data, manuscript registries, reference-implementation concordance
 
 Do not add estimation grids or SuperLearner stacks here beyond integration examples.
+
+## Deferred (Phase 2b)
+
+- DeepSCM-style generative mechanisms on image/tensor nodes with L3 abduction

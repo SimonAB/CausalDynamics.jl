@@ -23,6 +23,17 @@ simulate_observed_panel
 RepresentationSpec
 representation_certificate
 encode_to_panel
+MechanismSpec
+MechanismLibrary
+mechanism_library_from_cdm
+register_mechanism!
+mechanism_certificate
+lux_mechanisms_available
+attach_lux_mechanism!
+build_ode_rhs
+graphscm_with_mechanisms
+train_mechanisms!
+pack_parent_vector
 AbstractIntervention
 DoSequence
 do_sequence

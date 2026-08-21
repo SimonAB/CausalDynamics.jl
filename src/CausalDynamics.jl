@@ -95,5 +95,6 @@ include("integration/discovery.jl")
 include("integration/iee.jl")
 include("integration/ode_parents.jl")
 include("integration/sciml.jl")
+include("cdm/mechanism.jl")
 
 end # module
