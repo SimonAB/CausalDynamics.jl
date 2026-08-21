@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `simulate_incomplete_panel`, and `require_complete_matrix` so
   `encode_to_panel` refuses `Missing` assays. Coverage:
   `test/test_missingness_dynamical.jl`; Deep SCM stress encode guard.
+- **Missingness edge suite:** `test/test_missingness_edge_cases.jl` (MCAR extremes,
+  multi-response joint mask, MNAR certificate separation, mechanism guards).
 - **Representation bridge:** `RepresentationSpec`, `encode_to_panel`, and
   `representation_certificate` compress high-dim inputs (spectra, images) to
   low-dim code columns for identification and estimation. No Flux/Lux hard
