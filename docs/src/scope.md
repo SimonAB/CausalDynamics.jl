@@ -19,6 +19,7 @@ package names stay Pearl/SciML-facing.
 | Discrete-time CDM | Trajectories over occasions | `DiscreteTimeCDM`, `DoSequence`, `simulate`, `counterfactual` |
 | Observational panels | Wide tables for sequential estimation | `CDMPanel`, `simulate_panel`, `panel_column_name` |
 | Latent → observed bridge | Filter/smoother outputs → panel columns | `ObservationBridge`, `panel_from_latent_series`, `simulate_observed_panel` |
+| Representation bridge | High-dim tensor → low-dim codes for ID/estimation | `RepresentationSpec`, `encode_to_panel`, `representation_certificate` |
 | Soft interventions | State-dependent treatment rules | `Policy`, `policy` |
 | Interventional means | Monte Carlo g-computation (discrete) | `g_computation` on `DiscreteTimeCDM` |
 | Continuous functionals | Monte Carlo g-computation (SciML) | `ContinuousEffectFunctional`, `g_computation` on `ContinuousCDMSpec` |
@@ -41,6 +42,7 @@ package names stay Pearl/SciML-facing.
 |---------|----------------|
 | Discovery algorithms (PC, OCE, CCM, …) | [Associations.jl](https://juliadynamics.github.io/Associations.jl/stable/) (optional weakdep bridge) |
 | ODE/SDE/UDE solvers | SciML (`OrdinaryDiffEq`, `UniversalDiffEq`, …); CausalDynamics supplies structure and `do` semantics |
+| Deep ``f_i`` mechanisms (DSCM / per-node CNN on endogenous state) | Planned Lux weakdep (Phase 2); Phase 1 is representation codes only. Full image L3 abduction deferred (Phase 2b) |
 | Full symbolic do-calculus / ModelingToolkit ID | Stubs only (`is_identifiable`, `SymbolicSCM`); unexported until implemented |
 | Process metaphysics vocabulary | CDCS book prose, not package exports |
 

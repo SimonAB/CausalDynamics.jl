@@ -20,6 +20,9 @@ observe_trajectory
 panel_from_trajectories
 panel_from_latent_series
 simulate_observed_panel
+RepresentationSpec
+representation_certificate
+encode_to_panel
 AbstractIntervention
 DoSequence
 do_sequence

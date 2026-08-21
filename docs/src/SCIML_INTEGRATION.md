@@ -118,6 +118,16 @@ Optional `parents` on [`ContinuousCDMSpec`](@ref) record the continuous causal
 parent graph ([`continuous_cdm_graph`](@ref)).
 Executable recipe: `examples/sciml_cdm_recipe.jl`.
 
+## Representation bridge (high-dim → codes)
+
+Before SciML or estimation on imaging/spectral inputs, compress with
+[`RepresentationSpec`](@ref) / [`encode_to_panel`](@ref) so the DAG and
+nuisance models see low-dim codes, not raw tensors. Roles `:measurement` vs
+`:definitional` are recorded in [`representation_certificate`](@ref). Example:
+`examples/representation_bridge.jl`. Graph-constrained deep mechanisms
+(``f_i`` / UDE residuals) are planned as a later weakdep phase; UniversalDiffEq
+remains an external advanced trainer (below).
+
 ## UniversalDiffEq
 
 Use CausalDynamics for **adjustment / `do` semantics**; use

@@ -80,6 +80,7 @@ include("scm/counterfactuals.jl")
 include("cdm/discrete_cdm.jl")
 include("cdm/panel.jl")
 include("cdm/observation.jl")
+include("cdm/representation.jl")
 
 # Utilities
 include("utils/graph_utils.jl")

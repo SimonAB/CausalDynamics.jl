@@ -116,7 +116,7 @@ Full matrices: [ECOSYSTEM_COMPARISON.md](ECOSYSTEM_COMPARISON.md) ·
 - **[RxInfer](https://github.com/ReactiveBayes/RxInfer.jl) / [GraphPPL](https://github.com/ReactiveBayes/GraphPPL.jl)** — optional extension for variational backdoor heads
 - **[DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl)** — optional extension for DAG figures (`plot_causal_graph`, `plot_backdoor_paths`, …)
 - **[Associations.jl](https://github.com/JuliaDynamics/Associations.jl)** — optional PC / OCE discovery bridge
-
+- **Representation bridge** — `RepresentationSpec` / `encode_to_panel` compress high-dim tensors (spectra, images) to low-dim **code** columns for identification and estimation (no Flux/Lux hard dependency; user-supplied encoder). Example: `examples/representation_bridge.jl`. Deep mechanisms as ``f_i`` on the graph are a later phase.
 ## Related packages
 
 | Package | Role |
