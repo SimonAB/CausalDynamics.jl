@@ -197,6 +197,10 @@ end
     train_mechanisms!(lib; loss, maxiters, opt, kwargs...) -> NamedTuple
 
 Thin Adam training loop over attached Lux parameters. Requires Lux ext.
+
+Training designs must be complete: do not pass panels containing `Missing` into
+`loss`. Drop or impute under an Observable policy first (see
+[`require_complete_matrix`](@ref) / [`apply_missingness_mechanism`](@ref)).
 """
 function train_mechanisms!(lib::MechanismLibrary; loss, kwargs...)
     return _require_lux_ext("train_mechanisms!").train_mechanisms!(lib; loss = loss, kwargs...)

@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `identify(...; missingness=)` attaching `result.missingness` (MCAR/MAR/MNAR).
   Causal `identifiable` stays separate from missingness ID. Coverage:
   `test/test_missingness_id.jl`.
+- **Dynamical incompleteness (Phase 5):** `apply_missingness_mechanism`,
+  `simulate_incomplete_panel`, and `require_complete_matrix` so
+  `encode_to_panel` refuses `Missing` assays. Coverage:
+  `test/test_missingness_dynamical.jl`; Deep SCM stress encode guard.
 - **Representation bridge:** `RepresentationSpec`, `encode_to_panel`, and
   `representation_certificate` compress high-dim inputs (spectra, images) to
   low-dim code columns for identification and estimation. No Flux/Lux hard

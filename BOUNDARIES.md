@@ -10,12 +10,11 @@
   representation (`RepresentationSpec`, `encode_to_panel`); graph-constrained
   deep mechanisms (`MechanismSpec` / `MechanismLibrary`; Lux weakdep);
   continuous functionals (SciML ext)
-- Missingness **structure**: `ObservationMask`, `MissingnessSpec`, and
-  `MissingnessCertificate` via `certify_missingness` /
-  `identify(...; missingness=)`. Response indicators $R$ and MAR/MNAR claims
-  live here; **silent** `Missing` → `Float64` coercion is forbidden. Numerical
-  policies (`:drop`, `:ipcw`, imputation) belong in CausalTargeted /
-  CausalMediation
+- Missingness **structure**: `ObservationMask`, `MissingnessSpec`,
+  `MissingnessCertificate`, generative `apply_missingness_mechanism` /
+  `simulate_incomplete_panel`. `encode_to_panel` refuses `Missing` matrices;
+  **silent** `Missing` → `Float64` coercion is forbidden. Numerical policies
+  (`:drop`, `:ipcw`, imputation) belong in CausalTargeted / CausalMediation
 - Transport identification (`TransportQuery`); not domain-cohort registries
 - Integration **façades** (TMLE.jl, RxInfer, DAGMakie) via package extensions
 

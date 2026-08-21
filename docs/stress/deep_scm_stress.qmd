@@ -294,6 +294,26 @@ record!(:nan_edge, "passthrough"; expected = 1.0, actual = Float64(isnan(panel_n
 println("NaN passthrough OK")
 ```
 
+### `Missing` rejected before encode
+
+```{julia}
+#| label: chunk-missing-encode-guard
+#| warning: false
+
+S_miss = Matrix{Union{Float64, Missing}}(copy(S_c))
+S_miss[2, 3] = missing
+threw = false
+try
+    encode_to_panel(S_miss, RepresentationSpec(:S, [:z1], S -> S[:, 1:1]))
+catch e
+    threw = e isa ArgumentError
+end
+@assert threw
+record!(:missing_encode, "reject_missing"; expected = 1.0, actual = Float64(threw),
+    tol = 0.0, note = "drop/impute raw assay before encode")
+println("Missing encode guard OK")
+```
+
 ## Part B — Mechanisms, `do`, and L3
 
 ### ODE residual + `do_pin`

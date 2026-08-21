@@ -77,14 +77,16 @@ weakdep extension is available and call
 `encode_to_panel(df, X, spec)`.
 """
 function encode_to_panel(
-    X::AbstractMatrix{<:Real},
+    X::AbstractMatrix,
     spec::RepresentationSpec;
     tabular::Union{Nothing, AbstractDict} = nothing,
 )
+    require_complete_matrix(X; context = "encode_to_panel input X")
     n, _ = size(X)
     n >= 1 || throw(ArgumentError("X must have at least one row"))
     d = length(spec.code_names)
-    codes = _materialise_codes(spec.encode(X), n, d, spec.code_names)
+    Xr = X isa AbstractMatrix{<:Real} ? X : map(Float64, X)
+    codes = _materialise_codes(spec.encode(Xr), n, d, spec.code_names)
 
     out = Dict{Symbol, Vector{Float64}}()
     for (j, name) in enumerate(spec.code_names)
