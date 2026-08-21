@@ -9,6 +9,10 @@ using Random
         @test m.node === :x
         @test m.parents == [:z]
         @test m.model === nothing
+        @test m.output_dim == 1
+        g = MechanismSpec(:y, [:x]; kind = :generative, output_dim = 3)
+        @test g.kind === :generative
+        @test g.output_dim == 3
         @test_throws ArgumentError MechanismSpec(:x, [:z]; kind = :bogus)
         @test_throws ArgumentError MechanismSpec(:x, [:z, :z])
     end

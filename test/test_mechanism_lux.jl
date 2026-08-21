@@ -119,4 +119,60 @@ using OptimizationOptimisers
         @test vals[3] isa Real
         @test isfinite(vals[3])
     end
+
+    @testset "generative L3 abduction (additive noise)" begin
+        rng = Random.Xoshiro(9)
+        # True: Y = 2X + U. Learn f(X)≈2X, then abduce U and do(X=x′)
+        lib = MechanismLibrary(;
+            allowed_parents = Dict(:x => Symbol[], :y => [:x]),
+        )
+        attach_lux_mechanism!(
+            lib, :y;
+            parents = [:x],
+            hidden = 8,
+            kind = :generative,
+            rng = rng,
+        )
+        spec = lib.mechanisms[:y]
+        xs = range(-1.5, 1.5; length = 40)
+        us = [0.2 * randn(rng) for _ in xs]
+        ys = [2x + u for (x, u) in zip(xs, us)]
+
+        loss = function (_ps)
+            s = 0.0
+            for x in xs
+                ŷ = generate_from_noise(spec, 0.0, [x])
+                s += abs2(ŷ - 2x)
+            end
+            return s / length(xs)
+        end
+        train_mechanisms!(lib; loss = loss, maxiters = 250, lr = 0.05)
+        spec = lib.mechanisms[:y]
+
+        x_f, u_true = 1.0, -0.3
+        y_f = 2x_f + u_true
+        z = abduce_noise(spec, y_f, [x_f])
+        @test z ≈ u_true atol = 0.15
+        y_cf = mechanism_counterfactual(spec, y_f, [x_f], [0.0])
+        # Under do(X=0): Y = f(0) + U ≈ 0 + u_true
+        @test y_cf ≈ u_true atol = 0.2
+
+        # GraphSCM generative + shared-U twin
+        g = DiGraph(2)
+        add_edge!(g, 1, 2)
+        names = Dict(1 => :x, 2 => :y)
+        equations = Dict{Int, Function}(
+            1 => (u,) -> u,
+            2 => (x, u) -> 0.0,
+        )
+        scm = graphscm_with_mechanisms(
+            g, equations, Set{Int}(), lib; node_names = names,
+        )
+        U = Dict(1 => 1.0, 2 => z)
+        fact = simulate_scm(scm, U)
+        scm_cf = counterfactual_graph(scm, do_intervention(1, 0.0))
+        cf = simulate_scm(scm_cf, U)
+        @test fact[2] ≈ y_f atol = 0.25
+        @test cf[2] ≈ y_cf atol = 0.25
+    end
 end

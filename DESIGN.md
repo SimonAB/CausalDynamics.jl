@@ -46,7 +46,8 @@ New integrations follow the same pattern: narrow API in `src/integration/`, impl
 - **Discrete-time:** `DiscreteTimeCDM`, typed `DoSequence` assignments, `Policy`, trajectory simulation, `CDMPanel` / `simulate_panel`.
 - **Observable bridge:** `ObservationBridge` maps latent/filter series to estimation columns (no filter algorithms in core).
 - **Representation bridge:** `RepresentationSpec` / `encode_to_panel` compress high-dim tensors (spectra, images) to low-dim code columns via a user-supplied encoder (no Flux/Lux hard dep). Codes are the DAG/estimation nodes; CNN layers are not. Roles `:measurement` vs `:definitional` are recorded in `representation_certificate`.
-- **Deep mechanisms (Phase 2):** `MechanismSpec` / `MechanismLibrary` declare parent-constrained ``f_i``; Lux extension attaches MLPs, `build_ode_rhs` / `graphscm_with_mechanisms`, and thin `train_mechanisms!`. Image L3 abduction remains Phase 2b.
+- **Deep mechanisms (Phase 2a):** `MechanismSpec` / `MechanismLibrary` declare parent-constrained ``f_i``; Lux extension attaches MLPs, `build_ode_rhs` / `graphscm_with_mechanisms`, and thin `train_mechanisms!`.
+- **Generative L3 (Phase 2b):** `:generative` mechanisms ``X = f(\\mathrm{pa}) + U`` with `abduce_noise` / `mechanism_counterfactual` (codes or low-dim vectors; raw images still go through Phase 1 first). Non-additive DeepSCM encoders remain deferred.
 - **Continuous functionals:** `ContinuousEffectFunctional` + SciML `g_computation` (weakdep).
 - **Transport ID:** `TransportQuery` unions domain covariates into backdoor adjustment.
 - **Time-indexed ID:** unroll lag structure, then apply backdoor on the unrolled graph.

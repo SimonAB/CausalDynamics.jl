@@ -137,8 +137,14 @@ Compose with known physics using [`build_ode_rhs`](@ref), then
 [`train_mechanisms!`](@ref). Examples: `examples/mechanism_ude.jl`,
 `examples/mechanism_scm.jl`.
 
-Full image/tensor generative SCMs with abduction (DeepSCM) remain **Phase 2b**.
-UniversalDiffEq stays an optional advanced trainer for ecology-style UDEs.
+Full non-additive image/tensor DeepSCM encoders remain deferred. Prefer Phase 1
+`RepresentationSpec` → codes, then Phase 2b `:generative` L3 on those codes.
+
+## Phase 2b: generative mechanisms and abduction
+
+For `:generative` nodes, ``X = f(\\mathrm{pa}) + U``. Use
+[`abduce_noise`](@ref) and [`mechanism_counterfactual`](@ref) for same-unit
+counterfactuals; see `examples/mechanism_counterfactual.jl`.
 
 ## UniversalDiffEq
 

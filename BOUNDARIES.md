@@ -30,6 +30,7 @@
 
 Do not add estimation grids or SuperLearner stacks here beyond integration examples.
 
-## Deferred (Phase 2b)
+## Deferred (beyond Phase 2b)
 
-- DeepSCM-style generative mechanisms on image/tensor nodes with L3 abduction
+- Full image/tensor DSCM with learned encoders (non-additive abduction);
+  Phase 2b covers additive-noise generative mechanisms on codes / low-dim vectors

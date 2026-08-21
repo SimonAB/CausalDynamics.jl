@@ -43,7 +43,7 @@ package names stay Pearl/SciML-facing.
 |---------|----------------|
 | Discovery algorithms (PC, OCE, CCM, …) | [Associations.jl](https://juliadynamics.github.io/Associations.jl/stable/) (optional weakdep bridge) |
 | ODE/SDE/UDE solvers | SciML (`OrdinaryDiffEq`, `UniversalDiffEq`, …); CausalDynamics supplies structure and `do` semantics |
-| DeepSCM / image L3 abduction | Phase 2b (deferred); Phase 2 is graph-constrained Lux residuals on known DAGs |
+| DeepSCM / non-additive image L3 encoders | Deferred; Phase 2b is additive-noise `:generative` on codes / low-dim vectors |
 | Full symbolic do-calculus / ModelingToolkit ID | Stubs only (`is_identifiable`, `SymbolicSCM`); unexported until implemented |
 | Process metaphysics vocabulary | CDCS book prose, not package exports |
 

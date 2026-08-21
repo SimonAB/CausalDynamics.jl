@@ -25,9 +25,10 @@ using Random
 using Graphs: DiGraph, inneighbors
 
 """
-    attach_lux_mechanism!(lib, node; parents, hidden, kind, rng, activation)
+    attach_lux_mechanism!(lib, node; parents, hidden, kind, rng, activation, output_dim)
 
-Register and attach a dense MLP ``|parents| → hidden → 1`` at `node`.
+Register and attach a dense MLP ``|parents| → hidden → output_dim`` at `node`.
+For `:generative`, the network is ``f(\\mathrm{pa})`` in ``X = f(\\mathrm{pa}) + U``.
 """
 function attach_lux_mechanism!(
     lib::MechanismLibrary,
@@ -37,12 +38,14 @@ function attach_lux_mechanism!(
     kind::Symbol = :ode_residual,
     rng::AbstractRNG = Random.default_rng(),
     activation = tanh,
+    output_dim::Int = 1,
 )
-    spec = MechanismSpec(node, parents; kind = kind)
+    spec = MechanismSpec(node, parents; kind = kind, output_dim = output_dim)
     register_mechanism!(lib, spec)
     nin = length(parents)
     nin >= 1 || throw(ArgumentError("parents must be non-empty for Lux mechanism at :$node"))
-    nn = Chain(Dense(nin => hidden, activation), Dense(hidden => 1))
+    output_dim >= 1 || throw(ArgumentError("output_dim must be ≥ 1"))
+    nn = Chain(Dense(nin => hidden, activation), Dense(hidden => output_dim))
     ps, st = Lux.setup(rng, nn)
     spec.model = nn
     spec.parameters = ComponentArray(ps)
@@ -52,16 +55,29 @@ function attach_lux_mechanism!(
 end
 
 """
-    _apply_scalar(spec, x) -> Float64
+    _apply_vector(spec, x) -> Vector{Float64}
 
-Evaluate attached Lux net on parent vector `x`.
+Evaluate attached Lux net on parent vector `x` (length `output_dim`).
 """
-function _apply_scalar(spec::MechanismSpec, x::AbstractVector{<:Real})
+function _apply_vector(spec::MechanismSpec, x::AbstractVector{<:Real})
     spec.model === nothing && throw(ArgumentError(
         "mechanism :$(spec.node) has no Lux model; call attach_lux_mechanism! first",
     ))
     y, _ = Lux.apply(spec.model, Float32.(x), spec.parameters, spec.states)
-    return Float64(first(y))
+    return Float64.(vec(y))
+end
+
+"""
+    _apply_scalar(spec, x) -> Float64
+
+Evaluate attached Lux net when `output_dim == 1`.
+"""
+function _apply_scalar(spec::MechanismSpec, x::AbstractVector{<:Real})
+    y = _apply_vector(spec, x)
+    length(y) == 1 || throw(ArgumentError(
+        "mechanism :$(spec.node) has output_dim=$(spec.output_dim); use _apply_vector",
+    ))
+    return y[1]
 end
 
 """
@@ -101,8 +117,9 @@ end
 """
     graphscm_with_mechanisms(g, equations, exogenous, lib; node_names) -> GraphSCM
 
-For each `:static` mechanism, replace the equation at the corresponding integer
-node with a Lux map of sorted graph parents.
+For each `:static` or `:generative` mechanism, replace the equation at the
+corresponding integer node. Generative nodes use additive noise
+``X = f(\\mathrm{pa}) + U`` with ``U`` the last equation argument.
 """
 function graphscm_with_mechanisms(
     g::DiGraph,
@@ -125,28 +142,94 @@ function graphscm_with_mechanisms(
 
     eqs = copy(equations)
     for m in values(lib.mechanisms)
-        m.kind === :static || continue
+        (m.kind === :static || m.kind === :generative) || continue
         haskey(s2i, m.node) || throw(ArgumentError(
-            "static mechanism :$(m.node) missing from node_names",
+            "$(m.kind) mechanism :$(m.node) missing from node_names",
         ))
         idx = s2i[m.node]
         parent_idxs = sort(collect(inneighbors(g, idx)))
         parent_syms = [i2s[i] for i in parent_idxs]
         Set(parent_syms) == Set(m.parents) || throw(ArgumentError(
-            "static mechanism :$(m.node) parents $(m.parents) ≠ graph parents $parent_syms",
+            "mechanism :$(m.node) parents $(m.parents) ≠ graph parents $parent_syms",
         ))
         order = [findfirst(==(p), parent_syms) for p in m.parents]
         n_pa = length(parent_idxs)
-        eqs[idx] = function (args...)
-            length(args) >= n_pa || throw(ArgumentError(
-                "equation for :$(m.node) expected ≥ $n_pa parent args; got $(length(args))",
-            ))
-            pa_sorted = collect(args[1:n_pa])
-            x = [pa_sorted[j] for j in order]
-            return _apply_scalar(m, x)
+        if m.kind === :static
+            eqs[idx] = function (args...)
+                length(args) >= n_pa || throw(ArgumentError(
+                    "equation for :$(m.node) expected ≥ $n_pa parent args; got $(length(args))",
+                ))
+                pa_sorted = collect(args[1:n_pa])
+                x = [pa_sorted[j] for j in order]
+                return m.output_dim == 1 ? _apply_scalar(m, x) : _apply_vector(m, x)
+            end
+        else
+            eqs[idx] = function (args...)
+                length(args) >= n_pa + 1 || throw(ArgumentError(
+                    "generative :$(m.node) expected parents + U; got $(length(args)) args",
+                ))
+                pa_sorted = collect(args[1:n_pa])
+                x = [pa_sorted[j] for j in order]
+                u = args[n_pa + 1]
+                return generate_from_noise(m, u, x)
+            end
         end
     end
     return GraphSCM(g, eqs, exogenous)
+end
+
+"""
+    abduce_noise(spec, x, pa) -> z
+
+Additive abduction ``U = X - f(\\mathrm{pa})`` for `:generative` mechanisms.
+"""
+function abduce_noise(spec::MechanismSpec, x, pa)
+    spec.kind === :generative || throw(ArgumentError(
+        "abduce_noise requires kind=:generative; got :$(spec.kind)",
+    ))
+    pa_vec = Float64[Float64(v) for v in pa]
+    length(pa_vec) == length(spec.parents) || throw(ArgumentError(
+        "expected $(length(spec.parents)) parent values; got $(length(pa_vec))",
+    ))
+    x_vec = x isa AbstractVector ? Float64.(vec(x)) : Float64[Float64(x)]
+    length(x_vec) == spec.output_dim || throw(ArgumentError(
+        "x length $(length(x_vec)) ≠ output_dim=$(spec.output_dim)",
+    ))
+    μ = _apply_vector(spec, pa_vec)
+    z = x_vec .- μ
+    return spec.output_dim == 1 ? z[1] : z
+end
+
+"""
+    generate_from_noise(spec, z, pa) -> x
+
+``X = f(\\mathrm{pa}) + U`` for `:generative` mechanisms.
+"""
+function generate_from_noise(spec::MechanismSpec, z, pa)
+    spec.kind === :generative || throw(ArgumentError(
+        "generate_from_noise requires kind=:generative; got :$(spec.kind)",
+    ))
+    pa_vec = Float64[Float64(v) for v in pa]
+    length(pa_vec) == length(spec.parents) || throw(ArgumentError(
+        "expected $(length(spec.parents)) parent values; got $(length(pa_vec))",
+    ))
+    z_vec = z isa AbstractVector ? Float64.(vec(z)) : Float64[Float64(z)]
+    length(z_vec) == spec.output_dim || throw(ArgumentError(
+        "noise length $(length(z_vec)) ≠ output_dim=$(spec.output_dim)",
+    ))
+    μ = _apply_vector(spec, pa_vec)
+    x = μ .+ z_vec
+    return spec.output_dim == 1 ? x[1] : x
+end
+
+"""
+    mechanism_counterfactual(spec, x_factual, pa_factual, pa_cf) -> x_cf
+
+Abduce ``U`` under factual parents, then generate under counterfactual parents.
+"""
+function mechanism_counterfactual(spec::MechanismSpec, x_factual, pa_factual, pa_cf)
+    z = abduce_noise(spec, x_factual, pa_factual)
+    return generate_from_noise(spec, z, pa_cf)
 end
 
 """

@@ -118,6 +118,7 @@ Full matrices: [ECOSYSTEM_COMPARISON.md](ECOSYSTEM_COMPARISON.md) ·
 - **[Associations.jl](https://github.com/JuliaDynamics/Associations.jl)** — optional PC / OCE discovery bridge
 - **Representation bridge** — `RepresentationSpec` / `encode_to_panel` compress high-dim tensors (spectra, images) to low-dim **code** columns for identification and estimation (no Flux/Lux hard dependency; user-supplied encoder). Example: `examples/representation_bridge.jl`.
 - **Deep mechanisms** — `MechanismSpec` / Lux weakdep for parent-constrained ``f_i`` and ODE residuals (`examples/mechanism_ude.jl`, `examples/mechanism_scm.jl`).
+- **Generative L3** — `:generative` additive-noise abduction / counterfactuals on codes (`examples/mechanism_counterfactual.jl`).
 ## Related packages
 
 | Package | Role |

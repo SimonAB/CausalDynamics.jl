@@ -34,6 +34,9 @@ build_ode_rhs
 graphscm_with_mechanisms
 train_mechanisms!
 pack_parent_vector
+abduce_noise
+generate_from_noise
+mechanism_counterfactual
 AbstractIntervention
 DoSequence
 do_sequence

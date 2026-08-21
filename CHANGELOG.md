@@ -17,11 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Coverage: `test/test_representation.jl` (units, edges, large-panel stress,
   Monte Carlo oracle recovery); CausalMediation
   `test/test_representation_bridge.jl` (codes → one-step mediation).
-- **Deep mechanisms (Phase 2):** `MechanismSpec` / `MechanismLibrary` with Lux
+- **Deep mechanisms (Phase 2a):** `MechanismSpec` / `MechanismLibrary` with Lux
   weakdep (`CausalDynamicsLuxExt`): parent-constrained MLP residuals,
   `build_ode_rhs`, `graphscm_with_mechanisms`, thin `train_mechanisms!`.
-  Examples `mechanism_ude.jl` / `mechanism_scm.jl`. Image L3 abduction deferred
-  (Phase 2b).
+  Examples `mechanism_ude.jl` / `mechanism_scm.jl`.
+- **Generative L3 (Phase 2b):** `:generative` additive-noise mechanisms with
+  `abduce_noise` / `mechanism_counterfactual` (example
+  `mechanism_counterfactual.jl`). Non-additive image DeepSCM encoders deferred.
 - Integer-coded factor recode via `Policy` (`2 → 1` on `A_t`): shared-`U`
   counterfactual mean matches the structural recode (CDMPanel stays `Float64`).
 

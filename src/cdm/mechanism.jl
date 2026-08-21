@@ -1,14 +1,17 @@
-"""Graph-constrained deep mechanisms (Phase 2).
+"""Graph-constrained deep mechanisms (Phase 2a/2b).
 
 Core types and certificates live here with **no** Lux/Optimization hard
 dependency. Call [`attach_lux_mechanism!`](@ref) after `using Lux` (and related
 weakdeps) so the package extension loads.
+
+Phase 2b adds `:generative` mechanisms with additive-noise abduction for L3
+counterfactuals on codes (or low-dim tensors treated as vectors).
 """
 
-const MECHANISM_KINDS = (:static, :ode_residual)
+const MECHANISM_KINDS = (:static, :ode_residual, :generative)
 
 """
-    MechanismSpec(node, parents; kind=:ode_residual, representation=nothing)
+    MechanismSpec(node, parents; kind=:ode_residual, representation=nothing, output_dim=1)
 
 Declare a deep structural mechanism at `node` that may only depend on `parents`
 (must be a subset of the graph / CDM parent set).
@@ -16,8 +19,10 @@ Declare a deep structural mechanism at `node` that may only depend on `parents`
 # Fields
 - `node`: endogenous variable
 - `parents`: allowed causal parents (order used when packing NN inputs)
-- `kind`: `:static` (SCM ``f_i``) or `:ode_residual` (additive NN on ``\\dot u``)
+- `kind`: `:static` (SCM ``f_i``), `:ode_residual` (additive NN on ``\\dot u``),
+  or `:generative` (``X = f(\\mathrm{pa}) + U`` with abduce/generate for L3)
 - `representation`: optional [`RepresentationSpec`](@ref) linking Phase 1 codes
+- `output_dim`: dimension of the node (1 for scalars; >1 for code/tensor vectors)
 - `model`, `parameters`, `states`: filled by the Lux extension (`nothing` until attach)
 """
 mutable struct MechanismSpec
@@ -28,6 +33,7 @@ mutable struct MechanismSpec
     model::Any
     parameters::Any
     states::Any
+    output_dim::Int
 end
 
 function MechanismSpec(
@@ -35,15 +41,19 @@ function MechanismSpec(
     parents::AbstractVector{Symbol};
     kind::Symbol = :ode_residual,
     representation::Union{Nothing, RepresentationSpec} = nothing,
+    output_dim::Int = 1,
 )
     kind in MECHANISM_KINDS || throw(ArgumentError(
         "kind must be one of $MECHANISM_KINDS; got :$kind",
     ))
+    output_dim >= 1 || throw(ArgumentError("output_dim must be ≥ 1; got $output_dim"))
     pa = Symbol[Symbol(p) for p in parents]
     length(unique(pa)) == length(pa) || throw(ArgumentError(
         "parents must be unique; got $pa",
     ))
-    return MechanismSpec(Symbol(node), pa, kind, representation, nothing, nothing, nothing)
+    return MechanismSpec(
+        Symbol(node), pa, kind, representation, nothing, nothing, nothing, output_dim,
+    )
 end
 
 """
@@ -112,11 +122,13 @@ function mechanism_certificate(lib::MechanismLibrary)
     attached = Dict(
         n => lib.mechanisms[n].model !== nothing for n in nodes
     )
+    output_dims = Dict(n => lib.mechanisms[n].output_dim for n in nodes)
     return (
         nodes = nodes,
         kinds = kinds,
         parents = parents,
         attached = attached,
+        output_dims = output_dims,
         graph_hash = lib.graph_hash,
         n_mechanisms = length(nodes),
         lux_available = lux_mechanisms_available(),
@@ -143,7 +155,7 @@ function _require_lux_ext(fname::String)
 end
 
 """
-    attach_lux_mechanism!(lib, node; parents, hidden, kind, rng, activation)
+    attach_lux_mechanism!(lib, node; parents, hidden, kind, rng, activation, output_dim)
 
 Attach a small Lux MLP at `node`. Requires the Lux weakdep extension.
 """
@@ -166,8 +178,8 @@ end
 """
     graphscm_with_mechanisms(g, equations, exogenous, lib; node_names) -> GraphSCM
 
-Replace selected equation entries with Lux static mechanisms from `lib`.
-Requires Lux ext.
+Replace selected equation entries with Lux `:static` / `:generative` mechanisms
+from `lib`. Requires Lux ext.
 """
 function graphscm_with_mechanisms(
     g::Graphs.DiGraph,
@@ -191,6 +203,38 @@ function train_mechanisms!(lib::MechanismLibrary; loss, kwargs...)
 end
 
 """
+    abduce_noise(spec, x, pa) -> noise
+
+Infer additive exogenous noise ``U = X - f(\\mathrm{pa})`` for a `:generative`
+mechanism. Requires Lux ext when `spec.model` is attached.
+"""
+function abduce_noise(spec::MechanismSpec, x, pa)
+    return _require_lux_ext("abduce_noise").abduce_noise(spec, x, pa)
+end
+
+"""
+    generate_from_noise(spec, z, pa) -> x
+
+Sample / reconstruct ``X = f(\\mathrm{pa}) + U`` for a `:generative` mechanism.
+Requires Lux ext.
+"""
+function generate_from_noise(spec::MechanismSpec, z, pa)
+    return _require_lux_ext("generate_from_noise").generate_from_noise(spec, z, pa)
+end
+
+"""
+    mechanism_counterfactual(spec, x_factual, pa_factual, pa_cf) -> x_cf
+
+Pearl L3 for one generative node: abduce ``U`` from the factual, then generate
+under counterfactual parents (same ``U``). Requires Lux ext.
+"""
+function mechanism_counterfactual(spec::MechanismSpec, x_factual, pa_factual, pa_cf)
+    return _require_lux_ext("mechanism_counterfactual").mechanism_counterfactual(
+        spec, x_factual, pa_factual, pa_cf,
+    )
+end
+
+"""
     pack_parent_vector(u, spec, parents) -> Vector
 
 Gather state coordinates for `parents` from `u` using `ContinuousCDMSpec` indices.
@@ -206,4 +250,5 @@ end
 export MechanismSpec, MechanismLibrary, mechanism_library_from_cdm
 export register_mechanism!, mechanism_certificate, lux_mechanisms_available
 export attach_lux_mechanism!, build_ode_rhs, graphscm_with_mechanisms, train_mechanisms!
+export abduce_noise, generate_from_noise, mechanism_counterfactual
 export pack_parent_vector
