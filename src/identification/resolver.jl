@@ -67,6 +67,7 @@ function resolve_identification_columns(
         result.identifiable,
         result.assumptions,
         result.temporal_nodes,
+        result.missingness,
     )
 end
 

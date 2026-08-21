@@ -1,7 +1,6 @@
-"""Observation masks and complete-value guards for incomplete panels.
-
-Structural response indicators `R` will attach via `MissingnessSpec` (Phase 3).
-This module owns the wire format: binary observation masks and refusal to
+"""Structural response indicators `R` attach via [`MissingnessSpec`](@ref)
+([`certify_missingness`](@ref) / `identify(...; missingness=)`).
+This module owns the **wire format**: binary observation masks and refusal to
 silently promote `Missing` to `Float64`. Numerical policies (`:drop`, `:ipcw`,
 …) live in CausalTargeted / CausalMediation.
 """

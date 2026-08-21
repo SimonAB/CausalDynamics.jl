@@ -4,6 +4,10 @@
     IdentificationResult{T}
 
 Machine-readable output of [`identify`](@ref): adjustment sets, strategy, and assumptions.
+
+Optional `missingness` holds a [`MissingnessCertificate`](@ref) when
+`identify(...; missingness=MissingnessSpec(...))` was used. Causal
+`identifiable` and missingness identification are reported separately.
 """
 struct IdentificationResult{T}
     query::CausalQuery
@@ -15,6 +19,7 @@ struct IdentificationResult{T}
     identifiable::Bool
     assumptions::Vector{Symbol}
     temporal_nodes::Vector{Tuple{T, Int}}
+    missingness::Union{Nothing, MissingnessCertificate}
 end
 
 function IdentificationResult(;
@@ -27,10 +32,11 @@ function IdentificationResult(;
     identifiable::Bool,
     assumptions::Vector{Symbol} = Symbol[],
     temporal_nodes::Vector{Tuple{T, Int}} = Tuple{T, Int}[],
+    missingness::Union{Nothing, MissingnessCertificate} = nothing,
 ) where {T}
     return IdentificationResult{T}(
         query, graph_hash, adjustment, mediators, moc,
-        strategy, identifiable, assumptions, temporal_nodes,
+        strategy, identifiable, assumptions, temporal_nodes, missingness,
     )
 end
 
@@ -58,6 +64,7 @@ function certificate_dict(result::IdentificationResult)
         :identifiable => result.identifiable,
         :assumptions => result.assumptions,
         :temporal_nodes => result.temporal_nodes,
+        :missingness => result.missingness,
     )
 end
 

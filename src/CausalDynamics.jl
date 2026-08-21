@@ -58,6 +58,7 @@ include("graphs/time_indexed.jl")  # unrolled lag DAGs for discrete-time ID
 
 # Identification algorithms
 include("identification/queries.jl")
+include("identification/missingness_id.jl")
 include("identification/result.jl")
 include("identification/resolver.jl")
 include("identification/backdoor.jl")

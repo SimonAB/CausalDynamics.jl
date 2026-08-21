@@ -106,12 +106,34 @@ function _recanting_witness_nodes(g::AbstractGraph, A::Int, Y::Int, mediator_idx
 end
 
 """
-    identify(g, query::TotalEffectQuery; node_names=nothing) -> IdentificationResult
+    _missingness_cert(missingness) -> Union{Nothing, MissingnessCertificate}
+"""
+function _missingness_cert(missingness::Nothing; kwargs...)
+    return nothing
+end
+
+function _missingness_cert(missingness::MissingnessSpec; kwargs...)
+    return certify_missingness(missingness; kwargs...)
+end
+
+function _missingness_cert(missingness; kwargs...)
+    throw(ArgumentError(
+        "missingness must be nothing or MissingnessSpec; got $(typeof(missingness))",
+    ))
+end
+
+"""
+    identify(g, query::TotalEffectQuery; node_names=nothing, missingness=nothing) -> IdentificationResult
+
+Optional `missingness::MissingnessSpec` attaches a [`MissingnessCertificate`](@ref)
+on `result.missingness` (MAR/MNAR claims). Causal backdoor `identifiable` is
+unchanged by the missingness claim; check both fields before estimation.
 """
 function identify(
     g::AbstractGraph,
     query::TotalEffectQuery;
     node_names = nothing,
+    missingness = nothing,
 )
     names = _normalize_node_names(node_names, nv(g))
     X = query.treatment isa Int ?
@@ -128,6 +150,7 @@ function identify(
     else
         names === nothing ? Int[] : Symbol[]
     end
+    miss = _missingness_cert(missingness; graph = g, node_names = names)
 
     return IdentificationResult{eltype(adjustment)}(
         query,
@@ -139,6 +162,7 @@ function identify(
         identifiable,
         [:no_unmeasured_confounding, :correct_graph],
         Tuple{eltype(adjustment), Int}[],
+        miss,
     )
 end
 
@@ -156,9 +180,13 @@ function identify(
     g::AbstractGraph,
     query::MediationQuery;
     node_names = nothing,
+    missingness = nothing,
 )
     names = _normalize_node_names(node_names, nv(g))
-    te = identify(g, TotalEffectQuery(query.treatment, query.outcome); node_names = node_names)
+    te = identify(
+        g, TotalEffectQuery(query.treatment, query.outcome);
+        node_names = node_names, missingness = missingness,
+    )
     T = eltype(te.adjustment)
 
     A = query.treatment isa Int ?
@@ -220,6 +248,7 @@ function identify(
         te.identifiable,
         assumptions,
         te.temporal_nodes,
+        te.missingness,
     )
 end
 
@@ -232,8 +261,12 @@ function identify(
     g::AbstractGraph,
     query::InterventionalPolicyQuery;
     node_names = nothing,
+    missingness = nothing,
 )
-    te = identify(g, TotalEffectQuery(query.treatment, query.outcome); node_names = node_names)
+    te = identify(
+        g, TotalEffectQuery(query.treatment, query.outcome);
+        node_names = node_names, missingness = missingness,
+    )
     return IdentificationResult{eltype(te.adjustment)}(
         query,
         te.graph_hash,
@@ -244,13 +277,18 @@ function identify(
         te.identifiable,
         te.assumptions,
         te.temporal_nodes,
+        te.missingness,
     )
 end
 
 """
-    identify(unrolling::TemporalUnrolling, query::TemporalEffectQuery) -> IdentificationResult
+    identify(unrolling::TemporalUnrolling, query::TemporalEffectQuery; missingness=nothing) -> IdentificationResult
 """
-function identify(unrolling::TemporalUnrolling, query::TemporalEffectQuery)
+function identify(
+    unrolling::TemporalUnrolling,
+    query::TemporalEffectQuery;
+    missingness = nothing,
+)
     X = temporal_node(unrolling, query.treatment, query.t_treat)
     Y = temporal_node(unrolling, query.outcome, query.t_outcome)
     g = unrolling.graph
@@ -261,6 +299,7 @@ function identify(unrolling::TemporalUnrolling, query::TemporalEffectQuery)
     )
     # Expose baseline symbols (variable component of temporal nodes)
     adj_syms = sort!(unique([var for (var, _) in temporal_nodes]))
+    miss = _missingness_cert(missingness; graph = g, node_names = nothing)
     return IdentificationResult{Symbol}(
         query,
         graph_fingerprint(g),
@@ -271,6 +310,7 @@ function identify(unrolling::TemporalUnrolling, query::TemporalEffectQuery)
         identifiable,
         [:no_unmeasured_confounding, :correct_lag_structure],
         collect(temporal_nodes),
+        miss,
     )
 end
 

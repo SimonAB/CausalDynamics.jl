@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `pack_parent_vector` refuses `Missing` rather than coercing to `Float64`.
   Coverage: `test/test_missingness_contract.jl`. BOUNDARIES document
   Structural masks vs Observable policies.
+- **Missingness certificates (Phase 3):** `MissingnessSpec`,
+  `MissingnessCertificate`, `certify_missingness`, and
+  `identify(...; missingness=)` attaching `result.missingness` (MCAR/MAR/MNAR).
+  Causal `identifiable` stays separate from missingness ID. Coverage:
+  `test/test_missingness_id.jl`.
 - **Representation bridge:** `RepresentationSpec`, `encode_to_panel`, and
   `representation_certificate` compress high-dim inputs (spectra, images) to
   low-dim code columns for identification and estimation. No Flux/Lux hard

@@ -10,8 +10,12 @@ function identify(
     g::AbstractGraph,
     query::TransportQuery;
     node_names = nothing,
+    missingness = nothing,
 )
-    te = identify(g, TotalEffectQuery(query.treatment, query.outcome); node_names = node_names)
+    te = identify(
+        g, TotalEffectQuery(query.treatment, query.outcome);
+        node_names = node_names, missingness = missingness,
+    )
     names = _normalize_node_names(node_names, Graphs.nv(g))
     T = eltype(te.adjustment)
     domain_idx = Set{Int}()
@@ -32,5 +36,6 @@ function identify(
         te.identifiable,
         assumptions,
         te.temporal_nodes,
+        te.missingness,
     )
 end
