@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Generative L3 (Phase 2b):** `:generative` additive-noise mechanisms with
   `abduce_noise` / `mechanism_counterfactual` (example
   `mechanism_counterfactual.jl`). Non-additive image DeepSCM encoders deferred.
+  Coverage: `test/test_mechanism.jl` (construction, register edges, certificates,
+  façades, pack, many-node stress); `test/test_mechanism_lux.jl` (attach, ODE/`do`,
+  GraphSCM, scalar and multi-dim L3 round-trips, multi-node train, Phase 1 hand-off).
 - Integer-coded factor recode via `Policy` (`2 → 1` on `A_t`): shared-`U`
   counterfactual mean matches the structural recode (CDMPanel stays `Float64`).
 
