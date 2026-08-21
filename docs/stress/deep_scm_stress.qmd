@@ -71,6 +71,7 @@ using Lux
 using ComponentArrays
 using Optimization
 using OptimizationOptimisers
+using FiniteDiff
 using CairoMakie
 using CairoMakie: Axis, Figure, scatter!, ablines!
 
