@@ -119,6 +119,7 @@ Full matrices: [ECOSYSTEM_COMPARISON.md](ECOSYSTEM_COMPARISON.md) ·
 - **Representation bridge** — `RepresentationSpec` / `encode_to_panel` compress high-dim tensors (spectra, images) to low-dim **code** columns for identification and estimation (no Flux/Lux hard dependency; user-supplied encoder). Example: `examples/representation_bridge.jl`.
 - **Deep mechanisms** — `MechanismSpec` / Lux weakdep for parent-constrained ``f_i`` and ODE residuals (`examples/mechanism_ude.jl`, `examples/mechanism_scm.jl`).
 - **Generative L3** — `:generative` additive-noise abduction / counterfactuals on codes (`examples/mechanism_counterfactual.jl`).
+
 ## Related packages
 
 | Package | Role |
@@ -133,7 +134,8 @@ Full matrices: [ECOSYSTEM_COMPARISON.md](ECOSYSTEM_COMPARISON.md) ·
 
 - [Documenter site](https://simonab.github.io/CausalDynamics.jl/dev/) (API, examples, live DAGMakie figures)
 - [References](https://simonab.github.io/CausalDynamics.jl/dev/references/) — DOIs / BibTeX keys
-- [Stress validation](https://github.com/SimonAB/CausalTargeted.jl/blob/main/STRESS.md) — Quarto notebook ([qmd](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/stress/stress_validation.qmd)); identify / DAG / panel bridges; [Documenter](https://simonab.github.io/CausalTargeted.jl/dev/stress_validation/)
+- [Deep SCM stress](STRESS.md) — Quarto ([qmd](docs/stress/deep_scm_stress.qmd)); encode / CNN stub / mechanisms / L3; [Documenter](https://simonab.github.io/CausalDynamics.jl/dev/stress_deep_scm/)
+- [Stack stress (Targeted)](https://github.com/SimonAB/CausalTargeted.jl/blob/main/STRESS.md) — estimation path ([qmd](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/stress/stress_validation.qmd)); [Documenter](https://simonab.github.io/CausalTargeted.jl/dev/stress_validation/)
 - [CDCS book](https://simonab.github.io/causal-dynamics-book/) — narrative companion
 
 Estimation-layer citations live in

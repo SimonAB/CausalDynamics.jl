@@ -1,0 +1,563 @@
+---
+title: "Deep SCM stress (CausalDynamics)"
+subtitle: "Representation bridge, Lux mechanisms, and additive L3"
+author: "Simon A. Babayan"
+date: today
+engine: julia
+julia:
+  # Prefer CDCS book env (Lux / ODE / Optimization); fallback is docs Manifest.
+  exeflags: ["--project=../../../../"]
+execute:
+  warning: false
+  daemon: false
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    embed-resources: true
+---
+
+## Why this notebook exists
+
+Unit tests cover construction, parent masks, and synthetic recovery. This notebook
+adds **application-scale** probes: large and wide panels, an AgeSCM-pattern Lux
+1D-CNN encoder stub, ODE residuals under `do`, generative L3 abduction, and a
+Phase 1→2b hand-off ledger.
+
+Estimation on codes (mediation / LMTP / missing $Y$) is in the sibling
+[CausalTargeted deep_scm_estimation_stress.qmd](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/stress/deep_scm_estimation_stress.qmd).
+
+Out of scope: UniversalDiffEq hard wiring, Flux-in-core, non-additive image DeepSCM,
+full MIRS cohort files.
+
+```{julia}
+#| label: chunk-setup-env
+#| warning: false
+#| code-fold: false
+
+using Pkg
+const PKG_ROOT = let
+    here = @__DIR__
+    normpath(joinpath(here, "..", ".."))
+end
+const BOOK_ROOT = normpath(joinpath(PKG_ROOT, "..", ".."))
+if isfile(joinpath(BOOK_ROOT, "Project.toml")) &&
+   isdir(joinpath(BOOK_ROOT, "packages", "CausalDynamics.jl"))
+    Pkg.activate(BOOK_ROOT)
+    println("Activated book project: ", BOOK_ROOT)
+else
+    Pkg.activate(joinpath(PKG_ROOT, "docs"))
+    println("Activated package docs project")
+end
+Pkg.instantiate()
+println("Package root: ", PKG_ROOT)
+```
+
+```{julia}
+#| label: chunk-setup-packages
+#| warning: false
+
+using CausalDynamics
+using Graphs
+using Random
+using Statistics
+using LinearAlgebra
+using DataFrames
+using Dates
+using OrdinaryDiffEq
+using Lux
+using ComponentArrays
+using Optimization
+using OptimizationOptimisers
+using CairoMakie
+using CairoMakie: Axis, Figure, scatter!, ablines!
+
+CairoMakie.activate!(type = "svg")
+include(joinpath(@__DIR__, "cnn_encoder_stub.jl"))
+@assert lux_mechanisms_available()
+println("Lux mechanisms available: ", lux_mechanisms_available())
+println("CausalDynamics ", pkgversion(CausalDynamics))
+```
+
+```{julia}
+#| label: chunk-audit-helpers
+#| warning: false
+
+const RESULTS = NamedTuple{(:section, :estimand, :expected, :actual, :abs_err, :ok, :note),
+    Tuple{String, String, Float64, Float64, Float64, Bool, String}}[]
+const TIMINGS = NamedTuple{(:section, :seconds), Tuple{String, Float64}}[]
+
+function record!(section, estimand; expected, actual, tol = nothing, note = "")
+    e = Float64(expected)
+    a = Float64(actual)
+    err = abs(a - e)
+    ok = tol === nothing ? isfinite(a) : (err <= Float64(tol))
+    push!(RESULTS, (string(section), string(estimand), e, a, err, ok, string(note)))
+    return (; err, ok)
+end
+
+function timed!(f::Function, section::AbstractString)
+    t0 = time()
+    out = f()
+    elapsed = time() - t0
+    push!(TIMINGS, (section = string(section), seconds = elapsed))
+    println("⏱ ", section, ": ", round(elapsed; digits = 3), " s")
+    return out
+end
+
+nothing
+```
+
+## Part A — Representation scale and CNN stub
+
+### Large $n \\times p$ linear encode
+
+```{julia}
+#| label: chunk-large-encode
+#| warning: false
+
+rng = Random.Xoshiro(99)
+n_big, p_big, d_big = 2_500, 128, 4
+Xbig = randn(rng, n_big, p_big)
+Bbig = randn(rng, p_big, d_big) ./ sqrt(p_big)
+names = [Symbol("z$j") for j in 1:d_big]
+spec_lin = RepresentationSpec(:S, names, S -> S * Bbig; role = :measurement)
+
+panel_big = timed!("large_encode") do
+    encode_to_panel(
+        Xbig, spec_lin;
+        tabular = Dict(:A => rand(rng, n_big), :Y => randn(rng, n_big)),
+    )
+end
+@assert length(panel_big[:z1]) == n_big
+@assert eltype(panel_big[:z1]) === Float64
+@assert panel_big[:z1] ≈ (Xbig * Bbig)[:, 1] rtol = 1e-10
+t_large = only(t.seconds for t in TIMINGS if t.section == "large_encode")
+@assert t_large < 5.0
+record!(:large_encode, "elapsed_s"; expected = 0.0, actual = t_large, tol = 5.0,
+    note = "soft wall-clock")
+println("large encode OK; elapsed=", round(t_large; digits = 3), " s")
+```
+
+### Wide $p \\gg n$
+
+```{julia}
+#| label: chunk-wide-encode
+#| warning: false
+
+rng_w = Random.Xoshiro(100)
+n_w, p_w, d_w = 40, 2_000, 3
+Xw = randn(rng_w, n_w, p_w)
+Bw = randn(rng_w, p_w, d_w) ./ sqrt(p_w)
+panel_w = encode_to_panel(
+    Xw, RepresentationSpec(:S, [:z1, :z2, :z3], S -> S * Bw),
+)
+@assert size(hcat(panel_w[:z1], panel_w[:z2], panel_w[:z3])) == (n_w, d_w)
+@assert all(isfinite, panel_w[:z1])
+record!(:wide_encode, "finite_z1"; expected = 1.0, actual = Float64(all(isfinite, panel_w[:z1])),
+    tol = 0.0, note = "1 = all finite")
+println("wide encode OK")
+```
+
+### AgeSCM-pattern Lux 1D-CNN encoder
+
+Synthetic bump spectra: latent $M^*$ embedded in a smooth peak; CNN maps
+$S \\mapsto z$ (definitional codes).
+
+```{julia}
+#| label: chunk-cnn-encode
+#| warning: false
+
+rng_c = Random.Xoshiro(11)
+n_c, p_c, d_c = 200, 64, 1
+A_c = Float64.(rand(rng_c, n_c) .< 0.5)
+W_c = randn(rng_c, n_c)
+Mstar = 1.2 .* A_c .+ 0.4 .* W_c .+ 0.35 .* randn(rng_c, n_c)
+grid = range(0, 1; length = p_c)
+bump = exp.(-((collect(grid) .- 0.4) ./ 0.08) .^ 2)
+S_c = randn(rng_c, n_c, p_c) .* 0.15
+for i in 1:n_c
+    S_c[i, :] .+= Mstar[i] .* bump
+end
+
+_, nn_cnn, ps_cnn, st_cnn = make_cnn_encoder(
+    p_c, d_c; hidden_ch = 4, kernel = 5, rng = Random.Xoshiro(12),
+)
+
+function cnn_loss(ps)
+    X = reshape(Float32.(transpose(S_c)), p_c, 1, n_c)
+    Y, _ = Lux.apply(nn_cnn, X, ps, st_cnn)
+    return sum(abs2, Float64.(vec(Array(Y))) .- Mstar) / n_c
+end
+
+before_cnn = timed!("cnn_loss_before") do
+    cnn_loss(ps_cnn)
+end
+
+after_cnn = timed!("cnn_train") do
+    optf = OptimizationFunction((ps, _) -> cnn_loss(ps), Optimization.AutoFiniteDiff())
+    sol = solve(
+        OptimizationProblem(optf, ps_cnn),
+        OptimizationOptimisers.Adam(0.05);
+        maxiters = 150,
+    )
+    ps_cnn .= sol.u
+    sol.objective
+end
+@assert after_cnn < before_cnn
+
+encode_trained = S -> begin
+    n, p_in = size(S)
+    X = reshape(Float32.(transpose(S)), p_in, 1, n)
+    Y, _ = Lux.apply(nn_cnn, X, ps_cnn, st_cnn)
+    Float64.(transpose(Array(Y)))
+end
+spec_cnn = RepresentationSpec(
+    :spectrum, [:z1], encode_trained; role = :definitional,
+)
+cert_cnn = representation_certificate(spec_cnn)
+@assert cert_cnn.role === :definitional
+panel_cnn = encode_to_panel(
+    S_c, spec_cnn; tabular = Dict(:A => A_c, :W => W_c, :Y => 1.5 .* Mstar .+ 0.3 .* W_c),
+)
+ρ = cor(panel_cnn[:z1], Mstar)
+@assert ρ > 0.7
+@assert after_cnn < before_cnn
+@assert after_cnn / before_cnn < 0.25
+record!(:cnn_encode, "cor_z_Mstar"; expected = 0.85, actual = ρ, tol = 0.2,
+    note = "AgeSCM-pattern Lux CNN")
+record!(:cnn_encode, "loss_before"; expected = before_cnn, actual = before_cnn, tol = 0.0,
+    note = "pre-train MSE to M*")
+record!(:cnn_encode, "loss_after"; expected = 0.0, actual = after_cnn, tol = 0.2,
+    note = "post-train MSE to M*")
+record!(:cnn_encode, "loss_ratio"; expected = 0.0, actual = after_cnn / before_cnn, tol = 0.25,
+    note = "after/before (want ≪ 1)")
+println("CNN codes cor(z, M*)=", round(ρ; digits = 3),
+    " loss ", round(before_cnn; digits = 3), " → ", round(after_cnn; digits = 3),
+    " (ratio ", round(after_cnn / before_cnn; digits = 3), ")")
+```
+
+```{julia}
+#| label: fig-cnn-codes-viz
+#| warning: false
+#| echo: false
+#| fig-cap: "Trained CNN codes versus latent mediator M* (definitional representation)."
+
+fig = Figure(size = (520, 360))
+ax = CairoMakie.Axis(fig[1, 1]; xlabel = "M*", ylabel = "z1", title = "CNN stub codes")
+scatter!(ax, Mstar, panel_cnn[:z1]; markersize = 6, color = (:steelblue, 0.6))
+ablines!(ax, 0, 1; color = :gray, linestyle = :dash)
+fig
+```
+
+### Small-$n$ conservation scale
+
+```{julia}
+#| label: chunk-small-n-encode
+#| warning: false
+
+rng_s = Random.Xoshiro(21)
+n_s, p_s = 48, 32
+Ms = randn(rng_s, n_s)
+bump_s = exp.(-((collect(range(0, 1; length = p_s)) .- 0.5) ./ 0.1) .^ 2)
+Ss = randn(rng_s, n_s, p_s) .* 0.2
+for i in 1:n_s
+    Ss[i, :] .+= Ms[i] .* bump_s
+end
+enc_s, _, ps_s, st_s = make_cnn_encoder(p_s, 1; rng = Random.Xoshiro(22))
+# freeze random CNN; matched-filter baseline for comparison
+z_filter = Ss * bump_s
+z_cnn = enc_s(Ss)[:, 1]
+@assert all(isfinite, z_cnn)
+@assert length(z_cnn) == n_s
+record!(:small_n, "cnn_finite"; expected = 1.0, actual = Float64(all(isfinite, z_cnn)),
+    tol = 0.0)
+record!(:small_n, "filter_cor"; expected = 0.9, actual = cor(z_filter, Ms), tol = 0.15)
+println("small-n encode OK; filter cor=", round(cor(z_filter, Ms); digits = 3))
+```
+
+### NaN passthrough edge
+
+```{julia}
+#| label: chunk-nan-edge
+#| warning: false
+
+S_nan = copy(S_c)
+S_nan[1, 1] = NaN
+panel_nan = encode_to_panel(S_nan, RepresentationSpec(:S, [:z1], S -> S[:, 1:1]))
+@assert isnan(panel_nan[:z1][1])
+record!(:nan_edge, "passthrough"; expected = 1.0, actual = Float64(isnan(panel_nan[:z1][1])),
+    tol = 0.0, note = "encode does not drop NaN")
+println("NaN passthrough OK")
+```
+
+## Part B — Mechanisms, `do`, and L3
+
+### ODE residual + `do_pin`
+
+```{julia}
+#| label: chunk-ode-residual
+#| warning: false
+
+rng_o = Random.Xoshiro(7)
+spec_ode = ContinuousCDMSpec(
+    [:z, :x, :y];
+    parents = Dict(:z => Symbol[], :x => [:z, :x], :y => [:x, :y]),
+)
+lib_ode = mechanism_library_from_cdm(spec_ode)
+attach_lux_mechanism!(
+    lib_ode, :x; parents = [:z], hidden = 4, kind = :ode_residual, rng = rng_o,
+)
+
+function known_rhs!(du, u, p, t)
+    z, x, y = u
+    du[1] = -0.1 * z
+    du[2] = -0.2 * x
+    du[3] = -0.1 * y + 0.4 * x
+    return nothing
+end
+rhs! = build_ode_rhs(known_rhs!, spec_ode, lib_ode)
+
+function true_rhs!(du, u, p, t)
+    z, x, y = u
+    du[1] = -0.1 * z
+    du[2] = -0.2 * x + 0.5 * z
+    du[3] = -0.1 * y + 0.4 * x
+    return nothing
+end
+u0 = [2.0, 0.5, 0.0]
+tspan = (0.0, 5.0)
+t_obs = 0.0:0.25:5.0
+data = Array(solve(ODEProblem(true_rhs!, u0, tspan), Tsit5(); saveat = t_obs))
+
+loss_ode = function (_ps)
+    pred = solve(
+        ODEProblem(rhs!, u0, tspan, nothing), Tsit5();
+        saveat = t_obs, abstol = 1e-6, reltol = 1e-6,
+    )
+    try
+        return sum(abs2, Array(pred) .- data)
+    catch
+        return 1e6
+    end
+end
+
+before_ode = loss_ode(nothing)
+timed!("ode_train") do
+    train_mechanisms!(lib_ode; loss = loss_ode, maxiters = 150, lr = 0.05)
+end
+after_ode = loss_ode(nothing)
+@assert after_ode < before_ode
+sol_do = solve_cdm(
+    spec_ode, rhs!, u0, tspan, nothing;
+    intervention = do_pin(:z, 1.0),
+)
+z_end = sol_do.u[end][spec_ode.index[:z]]
+@assert z_end ≈ 1.0 atol = 1e-8
+record!(:ode_residual, "loss_after"; expected = 0.0, actual = after_ode, tol = max(2.0, 0.5 * before_ode),
+    note = "recovery progress")
+record!(:ode_residual, "do_pin_z"; expected = 1.0, actual = z_end, tol = 1e-6)
+println("ODE loss ", round(before_ode; digits = 3), " → ", round(after_ode; digits = 3),
+    "; do(z=1) terminal z=", round(z_end; digits = 4))
+```
+
+### Wrong-parent rejection
+
+```{julia}
+#| label: chunk-parent-mask
+#| warning: false
+
+lib_bad = mechanism_library_from_cdm(
+    ContinuousCDMSpec([:z, :x]; parents = Dict(:z => Symbol[], :x => [:z])),
+)
+threw = false
+try
+    attach_lux_mechanism!(
+        lib_bad, :x; parents = [:z, :x], hidden = 2, rng = Random.Xoshiro(1),
+    )
+catch e
+    threw = e isa ArgumentError
+end
+@assert threw
+record!(:parent_mask, "reject_wrong_parent"; expected = 1.0, actual = Float64(threw), tol = 0.0)
+println("parent mask OK")
+```
+
+### Generative L3 (scalar)
+
+```{julia}
+#| label: chunk-l3-scalar
+#| warning: false
+
+rng_l = Random.Xoshiro(9)
+lib_l3 = MechanismLibrary(;
+    allowed_parents = Dict(:x => Symbol[], :y => [:x]),
+)
+attach_lux_mechanism!(
+    lib_l3, :y; parents = [:x], hidden = 8, kind = :generative, rng = rng_l,
+)
+m_y = lib_l3.mechanisms[:y]
+xs = range(-1.5, 1.5; length = 40)
+loss_l3 = function (_ps)
+    s = 0.0
+    for x in xs
+        s += abs2(generate_from_noise(m_y, 0.0, [x]) - 2x)
+    end
+    return s / length(xs)
+end
+timed!("l3_train") do
+    train_mechanisms!(lib_l3; loss = loss_l3, maxiters = 400, lr = 0.08)
+end
+m_y = lib_l3.mechanisms[:y]
+after_l3 = loss_l3(nothing)
+@assert after_l3 < 0.05
+
+# Additive-noise algebra is exact for any attached f
+for x in (-1.0, 0.0, 1.2), u in (-0.5, 0.0, 0.4)
+    y = generate_from_noise(m_y, u, [x])
+    @assert abduce_noise(m_y, y, [x]) ≈ u atol = 1e-10
+end
+
+x_f, u_true = 1.0, -0.3
+# Factual under the learned mechanism (L3 abduction is model-relative)
+y_f = generate_from_noise(m_y, u_true, [x_f])
+u_hat = abduce_noise(m_y, y_f, [x_f])
+y_cf = mechanism_counterfactual(m_y, y_f, [x_f], [0.0])
+@assert u_hat ≈ u_true atol = 1e-10
+@assert y_cf ≈ generate_from_noise(m_y, u_true, [0.0]) atol = 1e-10
+f1 = generate_from_noise(m_y, 0.0, [x_f])
+record!(:l3_scalar, "abduce_U"; expected = u_true, actual = u_hat, tol = 1e-8)
+record!(:l3_scalar, "cf_do_x0"; expected = generate_from_noise(m_y, u_true, [0.0]), actual = y_cf, tol = 1e-8)
+record!(:l3_scalar, "f_at_1_vs_2"; expected = 2.0, actual = f1, tol = 0.35)
+record!(:l3_scalar, "train_loss"; expected = 0.0, actual = after_l3, tol = 0.05)
+
+g = DiGraph(2)
+add_edge!(g, 1, 2)
+scm = graphscm_with_mechanisms(
+    g,
+    Dict{Int, Function}(1 => (u,) -> u, 2 => (x, u) -> 0.0),
+    Set{Int}(),
+    lib_l3;
+    node_names = Dict(1 => :x, 2 => :y),
+)
+U = Dict(1 => 1.0, 2 => u_hat)
+fact = simulate_scm(scm, U)
+cf = simulate_scm(counterfactual_graph(scm, do_intervention(1, 0.0)), U)
+record!(:l3_scalar, "twin_factual"; expected = y_f, actual = fact[2], tol = 0.35)
+record!(:l3_scalar, "twin_cf"; expected = y_cf, actual = cf[2], tol = 0.35)
+println("L3 abduce U≈", round(u_hat; digits = 3), " CF≈", round(y_cf; digits = 3),
+    " f(1)≈", round(f1; digits = 3))
+```
+
+### Multi-dim codes L3 ($d=3$)
+
+```{julia}
+#| label: chunk-l3-multidim
+#| warning: false
+
+rng_m = Random.Xoshiro(12)
+lib_m = MechanismLibrary(;
+    allowed_parents = Dict(:x => Symbol[], :y => [:x]),
+)
+attach_lux_mechanism!(
+    lib_m, :y;
+    parents = [:x], hidden = 6, kind = :generative, output_dim = 3, rng = rng_m,
+)
+m3 = lib_m.mechanisms[:y]
+xs3 = range(-1.0, 1.0; length = 30)
+loss_m = function (_ps)
+    s = 0.0
+    for x in xs3
+        ŷ = generate_from_noise(m3, zeros(3), [x])
+        s += sum(abs2, ŷ .- [x, 2x, -x])
+    end
+    return s / length(xs3)
+end
+before_m = loss_m(nothing)
+timed!("l3_multidim_train") do
+    train_mechanisms!(lib_m; loss = loss_m, maxiters = 300, lr = 0.05)
+end
+@assert loss_m(nothing) < before_m
+u3 = [0.1, -0.2, 0.05]
+y3 = generate_from_noise(m3, u3, [0.8])
+@assert abduce_noise(m3, y3, [0.8]) ≈ u3 atol = 1e-10
+y3_cf = mechanism_counterfactual(m3, y3, [0.8], [0.0])
+@assert y3_cf ≈ generate_from_noise(m3, u3, [0.0]) atol = 1e-10
+record!(:l3_multidim, "roundtrip_err"; expected = 0.0,
+    actual = norm(abduce_noise(m3, y3, [0.8]) .- u3), tol = 1e-9)
+println("multi-dim L3 OK")
+```
+
+### Phase 1 codes → generative L3 hand-off
+
+```{julia}
+#| label: chunk-phase1-hand-off
+#| warning: false
+
+rng_h = Random.Xoshiro(33)
+n_h, p_h, d_h = 80, 16, 2
+Xh = randn(rng_h, n_h, p_h)
+Bh = randn(rng_h, p_h, d_h)
+panel_h = encode_to_panel(
+    Xh, RepresentationSpec(:S, [:z1, :z2], S -> S * Bh),
+)
+lib_h = MechanismLibrary(;
+    allowed_parents = Dict(:z1 => Symbol[], :y => [:z1]),
+)
+attach_lux_mechanism!(
+    lib_h, :y; parents = [:z1], kind = :generative, hidden = 6, rng = rng_h,
+)
+mh = lib_h.mechanisms[:y]
+loss_h = function (_ps)
+    s = 0.0
+    for i in 1:n_h
+        s += abs2(generate_from_noise(mh, 0.0, [panel_h[:z1][i]]) - 1.5 * panel_h[:z1][i])
+    end
+    return s / n_h
+end
+timed!("phase1_l3_train") do
+    train_mechanisms!(lib_h; loss = loss_h, maxiters = 200, lr = 0.05)
+end
+u_h = -0.25
+y_fh = 1.5 * panel_h[:z1][1] + u_h
+y_cfh = mechanism_counterfactual(mh, y_fh, [panel_h[:z1][1]], [0.0])
+record!(:phase1_hand_off, "cf_under_do_z0"; expected = u_h, actual = y_cfh, tol = 0.4)
+println("Phase 1→2b CF≈", round(y_cfh; digits = 3), " (expect ≈", u_h, ")")
+```
+
+## Audit
+
+```{julia}
+#| label: tbl-timings
+#| warning: false
+#| tbl-cap: "Wall-clock timings for Deep SCM stress chunks."
+
+DataFrame(TIMINGS)
+```
+
+```{julia}
+#| label: tbl-results
+#| warning: false
+#| tbl-cap: "Expected versus actual (Deep SCM stress ledger)."
+
+df_res = DataFrame(RESULTS)
+n_ok = count(df_res.ok)
+println("Passed ", n_ok, " / ", nrow(df_res), " ledger checks")
+@assert n_ok == nrow(df_res)
+df_res
+```
+
+## Reproduce
+
+```bash
+cd packages/CausalDynamics.jl/docs/stress
+quarto render deep_scm_stress.qmd
+```
+
+Unit-test smoke (no Quarto):
+
+```bash
+julia --project=. --threads=auto -e 'include("packages/CausalDynamics.jl/test/test_mechanism.jl")'
+```

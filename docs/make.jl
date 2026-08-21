@@ -41,6 +41,7 @@ makedocs(
             "Utilities" => "api/utils.md",
         ],
         "Examples" => "examples.md",
+        "Deep SCM stress" => "stress_deep_scm.md",
         "References" => "references.md",
     ],
     checkdocs = :exports,

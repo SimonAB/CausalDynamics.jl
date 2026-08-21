@@ -32,5 +32,11 @@ Do not add estimation grids or SuperLearner stacks here beyond integration examp
 
 ## Deferred (beyond Phase 2b)
 
-- Full image/tensor DSCM with learned encoders (non-additive abduction);
-  Phase 2b covers additive-noise generative mechanisms on codes / low-dim vectors
+- Non-additive DeepSCM (learned encoder abduction on raw image/tensor nodes);
+  Phase 2b is additive-noise `:generative` on codes / low-dim vectors
+- UniversalDiffEq as a CausalDynamics hard dependency (optional advanced trainer
+  only; see [SCIML_INTEGRATION.md](docs/src/SCIML_INTEGRATION.md))
+- Flux as a CausalDynamics hard or weakdep (Flux remains MLJFlux / application
+  encoders; Lux is the SciML mechanism path)
+- Full MIRS / Twins cohort files in-package (synthetic spectra in
+  `docs/stress/`; real cohorts stay application / book-harness data)

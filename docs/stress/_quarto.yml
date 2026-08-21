@@ -1,0 +1,19 @@
+project:
+  type: default
+  title: "CausalDynamics Deep SCM stress"
+  render:
+    - deep_scm_stress.qmd
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    embed-resources: true
+
+engine: julia
+
+execute:
+  warning: false
+  daemon: false

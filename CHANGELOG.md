@@ -27,14 +27,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Coverage: `test/test_mechanism.jl` (construction, register edges, certificates,
   façades, pack, many-node stress); `test/test_mechanism_lux.jl` (attach, ODE/`do`,
   GraphSCM, scalar and multi-dim L3 round-trips, multi-node train, Phase 1 hand-off).
+  Application stress: `docs/stress/deep_scm_stress.qmd` (+ CausalTargeted
+  `deep_scm_estimation_stress.qmd` for mediation/LMTP on codes).
 - Integer-coded factor recode via `Policy` (`2 → 1` on `A_t`): shared-`U`
   counterfactual mean matches the structural recode (CDMPanel stays `Float64`).
 
-### Fixed
+### Changed
 
-- Document GraphSCM equation parent order (`sorted(inneighbors)`); add
-  confounding-triangle regression test
-  ([#8](https://github.com/SimonAB/CausalDynamics.jl/issues/8)).
+- Document deferred Deep SCM items (UniversalDiffEq hard dep, Flux-in-core,
+  non-additive image DeepSCM, full MIRS) in BOUNDARIES / DESIGN / scope /
+  SCIML_INTEGRATION; stress notebooks and SciML recipes describe the shipped tip.
 - Documenter: include `IdentificationError` in the identification API page
   (`checkdocs = :exports`).
 - Getting-started SCM math uses `\to` (not `\\to`)

@@ -21,6 +21,7 @@ package names stay Pearl/SciML-facing.
 | Latent → observed bridge | Filter/smoother outputs → panel columns | `ObservationBridge`, `panel_from_latent_series`, `simulate_observed_panel` |
 | Representation bridge | High-dim tensor → low-dim codes for ID/estimation | `RepresentationSpec`, `encode_to_panel`, `representation_certificate` |
 | Deep mechanisms | Parent-constrained Lux ``f_i`` / ODE residuals | `MechanismSpec`, `MechanismLibrary`, `build_ode_rhs`, `train_mechanisms!` (Lux weakdep) |
+| Generative L3 | Additive-noise abduction on codes | `abduce_noise`, `mechanism_counterfactual` (`:generative`) |
 | Soft interventions | State-dependent treatment rules | `Policy`, `policy` |
 | Interventional means | Monte Carlo g-computation (discrete) | `g_computation` on `DiscreteTimeCDM` |
 | Continuous functionals | Monte Carlo g-computation (SciML) | `ContinuousEffectFunctional`, `g_computation` on `ContinuousCDMSpec` |
@@ -43,7 +44,10 @@ package names stay Pearl/SciML-facing.
 |---------|----------------|
 | Discovery algorithms (PC, OCE, CCM, …) | [Associations.jl](https://juliadynamics.github.io/Associations.jl/stable/) (optional weakdep bridge) |
 | ODE/SDE/UDE solvers | SciML (`OrdinaryDiffEq`, `UniversalDiffEq`, …); CausalDynamics supplies structure and `do` semantics |
-| DeepSCM / non-additive image L3 encoders | Deferred; Phase 2b is additive-noise `:generative` on codes / low-dim vectors |
+| DeepSCM / non-additive image L3 encoders | Deferred; Phase 2b is additive-noise `:generative` on codes |
+| UniversalDiffEq hard dependency | Deferred; optional advanced trainer only ([SCIML recipes](SCIML_INTEGRATION.md)) |
+| Flux-in-core | Deferred; Flux via MLJFlux / application encoders; Lux for mechanisms |
+| Full MIRS / Twins cohort fixtures | Deferred; synthetic spectra in `docs/stress/` |
 | Full symbolic do-calculus / ModelingToolkit ID | Stubs only (`is_identifiable`, `SymbolicSCM`); unexported until implemented |
 | Process metaphysics vocabulary | CDCS book prose, not package exports |
 

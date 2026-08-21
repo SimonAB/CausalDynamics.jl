@@ -73,5 +73,7 @@ y_do = simulate_scm(apply_intervention(scm, do_intervention(2, 10.0)), U)
 ## See also
 
 - [API Reference](api/graphs.md)
+- [SciML recipes](SCIML_INTEGRATION.md) — representation bridge, Lux mechanisms, generative L3
+- [Deep SCM stress](stress_deep_scm.md)
 - [Examples](examples.md)
 - [CDCS Book](https://simonab.github.io/causal-dynamics-book/)

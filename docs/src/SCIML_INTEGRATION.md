@@ -124,33 +124,45 @@ Before SciML or estimation on imaging/spectral inputs, compress with
 [`RepresentationSpec`](@ref) / [`encode_to_panel`](@ref) so the DAG and
 nuisance models see low-dim codes, not raw tensors. Roles `:measurement` vs
 `:definitional` are recorded in [`representation_certificate`](@ref). Example:
-`examples/representation_bridge.jl`. Graph-constrained deep mechanisms
-(``f_i`` / UDE residuals) are planned as a later weakdep phase; UniversalDiffEq
-remains an external advanced trainer (below).
+`examples/representation_bridge.jl`.
 
-## Graph-constrained Lux mechanisms (Phase 2)
+## Graph-constrained Lux mechanisms (Phase 2a)
 
-Parent-constrained neural residuals attach via `MechanismLibrary` /
-`attach_lux_mechanism!` (requires Lux + ComponentArrays + Optimization).
-Compose with known physics using [`build_ode_rhs`](@ref), then
-[`solve_cdm`](@ref) / [`do_pin`](@ref). Thin training:
-[`train_mechanisms!`](@ref). Examples: `examples/mechanism_ude.jl`,
+Parent-constrained neural residuals attach via [`MechanismLibrary`](@ref) /
+[`attach_lux_mechanism!`](@ref) (requires Lux + ComponentArrays + Optimization;
+no Flux hard dependency). Compose with known physics using
+[`build_ode_rhs`](@ref), then [`solve_cdm`](@ref) / [`do_pin`](@ref). Thin
+training: [`train_mechanisms!`](@ref). Examples: `examples/mechanism_ude.jl`,
 `examples/mechanism_scm.jl`.
 
-Full non-additive image/tensor DeepSCM encoders remain deferred. Prefer Phase 1
-`RepresentationSpec` → codes, then Phase 2b `:generative` L3 on those codes.
+Application-scale Quarto stress:
+[`docs/stress/deep_scm_stress.qmd`](https://github.com/SimonAB/CausalDynamics.jl/blob/main/docs/stress/deep_scm_stress.qmd)
+([STRESS.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/STRESS.md)).
+Estimation on codes (mediation / LMTP) is the CausalTargeted sibling
+[`deep_scm_estimation_stress.qmd`](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/stress/deep_scm_estimation_stress.qmd).
 
-## Phase 2b: generative mechanisms and abduction
+## Generative L3 on codes (Phase 2b)
 
 For `:generative` nodes, ``X = f(\\mathrm{pa}) + U``. Use
 [`abduce_noise`](@ref) and [`mechanism_counterfactual`](@ref) for same-unit
-counterfactuals; see `examples/mechanism_counterfactual.jl`.
+counterfactuals; see `examples/mechanism_counterfactual.jl`. Prefer Phase 1
+codes (or other low-dim vectors) as nodes; raw images are not mechanism parents.
 
-## UniversalDiffEq
+## Deferred (explicitly not in core)
 
-Use CausalDynamics for **adjustment / `do` semantics**; use
-[UniversalDiffEq.jl](https://github.com/Jack-H-Buckner/UniversalDiffEq.jl) to
-learn `f` from series. Do not expect UDE training inside CausalDynamics core.
+- UniversalDiffEq as a **hard** dependency (use as an optional advanced trainer below)
+- Flux-in-core (Flux stays at MLJFlux nuisances / application encoders)
+- Non-additive image DeepSCM (learned encoder abduction on tensors)
+- Full MIRS / Twins cohort fixtures in-package (synthetic spectra in stress only)
+
+## UniversalDiffEq (optional advanced trainer)
+
+Use CausalDynamics for **adjustment / `do` semantics** and Lux
+[`MechanismLibrary`](@ref) residuals when you want parent masks in-process. Use
+[UniversalDiffEq.jl](https://github.com/Jack-H-Buckner/UniversalDiffEq.jl) only
+when you need that package’s ecology-oriented UDE training APIs. Do **not**
+expect UDE training inside CausalDynamics core, and do not add UniversalDiffEq
+to CausalDynamics `[deps]`.
 
 ODE parent ranking across environments
 ([`infer_ode_parents`](@ref); CausalKinetiX reference method
@@ -162,3 +174,4 @@ and bridges into [`ContinuousCDMSpec`](@ref) via [`ode_parent_ranking_to_continu
 - **0.2** — `DiscreteTimeCDM`, time-indexed unrolling helpers
 - **0.3** — `CausalDynamicsSciMLExt` weakdep (`ContinuousCDMSpec`, `solve_cdm`, `do(·)` RHS wrapper)
 - **0.3.x** — unified [`AbstractCausalIntervention`](@ref); SciML-native `DoPin` (`DiscreteCallback`); IEE → `TemporalDAGSpec`
+- **0.4.x** — representation bridge; Lux `MechanismLibrary` (2a) and additive generative L3 (2b); Deep SCM stress notebooks
