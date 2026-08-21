@@ -244,7 +244,9 @@ function pack_parent_vector(
     spec::ContinuousCDMSpec,
     parents::AbstractVector{Symbol},
 )
-    return Float64[u[spec.index[p]] for p in parents]
+    raw = [u[spec.index[p]] for p in parents]
+    require_complete_values(raw; context = "parent vector for ContinuousCDMSpec")
+    return Float64[Float64(v) for v in raw]
 end
 
 export MechanismSpec, MechanismLibrary, mechanism_library_from_cdm

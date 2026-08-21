@@ -79,6 +79,7 @@ include("scm/counterfactuals.jl")
 # Discrete-time Causal Dynamical Models
 include("cdm/discrete_cdm.jl")
 include("cdm/panel.jl")
+include("cdm/missingness.jl")
 include("cdm/observation.jl")
 include("cdm/representation.jl")
 

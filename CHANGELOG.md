@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Missingness contract (Phase 1):** `ObservationMask`, `observation_mask`,
+  `miss_rates`, `apply_observation_mask`, and `require_complete_values`.
+  `pack_parent_vector` refuses `Missing` rather than coercing to `Float64`.
+  Coverage: `test/test_missingness_contract.jl`. BOUNDARIES document
+  Structural masks vs Observable policies.
 - **Representation bridge:** `RepresentationSpec`, `encode_to_panel`, and
   `representation_certificate` compress high-dim inputs (spectra, images) to
   low-dim code columns for identification and estimation. No Flux/Lux hard
