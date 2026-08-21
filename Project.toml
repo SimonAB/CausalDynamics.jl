@@ -43,6 +43,7 @@ DataFrames = "1"
 DataInterpolations = "6, 7, 8, 9"
 GraphPPL = "4.6"
 Graphs = "1"
+LinearAlgebra = "1"
 Lux = "1"
 Optimization = "4, 5"
 OptimizationOptimisers = "0.3"
@@ -65,6 +66,7 @@ DAGMakie = "4e3bd891-6b6d-4d36-a31e-f0404dd10c7d"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
 GraphPPL = "b3f8163a-e979-4e85-b43e-1f63d8c8b42c"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
 Optimization = "7f7a1694-90dd-40f0-9382-eb1efda571ba"
 OptimizationOptimisers = "42dfb2eb-d2b4-4451-abcd-913932933ac1"
@@ -77,4 +79,4 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Associations", "ComponentArrays", "DataFrames", "DataInterpolations", "GraphPPL", "Lux", "Optimization", "OptimizationOptimisers", "OrdinaryDiffEq", "Random", "RxInfer", "SciMLSensitivity", "StableRNGs", "Statistics"]
+test = ["Test", "Associations", "ComponentArrays", "DataFrames", "DataInterpolations", "GraphPPL", "LinearAlgebra", "Lux", "Optimization", "OptimizationOptimisers", "OrdinaryDiffEq", "Random", "RxInfer", "SciMLSensitivity", "StableRNGs", "Statistics"]
