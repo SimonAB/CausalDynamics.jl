@@ -20,6 +20,15 @@ observe_trajectory
 panel_from_trajectories
 panel_from_latent_series
 simulate_observed_panel
+ObservationMask
+observation_mask
+n_units
+miss_rates
+require_complete_values
+require_complete_matrix
+apply_observation_mask
+apply_missingness_mechanism
+simulate_incomplete_panel
 RepresentationSpec
 representation_certificate
 encode_to_panel

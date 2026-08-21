@@ -24,6 +24,7 @@ makedocs(
         "Scope" => "scope.md",
         "Comparison" => "comparison.md",
         "Getting Started" => "getting-started.md",
+        "Missingness" => "missingness.md",
         "Integration" => [
             "Overview" => "integration.md",
             "SciML recipes" => "SCIML_INTEGRATION.md",

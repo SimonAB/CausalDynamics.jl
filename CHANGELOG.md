@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `test/test_missingness_dynamical.jl`; Deep SCM stress encode guard.
 - **Missingness edge suite:** `test/test_missingness_edge_cases.jl` (MCAR extremes,
   multi-response joint mask, MNAR certificate separation, mechanism guards).
+- **Documentation:** narrative [Missingness](docs/src/missingness.md) page
+  (masks, certificates, generative mechanisms, hand-off to estimation).
 - **Representation bridge:** `RepresentationSpec`, `encode_to_panel`, and
   `representation_certificate` compress high-dim inputs (spectra, images) to
   low-dim code columns for identification and estimation. No Flux/Lux hard
