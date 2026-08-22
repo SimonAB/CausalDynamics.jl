@@ -110,6 +110,22 @@ intervened = simulate_scm(apply_intervention(scm, do_intervention(2, 10.0)), U)
 Full matrices: [ECOSYSTEM_COMPARISON.md](ECOSYSTEM_COMPARISON.md) ·
 [Documenter comparison](https://simonab.github.io/CausalDynamics.jl/dev/comparison/).
 
+## Testing and validation
+
+CI runs `Pkg.test()` on Julia **1.12** (macOS and Ubuntu). Package `test/` is the merge gate; Quarto stress notebooks are pre-ship / methods probes (see [STRESS.md](STRESS.md)).
+
+| Guardrail | What we exercise | Where |
+|-----------|------------------|-------|
+| **Unit / API** | d-separation, backdoor / frontdoor / IV, typed `identify`, SCM / discrete-time CDM, observation masks, Structural / Dynamical missingness, `RepresentationSpec`, mechanisms (static / ODE / generative), policies, transport queries, temporal unrolling | `test/` |
+| **Synthetic recovery** | SCM intervention vs factual, OLS slope checks, linear representation oracle, Lux mechanism training, incomplete panels | `test/test_scm.jl`, `test/test_representation.jl`, `test/test_mechanism*.jl`, `test/test_cdm.jl` |
+| **Integration / extensions** | TMLE bridge, CausalInference frontdoor, SciML ODE parents, RxInfer (optional), Associations / PC discovery, Lux weakdep | `test/test_integration.jl`, `test/test_frontdoor_ci.jl`, `test/test_sciml.jl`, `test/test_rxinfer.jl`, `test/test_discovery.jl` |
+| **Reference concordance** | Interventional embedding entropy vs MATLAB reference port | `test/test_iee.jl`, `test/reference_iee_matlab.jl` |
+| **Edge / contract tests** | Invalid inputs, MNAR refusal, certificate separation, dense frontdoor graphs | `test/test_missingness_*.jl`, `test/test_best_practices.jl` |
+| **Stress (pre-ship)** | Wide panels, Lux 1D-CNN encoder stub, ODE residuals under `do`, generative L3 abduction | [docs/stress/deep_scm_stress.qmd](docs/stress/deep_scm_stress.qmd) |
+| **Estimation hand-off** | Codes → LMTP / mediation / missing $Y$ (sibling notebook) | [CausalTargeted deep SCM estimation stress](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/stress/deep_scm_estimation_stress.qmd) |
+
+If you have a scenario that should be harder to pass (tighter oracle bounds, messier missingness, larger real cohorts), please open an issue — we welcome stress cases that expose gaps before users do.
+
 ## Integrations
 
 - **[TMLE.jl](https://github.com/TARGENE/TMLE.jl)** — identify adjustment sets, then estimate CM / ATE / AIE (`prepare_for_tmle`)
