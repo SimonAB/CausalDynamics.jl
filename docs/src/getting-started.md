@@ -1,57 +1,217 @@
-# Getting Started
+# Getting started
 
-## Installation
+```@meta
+CurrentModule = CausalDynamics
+```
+
+CausalDynamics supplies graphs, d-separation, and identification certificates for
+structural and discrete-time models. The walk-throughs below run in Documenter
+with small examples you can copy into scripts or Quarto chunks.
+
+Install from General:
 
 ```julia
 using Pkg
 Pkg.add("CausalDynamics")
 ```
 
-Julia **1.12+** is required. For the tip of `main` before a new version is on General, use `Pkg.add(url="https://github.com/SimonAB/CausalDynamics.jl.git")`.
+Load DAGMakie when you want figures (`using DAGMakie, CairoMakie` activates the
+plotting extension):
 
-## Causal graphs
-
-```@example getting_started
+```julia
 using CausalDynamics, Graphs, DAGMakie, CairoMakie
+```
+
+DAG figures follow Cinelli, Forney & Pearl (2022,
+[SMR](https://doi.org/10.1177/00491241221099552)): a **good-control triangle**
+for adjustment, then the **estimand path** with effects on edges where helpful.
+Plotting uses DAGMakie directly (`dagplot_confounding`, `dagplot_backdoor`,
+`dagplot_chain`, `dagplot_mediation`, `dagplot_temporal`).
+
+## 1. Backdoor adjustment (good control)
+
+**Graph.** Classic confounding: `Z → X → Y` and `Z → Y`.
+
+```@example gs-backdoor
+using CausalDynamics, Graphs
 
 g = DiGraph(3)
 add_edge!(g, 1, 2)  # Z → X
 add_edge!(g, 1, 3)  # Z → Y
 add_edge!(g, 2, 3)  # X → Y
-g
+names = Dict(1 => :Z, 2 => :X, 3 => :Y)
+
+d_separated(g, 2, 3, [1])  # true once Z is conditioned
+backdoor_adjustment_set(g, 2, 3)
 ```
 
-## d-separation
+**Graph (identification).** Good-control triangle: adjust `Z` (Cinelli et al. 2022).
 
-```@example getting_started
-d_separated(g, 2, 3, [1])  # true (Z blocks the path)
-```
+```@example gs-backdoor
+using DAGMakie, CairoMakie
 
-## Adjustment sets
-
-```@example getting_started
-adj_set = backdoor_adjustment_set(g, 2, 3)  # Set([1])
-```
-
-## Plotting (optional)
-
-`plot_causal_graph` and related façades require `using DAGMakie` so the package
-extension loads. Layout and styling conventions are documented in the
-[DAGMakie user guide](https://simonab.github.io/DAGMakie.jl/dev/).
-
-```@example getting_started
-fig = plot_backdoor_paths(g, 2, 3; node_labels = ["Z", "X", "Y"])
+fig, _, _ = dagplot_confounding(["Z", "X", "Y"];
+    color_by = :adjustment,
+    exposure = 2,
+    outcome = 3,
+    adjustment = Set([1]),
+    title = "Good control Z (identification)",
+)
 fig
 ```
 
-Highlight an explicit adjustment set (here `{Z}`):
+**Graph (backdoor paths).** Biased paths through `Z` blocked by adjustment.
 
-```@example getting_started
-fig = plot_with_adjustment_set(g, 2, 3, [1]; node_labels = ["Z", "X", "Y"])
+```@example gs-backdoor
+adj = backdoor_adjustment_set(g, 2, 3)
+fig, _, _ = dagplot_backdoor(g, 2, 3;
+    adjustment = adj,
+    labels = ["Z", "X", "Y"],
+    title = "Backdoor paths (adjust Z)",
+)
 fig
 ```
 
-## SCM simulation and intervention
+**Typed identification.** `identify` returns a certificate-friendly result:
+
+```@example gs-backdoor
+id = identify(g, TotalEffectQuery(:X, :Y); node_names = names)
+id.identifiable, id.strategy, id.adjustment
+```
+
+**Graph (total effect).** Estimand path `X → Y` only (confounder omitted from the TE diagram).
+
+```@example gs-backdoor
+g_te, _ = chain_graph(["X", "Y"])
+fig, _, _ = dagplot_chain(["X", "Y"];
+    title = "Total effect path",
+)
+fig
+```
+
+Further reading: [Identification API](api/identification.md) · [Graph operations](api/graphs.md).
+
+## 2. Mediation (triangle)
+
+**Graph.** Baseline confounding plus mediator `M` on `A → Y`.
+
+```@example gs-mediation
+using CausalDynamics, Graphs
+
+g = DiGraph(4)
+add_edge!(g, 1, 2); add_edge!(g, 1, 3); add_edge!(g, 1, 4)
+add_edge!(g, 2, 3); add_edge!(g, 2, 4); add_edge!(g, 3, 4)
+names = Dict(1 => :W, 2 => :A, 3 => :M, 4 => :Y)
+
+id = identify(
+    g, MediationQuery(:A, :Y, [:M]; effect_kind = :interventional);
+    node_names = names,
+)
+id.identifiable, id.strategy, id.adjustment
+```
+
+**Graph (mediation paths).** Direct and indirect routes; `W` is adjusted in estimation but omitted from the path diagram.
+
+```@example gs-mediation
+using DAGMakie, CairoMakie
+
+fig, _, _ = dagplot_mediation(["A", "M", "Y"];
+    title = "Mediation triangle (A, M, Y)",
+)
+fig
+```
+
+**Graph (effect labels).** NDE on `A → Y`, NIE via `A → M` (illustrative values).
+
+```@example gs-mediation
+using Graphs: edges, src, dst
+
+g_med, _ = mediation_graph(["A", "M", "Y"])
+elookup = Dict((1, 3) => "NDE", (1, 2) => "NIE")
+fig, _, _ = dagplot_mediation(["A", "M", "Y"];
+    elabels = structural_edge_labels(g_med, [
+        get(elookup, (src(e), dst(e)), "") for e in edges(g_med)
+    ]),
+    elabels_fontsize = 13,
+    elabels_distance = 14,
+    elabels_rotation = 0,
+    title = "Direct and indirect paths",
+)
+fig
+```
+
+Estimation of interventional NDE/NIE under MTP shifts lives in
+[CausalMediation.jl](https://simonab.github.io/CausalMediation.jl/dev/getting-started/).
+
+## 3. Time-indexed graphs
+
+**Spec.** Two occasions with baseline `w`, treatments `a`, time-varying `l`, outcome `y`.
+
+```@example gs-temporal
+using CausalDynamics
+using CausalDynamics: TemporalDAGSpec, LaggedEdge, unroll_temporal_dag, TemporalEffectQuery
+
+spec = TemporalDAGSpec([:w, :a, :l, :y], [
+    LaggedEdge(:w, :a, 0),
+    LaggedEdge(:a, :l, 0),
+    LaggedEdge(:l, :a, 1),
+    LaggedEdge(:a, :y, 0),
+    LaggedEdge(:a, :y, 1),
+    LaggedEdge(:w, :y, 0),
+])
+u = unroll_temporal_dag(spec, 2)
+tq = TemporalEffectQuery(:a, :y, 1, 2)
+id = identify(u, tq)
+id.strategy, id.adjustment
+```
+
+**Graph (identification).** Good control `w[1]` on the unrolled DAG.
+
+```@example gs-temporal
+using DAGMakie, CairoMakie
+using CausalDynamics: temporal_node
+
+w1 = temporal_node(u, :w, 1)
+a2 = temporal_node(u, :a, 2)
+y2 = temporal_node(u, :y, 2)
+fig, _, _ = dagplot_temporal(u;
+    dx = 2.4,
+    dy = 1.7,
+    fit_node_size_to_labels = false,
+    node_size = 28,
+    color_by = :adjustment,
+    exposure = a2,
+    outcome = y2,
+    adjustment = Set([w1]),
+    title = "Good control w[1] (identification)",
+)
+fig
+```
+
+Sequential LMTP estimation: [CausalTargeted getting started](https://simonab.github.io/CausalTargeted.jl/dev/getting-started/#4.-Sequential-LMTP).
+
+## 4. CausalDynamics plot façades
+
+Optional helpers wrap DAGMakie when you already hold node indices from
+`backdoor_adjustment_set`:
+
+```@example gs-plots
+using CausalDynamics, Graphs, DAGMakie, CairoMakie
+
+g = DiGraph(3)
+add_edge!(g, 1, 2); add_edge!(g, 1, 3); add_edge!(g, 2, 3)
+plot_backdoor_paths(g, 2, 3; node_labels = ["Z", "X", "Y"])
+```
+
+Highlight a chosen adjustment set explicitly:
+
+```@example gs-plots
+plot_with_adjustment_set(g, 2, 3, [1]; node_labels = ["Z", "X", "Y"])
+```
+
+Layout and styling conventions: [DAGMakie user guide](https://simonab.github.io/DAGMakie.jl/dev/).
+
+## 5. SCM simulation and intervention
 
 `simulate_scm` evaluates each structural equation with **parent values in sorted
 `inneighbors` order**, followed by that node's exogenous draw `U`. When several
@@ -70,10 +230,13 @@ y_factual = simulate_scm(scm, U)
 y_do = simulate_scm(apply_intervention(scm, do_intervention(2, 10.0)), U)
 ```
 
+Shared-`U` counterfactuals and discrete-time CDMs: [SCM API](api/scm.md) ·
+[Discrete-time CDMs](api/cdm.md).
+
 ## See also
 
-- [API Reference](api/graphs.md)
-- [SciML recipes](SCIML_INTEGRATION.md) — representation bridge, Lux mechanisms, generative L3
-- [Deep SCM stress](stress_deep_scm.md)
+- [Scope](scope.md) · [Comparison](comparison.md)
+- [Time-indexed graphs](api/time_graphs.md)
+- [SciML recipes](SCIML_INTEGRATION.md)
 - [Examples](examples.md)
-- [CDCS Book](https://simonab.github.io/causal-dynamics-book/)
+- [CDCS book](https://simonab.github.io/causal-dynamics-book/)

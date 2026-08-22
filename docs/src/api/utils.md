@@ -37,7 +37,11 @@ using CausalDynamics, DAGMakie, CairoMakie
 
 spec = TemporalDAGSpec([:a, :y], [(:a, :y, 0), (:a, :a, 1), (:y, :y, 1)])
 u = unroll_temporal_dag(spec, 4)
-fig, ax, p = dagplot_temporal(u; figure_size = (560, 240))
+fig, ax, p = dagplot_temporal(u;
+    figure_size = (560, 240),
+    fit_node_size_to_labels = false,
+    node_size = 28,
+)
 fig
 ```
 

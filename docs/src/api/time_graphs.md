@@ -31,7 +31,11 @@ spec = TemporalDAGSpec(
 )
 u = unroll_temporal_dag(spec, 3)
 
-fig, ax, p = dagplot_temporal(u; figure_size = (520, 260))
+fig, ax, p = dagplot_temporal(u;
+    figure_size = (520, 260),
+    fit_node_size_to_labels = false,
+    node_size = 28,
+)
 fig
 ```
 
