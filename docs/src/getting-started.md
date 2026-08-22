@@ -26,7 +26,8 @@ DAG figures follow Cinelli, Forney & Pearl (2022,
 [SMR](https://doi.org/10.1177/00491241221099552)): a **good-control triangle**
 for adjustment, then the **estimand path** with effects on edges where helpful.
 Plotting uses DAGMakie directly (`dagplot_confounding`, `dagplot_backdoor`,
-`dagplot_chain`, `dagplot_mediation`, `dagplot_temporal`).
+`dagplot_chain`, `dagplot_mediation`, `dagplot_temporal`, [`edge_routing`](https://simonab.github.io/DAGMakie.jl/dev/),
+[`CurvedEdge`](https://simonab.github.io/DAGMakie.jl/dev/)).
 
 ## 1. Backdoor adjustment (good control)
 
@@ -110,13 +111,38 @@ id = identify(
 id.identifiable, id.strategy, id.adjustment
 ```
 
-**Graph (mediation paths).** Direct and indirect routes; `W` is adjusted in estimation but omitted from the path diagram.
+**Graph (identification).** Full mediation DAG; adjust `W` only (`M` is a mediator, not a good control).
 
 ```@example gs-mediation
 using DAGMakie, CairoMakie
 
+g_id = DiGraph(4)
+add_edge!(g_id, 1, 2); add_edge!(g_id, 1, 3); add_edge!(g_id, 1, 4)
+add_edge!(g_id, 2, 3); add_edge!(g_id, 2, 4); add_edge!(g_id, 3, 4)
+layout_id = [
+    Point2f(0.0, 0.0), Point2f(1.2, 0.0), Point2f(2.4, 1.0), Point2f(3.6, 0.0),
+]
+fig, _, _ = dagplot(g_id;
+    layout = layout_id,
+    labels = ["W", "A", "M", "Y"],
+    color_by = :adjustment,
+    exposure = 2,
+    outcome = 4,
+    adjustment = Set([1]),
+    edge_routing = Dict(
+        (1, 4) => CurvedEdge(bow = 0.18, side = :right),
+        (1, 3) => CurvedEdge(bow = 0.12),
+    ),
+    title = "Good control W (mediation DAG)",
+)
+fig
+```
+
+**Graph (mediation paths).** Direct and indirect routes with `W` omitted (already adjusted).
+
+```@example gs-mediation
 fig, _, _ = dagplot_mediation(["A", "M", "Y"];
-    title = "Mediation triangle (A, M, Y)",
+    title = "Mediation paths (A → M → Y, A → Y)",
 )
 fig
 ```
@@ -172,17 +198,23 @@ using DAGMakie, CairoMakie
 using CausalDynamics: temporal_node
 
 w1 = temporal_node(u, :w, 1)
+a1 = temporal_node(u, :a, 1)
+l1 = temporal_node(u, :l, 1)
 a2 = temporal_node(u, :a, 2)
 y2 = temporal_node(u, :y, 2)
 fig, _, _ = dagplot_temporal(u;
     dx = 2.4,
     dy = 1.7,
+    figure_size = (720, 420),
     fit_node_size_to_labels = false,
-    node_size = 28,
     color_by = :adjustment,
     exposure = a2,
     outcome = y2,
     adjustment = Set([w1]),
+    edge_routing = Dict(
+        (a1, y2) => CurvedEdge(bow = 0.14, side = :right),
+        (l1, a2) => CurvedEdge(bow = 0.12),
+    ),
     title = "Good control w[1] (identification)",
 )
 fig
