@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Hierarchical nesting (Phase 1–2):** `RandomEffectSpec`, `assign_cluster_ids`,
+  `draw_nested_effects`, `add_nested_effects!`, `simulate_hierarchical_panel`,
+  and synthetic `simulate_hierarchical_intercept_ate`. Hierarchical DAG unroll
+  via `HierarchicalNestingSpec`, `unroll_hierarchical_dag`,
+  `hierarchical_node` / `hierarchical_node_names`, and
+  `attach_hierarchy_assumptions`. Coverage: `test/test_hierarchy.jl`. Docs:
+  [hierarchy.md](docs/src/hierarchy.md). Application MixedModels concordance:
+  `examples/hierarchical_mixedmodels_concordance.md`. LMM fitting remains
+  deferred (BOUNDARIES).
+
 - **Missingness contract (Phase 1):** `ObservationMask`, `observation_mask`,
   `miss_rates`, `apply_observation_mask`, and `require_complete_values`.
   `pack_parent_vector` refuses `Missing` rather than coercing to `Float64`.

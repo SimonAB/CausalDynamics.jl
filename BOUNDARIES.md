@@ -6,6 +6,13 @@
 
 - Causal graphs, d-separation, identification (`identify`, `IdentificationResult`)
 - SCMs, CDMs, temporal unrolling, observational panels (`simulate_panel` / `CDMPanel`; `Float64` columns, including integer-coded factor recodes via `Policy`)
+- **Hierarchical / nested exogenous structure** (`RandomEffectSpec`, nested
+  cluster→unit noise, `simulate_hierarchical_panel`, synthetic
+  `simulate_hierarchical_intercept_ate`): generative nesting and panel
+  columns for downstream cluster-aware estimation; **not** LMM/BLUP fitting
+- **Hierarchical DAG unroll** (`HierarchicalNestingSpec`,
+  `unroll_hierarchical_dag`, `attach_hierarchy_assumptions`): expand unit
+  templates + cluster nodes to a flat DAG for `identify`
 - Latent→observed bridges (`ObservationBridge`); high-dim → code
   representation (`RepresentationSpec`, `encode_to_panel`); graph-constrained
   deep mechanisms (`MechanismSpec` / `MechanismLibrary`; Lux weakdep);
@@ -37,6 +44,8 @@ Do not add estimation grids or SuperLearner stacks here beyond integration examp
 
 ## Deferred (beyond Phase 2b)
 
+- MixedModels / lme4-style fitting (application layer or optional RxInfer
+  hierarchical heads; not package core)
 - Non-additive DeepSCM (learned encoder abduction on raw image/tensor nodes);
   Phase 2b is additive-noise `:generative` on codes / low-dim vectors
 - UniversalDiffEq as a CausalDynamics hard dependency (optional advanced trainer

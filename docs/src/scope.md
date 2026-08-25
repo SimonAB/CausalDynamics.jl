@@ -18,6 +18,7 @@ package names stay Pearl/SciML-facing.
 | Static SCM | One-shot settlement given `U` | `GraphSCM`, `DoIntervention`, `simulate_scm`, `compute_counterfactual` |
 | Discrete-time CDM | Trajectories over occasions | `DiscreteTimeCDM`, `DoSequence`, `simulate`, `counterfactual` |
 | Observational panels | Wide tables for sequential estimation | `CDMPanel`, `simulate_panel`, `panel_column_name` |
+| Hierarchical nesting | Cluster→unit exogenous draws; plate unroll for ID | `RandomEffectSpec`, `simulate_hierarchical_panel`, `unroll_hierarchical_dag`, `attach_hierarchy_assumptions` |
 | Latent → observed bridge | Filter/smoother outputs → panel columns | `ObservationBridge`, `panel_from_latent_series`, `simulate_observed_panel` |
 | Representation bridge | High-dim tensor → low-dim codes for ID/estimation | `RepresentationSpec`, `encode_to_panel`, `representation_certificate` |
 | Deep mechanisms | Parent-constrained Lux ``f_i`` / ODE residuals | `MechanismSpec`, `MechanismLibrary`, `build_ode_rhs`, `train_mechanisms!` (Lux weakdep) |
@@ -42,6 +43,7 @@ package names stay Pearl/SciML-facing.
 
 | Concern | Where it lives |
 |---------|----------------|
+| LMM / MixedModels fitting | Application repos (or RxInfer hierarchical demos); see `examples/hierarchical_mixedmodels_concordance.md` |
 | Discovery algorithms (PC, OCE, CCM, …) | [Associations.jl](https://juliadynamics.github.io/Associations.jl/stable/) (optional weakdep bridge) |
 | ODE/SDE/UDE solvers | SciML (`OrdinaryDiffEq`, `UniversalDiffEq`, …); CausalDynamics supplies structure and `do` semantics |
 | DeepSCM / non-additive image L3 encoders | Deferred; Phase 2b is additive-noise `:generative` on codes |

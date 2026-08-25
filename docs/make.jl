@@ -24,6 +24,7 @@ makedocs(
         "Scope" => "scope.md",
         "Comparison" => "comparison.md",
         "Getting Started" => "getting-started.md",
+        "Hierarchical / nested units" => "hierarchy.md",
         "Missingness" => "missingness.md",
         "Integration" => [
             "Overview" => "integration.md",

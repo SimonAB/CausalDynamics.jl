@@ -17,6 +17,8 @@ using RxInfer   # activates CausalDynamicsRxInfer
 
 Confounders in the identified adjustment set are **partialled out** of outcome and treatment (`residualise_backdoor`) so the RxInfer head is a single conjugate slope `τ` on residualised `(y, x)`. A full multi-coefficient GraphPPL regression with latent `β` vectors is reserved for a later release (non-conjugate without custom initialisation).
 
+**Hierarchical Bayesian heads** (random intercepts / partial pooling on residualised ATE) belong in **application** GraphPPL models or optional demos — not in CausalDynamics core and not as a substitute for [`identify`](@ref) or CausalTargeted MSM / LMTP. Generative nesting uses [`RandomEffectSpec`](@ref) / [`simulate_hierarchical_intercept_ate`](@ref); see [Hierarchical / nested units](hierarchy.md).
+
 ```julia
 using CausalDynamics, RxInfer, Graphs, DataFrames, Random
 
