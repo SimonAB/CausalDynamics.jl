@@ -44,6 +44,7 @@ makedocs(
         ],
         "Examples" => "examples.md",
         "Deep SCM stress" => "stress_deep_scm.md",
+        "Hierarchical nesting stress" => "stress_hierarchy.md",
         "References" => "references.md",
     ],
     checkdocs = :exports,

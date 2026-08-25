@@ -17,7 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `attach_hierarchy_assumptions`. Coverage: `test/test_hierarchy.jl`. Docs:
   [hierarchy.md](docs/src/hierarchy.md). Application MixedModels concordance:
   `examples/hierarchical_mixedmodels_concordance.md`. LMM fitting remains
-  deferred (BOUNDARIES).
+  deferred (BOUNDARIES). Stress:
+  [`docs/stress/hierarchy_stress.qmd`](docs/stress/hierarchy_stress.qmd);
+  Documenter [stress_hierarchy.md](docs/src/stress_hierarchy.md); getting-started
+  §6 nested units.
 
 - **Missingness contract (Phase 1):** `ObservationMask`, `observation_mask`,
   `miss_rates`, `apply_observation_mask`, and `require_complete_values`.

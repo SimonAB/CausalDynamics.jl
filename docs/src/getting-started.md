@@ -265,6 +265,29 @@ y_do = simulate_scm(apply_intervention(scm, do_intervention(2, 10.0)), U)
 Shared-`U` counterfactuals and discrete-time CDMs: [SCM API](api/scm.md) ·
 [Discrete-time CDMs](api/cdm.md).
 
+## 6. Nested units (hierarchical ``U``)
+
+When farms, herds, or classrooms share a latent draw, put that structure in the
+**generative** model, then estimate with ordinary IF tools (optionally
+cluster-robust in CausalTargeted). CausalDynamics does **not** fit LMMs.
+
+```@example gs-hierarchy
+using CausalDynamics, Random, Statistics
+
+cols, truth = simulate_hierarchical_intercept_ate(
+    800; n_clusters = 20, σ_cluster = 1.0, β_a = 0.6, σ_y = 0.3,
+    rng = Xoshiro(7),
+)
+# OLS Y ~ 1 + A + W recovers β_a when U_j is nested noise independent of (A, W)
+X = [ones(length(cols[:Y])) cols[:A] cols[:W]]
+β̂ = X \ cols[:Y]
+isapprox(β̂[2], truth.ate; atol = 0.08)
+```
+
+DAG unrolling with plate-style node names: [`unroll_hierarchical_dag`](hierarchy.md).
+Cluster sandwich for repeated-outcome MSM: CausalTargeted `cluster=`. Stress:
+[Hierarchical nesting stress](stress_hierarchy.md).
+
 ## See also
 
 - [Scope](scope.md) · [Comparison](comparison.md)

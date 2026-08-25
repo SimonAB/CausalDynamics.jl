@@ -1,0 +1,164 @@
+---
+title: "Hierarchical nesting stress (CausalDynamics)"
+subtitle: "Nested U, DAG unroll, and cluster-robust MSM hand-off"
+author: "Simon A. Babayan"
+date: today
+engine: julia
+julia:
+  exeflags: ["--project=../../../../"]
+execute:
+  warning: false
+  daemon: false
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    embed-resources: true
+---
+
+## Why this notebook exists
+
+Unit tests cover construction and small synthetic recovery. This notebook probes
+**larger** nested DGPs, hierarchical DAG unrolling for `identify`, and the
+hand-off to CausalTargeted cluster-robust MSM (same point estimates; sandwich Σ).
+
+Out of scope: MixedModels / BLUP fitting (application layer only; see
+`examples/hierarchical_mixedmodels_concordance.md`).
+
+```{julia}
+#| label: chunk-setup-env
+#| warning: false
+
+using Pkg
+const PKG_ROOT = let
+    here = @__DIR__
+    normpath(joinpath(here, "..", ".."))
+end
+const BOOK_ROOT = normpath(joinpath(PKG_ROOT, "..", ".."))
+if isfile(joinpath(BOOK_ROOT, "Project.toml")) &&
+   isdir(joinpath(BOOK_ROOT, "packages", "CausalDynamics.jl"))
+    Pkg.activate(BOOK_ROOT)
+    println("Activated book project: ", BOOK_ROOT)
+else
+    Pkg.activate(joinpath(PKG_ROOT, "docs"))
+    println("Activated package docs project")
+end
+Pkg.instantiate()
+```
+
+```{julia}
+#| label: chunk-setup-packages
+#| warning: false
+
+using CausalDynamics
+using CausalTargeted
+using Graphs
+using Random
+using Statistics
+using DataFrames
+using LinearAlgebra
+using StableRNGs
+```
+
+## Generative nest: within-cluster dependence and ATE
+
+```{julia}
+#| label: chunk-nested-ate
+#| warning: false
+
+cols, truth = simulate_hierarchical_intercept_ate(
+    1500; n_clusters = 50, σ_cluster = 1.25, β_a = 0.5, σ_y = 0.35,
+    rng = MersenneTwister(41),
+)
+Y = cols[:Y]; A = cols[:A]; W = cols[:W]; C = cols[:cluster]
+X = [ones(length(Y)) A W]
+ate_hat = (X \ Y)[2]
+@assert abs(ate_hat - truth.ate) < 0.06
+# Residual within-cluster products should track σ_cluster²
+Y_res = Y .- truth.ate .* A .- truth.β_w .* W
+function mean_within_product(y, c)
+    s = 0.0; n_pairs = 0
+    for i in eachindex(y), j in (i + 1):length(y)
+        if c[i] == c[j]
+            s += y[i] * y[j]
+            n_pairs += 1
+        end
+    end
+    return n_pairs == 0 ? 0.0 : s / n_pairs
+end
+ρ = mean_within_product(Y_res, C)
+@assert ρ > 0.5
+(ate_hat, truth.ate, ρ, truth.σ_cluster^2)
+```
+
+## Hierarchical DAG unroll → identify
+
+```{julia}
+#| label: chunk-unroll-identify
+#| warning: false
+
+spec = HierarchicalNestingSpec(
+    [:W, :A, :Y],
+    [(:W, :A), (:W, :Y), (:A, :Y)];
+    cluster_variable = :U,
+    affects = [:Y],
+)
+un = unroll_hierarchical_dag(spec, 6; n_clusters = 3)
+@assert nv(un.graph) == 3 + 6 * 3
+A1 = hierarchical_node(un, (:unit, 1, :A))
+Y1 = hierarchical_node(un, (:unit, 1, :Y))
+id = attach_hierarchy_assumptions(identify(un.graph, TotalEffectQuery(A1, Y1)))
+@assert id.identifiable
+@assert :nested_exogenous in id.assumptions
+(nv(un.graph), id.strategy, id.assumptions)
+```
+
+## Targeted MSM: unit vs cluster sandwich
+
+```{julia}
+#| label: chunk-msm-cluster
+#| warning: false
+
+df, _ = simulate_repeated_outcome_ate(
+    800; T = 3, β_a = [0.2, 0.5, 0.35], rng = StableRNG(42),
+)
+df.cluster = Float64.(mod1.(1:nrow(df), 25))
+rng_u = StableRNG(43)
+u_by = Dict{Float64, Float64}(c => randn(rng_u) for c in unique(df.cluster))
+uv = [u_by[c] for c in df.cluster]
+for y in (:Y1, :Y2, :Y3)
+    df[!, y] = df[!, y] .+ uv
+end
+res_u = run_repeated_outcome_msm(
+    df, :A, [:Y1, :Y2, :Y3];
+    baseline = [:W], folds = 3, learners = (:glm, :mean), rng = StableRNG(44),
+)
+res_c = run_repeated_outcome_msm(
+    df, :A, [:Y1, :Y2, :Y3];
+    baseline = [:W], folds = 3, learners = (:glm, :mean), rng = StableRNG(44),
+    cluster = :cluster,
+)
+@assert res_c.estimates ≈ res_u.estimates atol = 1e-12
+@assert res_c.covariance_kind === :cluster
+@assert res_c.covariance ≉ res_u.covariance
+@assert all(isfinite, res_c.se)
+(res_u.se, res_c.se, maximum(abs.(res_c.estimates .- [0.2, 0.5, 0.35])))
+```
+
+## Ledger
+
+| Probe | Gate |
+|-------|------|
+| Nested ATE recovery | `|ate_hat - 0.5| < 0.06` |
+| Within-cluster residual product | `ρ > 0.5` |
+| Unroll + identify | identifiable + hierarchy assumptions |
+| MSM cluster sandwich | same τ̂; Σ_cluster ≠ Σ_unit; finite SEs |
+
+Render:
+
+```bash
+cd packages/CausalDynamics.jl/docs/stress
+quarto render hierarchy_stress.qmd
+```

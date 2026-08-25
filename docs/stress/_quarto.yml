@@ -3,6 +3,7 @@ project:
   title: "CausalDynamics Deep SCM stress"
   render:
     - deep_scm_stress.qmd
+    - hierarchy_stress.qmd
 
 format:
   html:

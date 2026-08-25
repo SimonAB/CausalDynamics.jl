@@ -144,4 +144,42 @@ using CausalDynamics: TotalEffectQuery, identify
         id_h2 = attach_hierarchy_assumptions(id_h)
         @test count(==(:nested_exogenous), id_h2.assumptions) == 1
     end
+
+    @testset "unroll custom assignment and validation" begin
+        spec = HierarchicalNestingSpec(
+            [:A, :Y], [(:A, :Y)]; cluster_variable = :U, affects = [:Y],
+        )
+        un = unroll_hierarchical_dag(
+            spec, 4; n_clusters = 2, cluster_of_unit = [1, 1, 2, 2],
+        )
+        @test un.cluster_of_unit == [1, 1, 2, 2]
+        @test Graphs.has_edge(
+            un.graph,
+            hierarchical_node(un, (:cluster, 1)),
+            hierarchical_node(un, (:unit, 2, :Y)),
+        )
+        @test !Graphs.has_edge(
+            un.graph,
+            hierarchical_node(un, (:cluster, 1)),
+            hierarchical_node(un, (:unit, 3, :Y)),
+        )
+        @test_throws ArgumentError HierarchicalNestingSpec(
+            [:U, :Y], [(:U, :Y)]; cluster_variable = :U, affects = [:Y],
+        )
+        @test_throws ArgumentError unroll_hierarchical_dag(spec, 2; n_clusters = 5)
+        @test_throws ArgumentError hierarchical_node(un, (:unit, 99, :Y))
+    end
+
+    @testset "ATE recovery under nested U (OLS with intercept)" begin
+        # Large-n check that generative nest does not bias OLS for β_a
+        # (U_j ⊥ (A, W); Y ~ 1 + A + W recovers ATE = β_a).
+        cols, truth = simulate_hierarchical_intercept_ate(
+            2000; n_clusters = 40, σ_cluster = 1.2, β_a = 0.55, σ_y = 0.4,
+            rng = Random.Xoshiro(11),
+        )
+        Y = cols[:Y]; A = cols[:A]; W = cols[:W]
+        X = [ones(length(Y)) A W]
+        β̂ = X \ Y
+        @test abs(β̂[2] - truth.ate) < 0.05
+    end
 end

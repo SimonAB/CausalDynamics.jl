@@ -54,3 +54,7 @@ nv(un.graph)
 - Plate figures: DAGMakie (viz only) when drawing unrolled hierarchical DAGs.
 - Optional Bayesian hierarchical heads: RxInfer demos in application code
   ([RxInfer integration](RXINFER_INTEGRATION.md)); not required for ID or LMTP.
+- Stress notebook: [Hierarchical nesting stress](stress_hierarchy.md).
+
+See also [Scope](scope.md) and
+[BOUNDARIES](https://github.com/SimonAB/CausalDynamics.jl/blob/main/BOUNDARIES.md).
