@@ -8,10 +8,16 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 |---------|--------|
 | **0.3.16** | On General ([#163619](https://github.com/JuliaRegistries/General/pull/163619)) |
 | **0.4.0** | On General ([#163649](https://github.com/JuliaRegistries/General/pull/163649), merged 2026-08-05) |
-| **0.4.2** | Local tip of `main` (not yet on General) — hierarchical nested ``U`` / `simulate_hierarchical_panel` |
+| **0.4.2** | Local tip of `main` — hierarchical nested ``U`` / `simulate_hierarchical_panel` |
 | **0.4.1** | On General ([#163720](https://github.com/JuliaRegistries/General/pull/163720), merged 2026-08-06) |
 
 Local `main` targets **0.4.2**. Register **incrementally** (no version skips).
+
+## 0.4.2 register steps
+
+1. Push `main` with `version = "0.4.2"` — done (`e0af719`)
+2. Comment `@JuliaRegistrator register` — done ([issue #7](https://github.com/SimonAB/CausalDynamics.jl/issues/7#issuecomment-5414845977))
+3. General AutoMerge — pending
 
 ## 0.4.1 register steps
 
