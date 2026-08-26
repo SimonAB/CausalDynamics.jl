@@ -3,6 +3,7 @@ using Test
 using Graphs
 
 @testset "CausalDynamics.jl" begin
+@test Base.get_extension(CausalDynamics, :CausalDynamicsMixedModelsExt) === nothing
 include("test_graphs.jl")
 include("test_identification.jl")
 include("test_frontdoor_ci.jl")
@@ -29,6 +30,8 @@ include("test_sciml.jl")
 include("test_mechanism_lux.jl")
 include("test_iee.jl")
 include("test_ode_parents.jl")
+include("test_mixedmodels.jl")
+include("test_profiled_nb2.jl")
 # Load DAGMakie last so its overlapping path exports do not shadow CausalDynamics in earlier tests.
 include("test_utils.jl")
 end
