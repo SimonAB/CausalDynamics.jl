@@ -10,7 +10,7 @@ Three objects that must not be conflated:
 |--------|---------|-------|
 | Generative hierarchy | Nested ``U_j``, ``U_{ij}`` in simulation | CausalDynamics |
 | Sampling hierarchy | Dependence in the IF / cluster-robust sandwich | CausalTargeted (mediation EIFs → CausalMediation) |
-| Partial-pooling estimator | LMM/GLMM/Bayes BLUPs | Application layer (or RxInfer demo) |
+| Partial-pooling estimator | LMM/GLMM/Bayes BLUPs | CausalTargeted optional MixedModels ext (or RxInfer demo) |
 
 ## API
 
@@ -49,8 +49,9 @@ nv(un.graph)
 - Estimation with joint or **cluster-robust** covariance: CausalTargeted
   `run_repeated_outcome_msm(...; cluster=:cluster)` (and parametric MSM).
   Point estimates are unchanged; only ``\\widehat{\\Sigma}`` uses the cluster sandwich.
-- LMM concordance: application repositories (see
-  `examples/hierarchical_mixedmodels_concordance.md`); not this package.
+- LMM / MixedModels / `mixed_g_computation`: CausalTargeted optional extension
+  (`CausalTargetedMixedModelsExt`); see
+  `examples/hierarchical_mixedmodels_concordance.md`. Not this package.
 - Plate figures: DAGMakie (viz only) when drawing unrolled hierarchical DAGs.
 - Optional Bayesian hierarchical heads: RxInfer demos in application code
   ([RxInfer integration](RXINFER_INTEGRATION.md)); not required for ID or LMTP.
