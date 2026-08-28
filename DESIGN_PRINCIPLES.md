@@ -81,7 +81,7 @@ Documenter pages and README prose follow the [Julia Language manual](https://doc
 | Is it graph structure, ID, or CDM simulation? | CausalDynamics | — |
 | Is it nested generative ``U`` / hierarchical DAG structure? | CausalDynamics | — |
 | Is it cluster-robust IF / cluster missingness on estimands? | CausalTargeted (mediation EIFs → CausalMediation) | — |
-| Is it LMM/GLMM/Bayes partial pooling? | Application repo (or RxInfer demo) | — |
+| Is it LMM/GLMM/Bayes partial pooling? | CausalTargeted optional MixedModels ext (or RxInfer demo) | — |
 | Is it cross-fitted LMTP estimation? | CausalTargeted | — |
 | Is it mediation (RI / natural / RT / moc)? | CausalMediation | — |
 | Is it DAG layout or styling? | DAGMakie | — |

@@ -44,8 +44,9 @@ Do not add estimation grids or SuperLearner stacks here beyond integration examp
 
 ## Deferred (beyond Phase 2b)
 
-- MixedModels / lme4-style fitting (application layer or optional RxInfer
-  hierarchical heads; not package core)
+- MixedModels / lme4-style fitting lives in **CausalTargeted** as an optional
+  weakdep extension (`fit_profiled_nb2`, `mixed_g_computation`); not in
+  CausalDynamics core. Generative nesting stays here.
 - Non-additive DeepSCM (learned encoder abduction on raw image/tensor nodes);
   Phase 2b is additive-noise `:generative` on codes / low-dim vectors
 - UniversalDiffEq as a CausalDynamics hard dependency (optional advanced trainer
