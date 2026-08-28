@@ -33,6 +33,11 @@ certify_missingness
 certificate_dict
 graph_fingerprint
 identification_report
+temporal_adjustment_columns
+adjustment_columns
+query_panel_columns
+EstimationPlan
+identification_support
 ```
 
 ## Adjustment and instruments

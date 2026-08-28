@@ -88,6 +88,12 @@ function residualise_backdoor(y::AbstractVector{<:Real}, x::AbstractVector{<:Rea
     n = length(y)
     cols = collect(AbstractVector{<:Real}, confounder_cols)
     design = isempty(cols) ? ones(n, 1) : hcat(ones(n), cols...)
+    if rank(design) < size(design, 2)
+        throw(ArgumentError(
+            "Frisch–Waugh design is rank deficient ($(rank(design)) < $(size(design, 2))) " *
+            "for n=$n; reduce confounders or increase sample size",
+        ))
+    end
     β_y = design \ y
     β_x = design \ x
     return y .- design * β_y, x .- design * β_x

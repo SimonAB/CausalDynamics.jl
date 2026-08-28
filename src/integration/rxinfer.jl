@@ -66,8 +66,14 @@ function posterior_mean_τ(args...)
     return ext.posterior_mean_τ(args...)
 end
 
+function residualise_backdoor(args...; kwargs...)
+    ext = _require_rxinfer!(:residualise_backdoor)
+    return ext.residualise_backdoor(args...; kwargs...)
+end
+
 export has_rxinfer,
     infer_backdoor_effect,
     backdoor_graphppl_model,
     ppl_data_from_spec,
-    posterior_mean_τ
+    posterior_mean_τ,
+    residualise_backdoor

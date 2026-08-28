@@ -62,5 +62,12 @@ using Test
         @test length(ppl_data.y) == n
         @test ppl_data.n_conf == 1
         @test length(ppl_data.y) == n
+
+        # Rank-deficient Frisch–Waugh at small n
+        @test_throws ArgumentError CausalDynamics.residualise_backdoor(
+            randn(5),
+            randn(5),
+            [randn(5), randn(5), randn(5), randn(5)],
+        )
     end
 end
