@@ -1,6 +1,66 @@
 """Map temporal identification certificates to wide-panel column names."""
 
 """
+    OutcomeKind
+
+Outcome family for a DAG node when planning targeted estimation.
+"""
+@enum OutcomeKind begin
+    gaussian
+    binary
+    count
+    hurdle
+end
+
+"""
+    NodeOutcomeSpec(kind; presence_var=nothing, intensity_var=nothing)
+
+Metadata for how a temporal node is observed in wide panels. For
+[`hurdle`](@ref), `presence_var` and `intensity_var` name the
+wide-table base symbols (time suffix added via [`panel_column_name`](@ref)).
+"""
+struct NodeOutcomeSpec
+    kind::OutcomeKind
+    presence_var::Union{Nothing, Symbol}
+    intensity_var::Union{Nothing, Symbol}
+
+    NodeOutcomeSpec(kind::OutcomeKind) = new(kind, nothing, nothing)
+    function NodeOutcomeSpec(
+        kind::OutcomeKind,
+        presence_var::Symbol,
+        intensity_var::Symbol,
+    )
+        return new(kind, presence_var, intensity_var)
+    end
+end
+
+function _outcome_spec(
+    outcome_specs::Dict{Symbol, NodeOutcomeSpec},
+    var::Symbol,
+)
+    return get(outcome_specs, var, NodeOutcomeSpec(gaussian))
+end
+
+function _hurdle_panel_columns(
+    spec::NodeOutcomeSpec,
+    query::TemporalEffectQuery,
+    unit::Set{Symbol},
+    name_fn,
+)
+    pres_var = spec.presence_var
+    int_var = spec.intensity_var
+    pres_var === nothing && throw(ArgumentError(
+        "hurdle NodeOutcomeSpec for :$(query.outcome) requires presence_var",
+    ))
+    int_var === nothing && throw(ArgumentError(
+        "hurdle NodeOutcomeSpec for :$(query.outcome) requires intensity_var",
+    ))
+    presence_col = pres_var in unit ? pres_var : name_fn(pres_var, query.t_outcome)
+    intensity_col = int_var in unit ? int_var : name_fn(int_var, query.t_outcome)
+    return (presence = presence_col, intensity = intensity_col)
+end
+
+"""
     temporal_adjustment_columns(result, unrolling; unit_level, skip, name_fn) -> Vector{Symbol}
 
 Map `result.temporal_nodes` (pairs `(variable, occasion)`) to wide-table column
@@ -63,12 +123,19 @@ function query_panel_columns(
     query::TemporalEffectQuery;
     unit_level::AbstractVector{Symbol} = Symbol[],
     name_fn = panel_column_name,
+    outcome_specs::Dict{Symbol, NodeOutcomeSpec} = Dict{Symbol, NodeOutcomeSpec}(),
 )
     unit = Set(unit_level)
     treat_col = query.treatment in unit ? query.treatment :
         name_fn(query.treatment, query.t_treat)
-    out_col = query.outcome in unit ? query.outcome :
-        name_fn(query.outcome, query.t_outcome)
+    spec = _outcome_spec(outcome_specs, query.outcome)
+    if spec.kind == hurdle
+        hurdle_cols = _hurdle_panel_columns(spec, query, unit, name_fn)
+        out_col = hurdle_cols.presence
+    else
+        out_col = query.outcome in unit ? query.outcome :
+            name_fn(query.outcome, query.t_outcome)
+    end
     return (treatment = treat_col, outcome = out_col)
 end
 
@@ -82,6 +149,8 @@ struct EstimationPlan
     engine::Symbol
     treatment::Symbol
     outcome::Symbol
+    presence_col::Union{Nothing, Symbol}
+    intensity_col::Union{Nothing, Symbol}
     baseline::Vector{Symbol}
     query::TemporalEffectQuery
     identifiable::Bool
@@ -90,22 +159,47 @@ struct EstimationPlan
     missing_columns::Vector{Symbol}
 end
 
+function EstimationPlan(
+    engine::Symbol,
+    treatment::Symbol,
+    outcome::Symbol,
+    baseline::Vector{Symbol},
+    query::TemporalEffectQuery,
+    identifiable::Bool,
+    strategy::Symbol,
+    adjustment_columns::Vector{Symbol},
+    missing_columns::Vector{Symbol};
+    presence_col::Union{Nothing, Symbol} = nothing,
+    intensity_col::Union{Nothing, Symbol} = nothing,
+)
+    return EstimationPlan(
+        engine, treatment, outcome, presence_col, intensity_col,
+        baseline, query, identifiable, strategy,
+        adjustment_columns, missing_columns,
+    )
+end
+
 function Base.show(io::IO, plan::EstimationPlan)
+    hurdle = plan.presence_col !== nothing ? ", hurdle" : ""
     print(io, "EstimationPlan(", plan.engine, ", ",
-        plan.treatment, " → ", plan.outcome,
+        plan.treatment, " → ", plan.outcome, hurdle,
         ", baseline=", length(plan.baseline), " cols",
         plan.identifiable ? "" : " [not identifiable]", ")")
 end
 
 """
-    _targeted_engine_for_query(query, discrete_treatment) -> Symbol
+    _targeted_engine_for_query(query, discrete_treatment, outcome_spec) -> Symbol
 
 Choose a default CausalTargeted runner symbol for a temporal query.
 """
 function _targeted_engine_for_query(
     query::TemporalEffectQuery,
     discrete_treatment::Bool,
+    outcome_spec::NodeOutcomeSpec = NodeOutcomeSpec(gaussian),
 )
+    if outcome_spec.kind == hurdle
+        return :two_part_discrete_lmtp
+    end
     if query.t_treat == query.t_outcome
         return discrete_treatment ? :discrete_lmtp : :lmtp_grid
     end
@@ -119,11 +213,15 @@ end
     plan_targeted_estimation(unrolling, query, column_names; ...)
 
 Run temporal identification and return an [`EstimationPlan`](@ref) with engine
-choice (`:discrete_lmtp`, `:lmtp_grid`, `:sequential_lmtp`), treatment/outcome
-columns, and adjustment columns present in `column_names`.
+choice (`:discrete_lmtp`, `:two_part_discrete_lmtp`, `:lmtp_grid`,
+`:sequential_lmtp`), treatment/outcome columns, and adjustment columns present in
+`column_names`.
 
 `discrete_treatment=true` (default) selects `:discrete_lmtp` for same-occasion
 contrasts; set `false` for continuous shift LMTP.
+
+`outcome_specs` maps DAG node symbols to [`NodeOutcomeSpec`](@ref); hurdle nodes
+populate `presence_col` and `intensity_col` for two-part LMTP runners.
 """
 function plan_targeted_estimation(
     unrolling::TemporalUnrolling,
@@ -134,10 +232,16 @@ function plan_targeted_estimation(
     skip::AbstractVector{Symbol} = [:sex],
     name_fn = panel_column_name,
     discrete_treatment::Bool = true,
+    outcome_specs::Dict{Symbol, NodeOutcomeSpec} = Dict{Symbol, NodeOutcomeSpec}(),
 )
     result = identify(unrolling, query; missingness = missingness)
+    unit = Set(unit_level)
+    outcome_spec = _outcome_spec(outcome_specs, query.outcome)
     qcols = query_panel_columns(
-        query; unit_level = unit_level, name_fn = name_fn,
+        query;
+        unit_level = unit_level,
+        name_fn = name_fn,
+        outcome_specs = outcome_specs,
     )
     baseline = temporal_adjustment_columns(
         result, unrolling;
@@ -146,7 +250,14 @@ function plan_targeted_estimation(
     avail = Set(column_names)
     present = Symbol[c for c in baseline if c in avail]
     missing_cols = Symbol[c for c in baseline if !(c in avail)]
-    engine = _targeted_engine_for_query(query, discrete_treatment)
+    presence_col = nothing
+    intensity_col = nothing
+    if outcome_spec.kind == hurdle
+        hurdle_cols = _hurdle_panel_columns(outcome_spec, query, unit, name_fn)
+        presence_col = hurdle_cols.presence
+        intensity_col = hurdle_cols.intensity
+    end
+    engine = _targeted_engine_for_query(query, discrete_treatment, outcome_spec)
     return EstimationPlan(
         engine,
         qcols.treatment,
@@ -156,10 +267,13 @@ function plan_targeted_estimation(
         result.identifiable,
         result.strategy,
         present,
-        missing_cols,
+        missing_cols;
+        presence_col = presence_col,
+        intensity_col = intensity_col,
     )
 end
 
+export OutcomeKind, NodeOutcomeSpec
 export temporal_adjustment_columns, adjustment_columns, query_panel_columns
 export EstimationPlan, plan_targeted_estimation
 
@@ -188,7 +302,7 @@ function identification_support(
             complete[i] = complete[i] && !_ismissing_or_nan(v[i])
         end
     end
-    min_complete_n = count(complete)
+    min_complete_n = Base.count(complete)
     estimability = if min_complete_n == 0
         :empty
     elseif min_complete_n < min_n

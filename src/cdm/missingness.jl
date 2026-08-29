@@ -37,7 +37,7 @@ function miss_rates(mask::ObservationMask)
     n = n_units(mask)
     n == 0 && return Dict{Symbol, Float64}(c => NaN for c in mask.columns)
     return Dict{Symbol, Float64}(
-        mask.columns[j] => 1.0 - (count(mask.observed[:, j]) / n)
+        mask.columns[j] => 1.0 - (Base.count(mask.observed[:, j]) / n)
         for j in eachindex(mask.columns)
     )
 end
