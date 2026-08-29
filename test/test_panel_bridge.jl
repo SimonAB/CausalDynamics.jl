@@ -1,4 +1,5 @@
 using CausalDynamics
+using CausalDynamics: hurdle, NodeOutcomeSpec
 using DataFrames
 using Test
 
@@ -66,6 +67,51 @@ end
     @test plan.outcome === :fec2
     @test isempty(plan.baseline)
     @test isempty(plan.missing_columns)
+end
+
+@testset "hurdle outcome planner (#22)" begin
+    spec = TemporalDAGSpec(
+        [:grid_type, :fec],
+        [(:grid_type, :fec, 0)],
+    )
+    u = unroll_temporal_dag(spec, 4)
+    query = TemporalEffectQuery(:grid_type, :fec, 2, 2)
+    outcome_specs = Dict(
+        :fec => NodeOutcomeSpec(hurdle, :fec_bin, :fec_intensity),
+    )
+    wide_cols = [
+        :mouse_id, :grid_type,
+        :fec_bin1, :fec_bin2, :fec_bin3, :fec_bin4,
+        :fec_intensity1, :fec_intensity2, :fec_intensity3, :fec_intensity4,
+        :weight1, :weight2,
+    ]
+    plan = plan_targeted_estimation(
+        u, query, wide_cols;
+        unit_level = [:grid_type],
+        outcome_specs = outcome_specs,
+    )
+    @test plan.engine === :two_part_discrete_lmtp
+    @test plan.treatment === :grid_type
+    @test plan.outcome === :fec_bin2
+    @test plan.presence_col === :fec_bin2
+    @test plan.intensity_col === :fec_intensity2
+    @test plan.query == query
+
+    qcols = query_panel_columns(
+        query;
+        unit_level = [:grid_type],
+        outcome_specs = outcome_specs,
+    )
+    @test qcols.outcome === :fec_bin2
+
+    gaussian_plan = plan_targeted_estimation(
+        u, query, wide_cols;
+        unit_level = [:grid_type],
+    )
+    @test gaussian_plan.engine === :discrete_lmtp
+    @test gaussian_plan.outcome === :fec2
+    @test gaussian_plan.presence_col === nothing
+    @test gaussian_plan.intensity_col === nothing
 end
 
 @testset "identification_support" begin
