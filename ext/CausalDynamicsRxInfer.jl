@@ -13,6 +13,7 @@ using CausalDynamics: CausalDynamics,
     Graphs
 using DataFrames: DataFrames
 using GraphPPL: GraphPPL
+using LinearAlgebra: rank
 using RxInfer: RxInfer, @model, infer, Normal, KeepLast
 
 export BackdoorInferenceResult,

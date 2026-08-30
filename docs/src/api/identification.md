@@ -37,6 +37,7 @@ temporal_adjustment_columns
 adjustment_columns
 query_panel_columns
 EstimationPlan
+plan_targeted_estimation
 identification_support
 ```
 
