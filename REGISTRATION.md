@@ -21,7 +21,7 @@ Local `main` targets **0.4.6**. Register **incrementally** (no version skips).
 
 1. Push `main` with `version = "0.4.6"`
 2. Comment `@JuliaRegistrator register` on [issue #7](https://github.com/SimonAB/CausalDynamics.jl/issues/7)
-3. General AutoMerge — pending
+3. General AutoMerge — pending ([#166644](https://github.com/JuliaRegistries/General/pull/166644))
 
 ## 0.4.3 register steps
 
