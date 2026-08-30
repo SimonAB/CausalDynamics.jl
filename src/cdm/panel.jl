@@ -174,4 +174,45 @@ function Base.NamedTuple(panel::CDMPanel)
     return NamedTuple{names}(vals)
 end
 
-export panel_column_name, CDMPanel, trajectory_wide_row, simulate_panel
+"""
+    check_occasion_resolution(query, measured_at; warn=true) -> Vector{NamedTuple}
+
+Check whether a [`TemporalEffectQuery`](@ref) references variables at occasions
+that differ from where they were actually measured in the wide panel.
+
+`measured_at` maps DAG node symbols to the occasion index of the wide column
+that holds the value (e.g. period-constant contact scores measured once at
+occasion 1 but referenced at `t_outcome = 4`).
+
+Returns a vector of issue records; emits `@warn` when `warn=true`.
+"""
+function check_occasion_resolution(
+    query::TemporalEffectQuery,
+    measured_at::AbstractDict{Symbol, Int};
+    warn::Bool = true,
+)
+    issues = NamedTuple[]
+    for (var, src_t) in measured_at
+        ref_t = if var == query.treatment
+            query.t_treat
+        elseif var == query.outcome
+            query.t_outcome
+        else
+            continue
+        end
+        src_t == ref_t && continue
+        rec = (
+            variable = var,
+            query_occasion = ref_t,
+            source_occasion = src_t,
+            message = ":$(var) at query occasion $ref_t uses measurement from occasion $src_t",
+        )
+        push!(issues, rec)
+        if warn
+            @warn rec.message variable = var query_occasion = ref_t source_occasion = src_t
+        end
+    end
+    return issues
+end
+
+export panel_column_name, CDMPanel, trajectory_wide_row, simulate_panel, check_occasion_resolution

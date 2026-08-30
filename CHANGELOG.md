@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-08-30
+
+### Added
+
+- **`EstimationPlan` empirical support:** `plan_targeted_estimation(...; data=, min_n=)`
+  sets `min_complete_n` and `estimability` via [`identification_support`](@ref)
+  ([#18](https://github.com/SimonAB/CausalDynamics.jl/issues/18)).
+- **`check_occasion_resolution`:** warn when query occasions differ from measured
+  occasions in wide panels ([#17](https://github.com/SimonAB/CausalDynamics.jl/issues/17)).
+
+## [0.4.2] - 2026-08-30
+
 ### Added
 
 - **Panel bridge:** `temporal_adjustment_columns`, `adjustment_columns`,

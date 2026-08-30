@@ -40,6 +40,7 @@ OutcomeKind
 NodeOutcomeSpec
 EstimationPlan
 plan_targeted_estimation
+check_occasion_resolution
 identification_support
 ```
 

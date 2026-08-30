@@ -11,6 +11,7 @@ DiscreteTimeCDM
 CDMTrajectory
 CDMPanel
 panel_column_name
+check_occasion_resolution
 trajectory_wide_row
 simulate_panel
 RandomEffectSpec

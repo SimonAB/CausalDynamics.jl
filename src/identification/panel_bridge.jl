@@ -160,6 +160,8 @@ struct EstimationPlan
     strategy::Symbol
     adjustment_columns::Vector{Symbol}
     missing_columns::Vector{Symbol}
+    min_complete_n::Union{Nothing, Int}
+    estimability::Union{Nothing, Symbol}
 end
 
 function EstimationPlan(
@@ -174,20 +176,25 @@ function EstimationPlan(
     missing_columns::Vector{Symbol};
     presence_col::Union{Nothing, Symbol} = nothing,
     intensity_col::Union{Nothing, Symbol} = nothing,
+    min_complete_n::Union{Nothing, Int} = nothing,
+    estimability::Union{Nothing, Symbol} = nothing,
 )
     return EstimationPlan(
         engine, treatment, outcome, presence_col, intensity_col,
         baseline, query, identifiable, strategy,
         adjustment_columns, missing_columns,
+        min_complete_n, estimability,
     )
 end
 
 function Base.show(io::IO, plan::EstimationPlan)
     hurdle = plan.presence_col !== nothing ? ", hurdle" : ""
+    power = plan.estimability === :underpowered ? " [underpowered]" :
+        plan.estimability === :empty ? " [empty]" : ""
     print(io, "EstimationPlan(", plan.engine, ", ",
         plan.treatment, " → ", plan.outcome, hurdle,
         ", baseline=", length(plan.baseline), " cols",
-        plan.identifiable ? "" : " [not identifiable]", ")")
+        plan.identifiable ? "" : " [not identifiable]", power, ")")
 end
 
 """
@@ -225,6 +232,10 @@ contrasts; set `false` for continuous shift LMTP.
 
 `outcome_specs` maps DAG node symbols to [`NodeOutcomeSpec`](@ref); hurdle nodes
 populate `presence_col` and `intensity_col` for two-part LMTP runners.
+
+Pass `data=` (wide `NamedTuple` or table-like object) to attach empirical
+`min_complete_n` and `estimability` from [`identification_support`](@ref) on
+treatment, outcome, and adjustment columns.
 """
 function plan_targeted_estimation(
     unrolling::TemporalUnrolling,
@@ -236,6 +247,8 @@ function plan_targeted_estimation(
     name_fn = panel_column_name,
     discrete_treatment::Bool = true,
     outcome_specs::Dict{Symbol, NodeOutcomeSpec} = Dict{Symbol, NodeOutcomeSpec}(),
+    data = nothing,
+    min_n::Int = 10,
 )
     result = identify(unrolling, query; missingness = missingness)
     unit = Set(unit_level)
@@ -261,6 +274,19 @@ function plan_targeted_estimation(
         intensity_col = hurdle_cols.intensity
     end
     engine = _targeted_engine_for_query(query, discrete_treatment, outcome_spec)
+    min_complete_n = nothing
+    estimability = nothing
+    if data !== nothing
+        analysis_cols = unique(vcat(
+            [qcols.treatment, qcols.outcome],
+            present,
+            presence_col === nothing ? Symbol[] : [presence_col],
+            intensity_col === nothing ? Symbol[] : [intensity_col],
+        ))
+        sup = identification_support(data, analysis_cols; min_n = min_n)
+        min_complete_n = sup.min_complete_n
+        estimability = sup.estimability
+    end
     return EstimationPlan(
         engine,
         qcols.treatment,
@@ -273,6 +299,8 @@ function plan_targeted_estimation(
         missing_cols;
         presence_col = presence_col,
         intensity_col = intensity_col,
+        min_complete_n = min_complete_n,
+        estimability = estimability,
     )
 end
 

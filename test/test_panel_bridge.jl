@@ -1,5 +1,5 @@
 using CausalDynamics
-using CausalDynamics: hurdle, NodeOutcomeSpec
+using CausalDynamics: hurdle, NodeOutcomeSpec, check_occasion_resolution
 using DataFrames
 using Test
 
@@ -124,4 +124,31 @@ end
     @test sup.estimability == :underpowered
     empty_adj = identification_support(data, Symbol[]; min_n = 1)
     @test empty_adj.min_complete_n == 4
+end
+
+@testset "plan_targeted_estimation empirical support (#18)" begin
+    spec = TemporalDAGSpec([:grid_type, :fec], [(:grid_type, :fec, 0)])
+    u = unroll_temporal_dag(spec, 4)
+    query = TemporalEffectQuery(:grid_type, :fec, 2, 2)
+    df = DataFrame(
+        grid_type = fill("R", 5),
+        fec2 = rand(5),
+    )
+    plan = plan_targeted_estimation(
+        u, query, propertynames(df);
+        unit_level = [:grid_type],
+        data = df,
+        min_n = 10,
+    )
+    @test plan.estimability === :underpowered
+    @test plan.min_complete_n == 5
+end
+
+@testset "occasion resolution (#17)" begin
+    query = TemporalEffectQuery(:grid_type, :fec, 3, 3)
+    issues = check_occasion_resolution(
+        query, Dict(:fec => 1); warn = false,
+    )
+    @test length(issues) == 1
+    @test issues[1].variable === :fec
 end
