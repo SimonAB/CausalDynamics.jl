@@ -5,8 +5,8 @@
 
 Outcome family for a DAG node when planning targeted estimation.
 
-Use [`count_outcome`](@ref) for nonnegative count nodes (Poisson / negative
-binomial routing is reserved for a later planner release).
+Use `OutcomeKind.count_outcome` for nonnegative count nodes (Poisson /
+negative binomial routing is reserved for a later planner release).
 """
 @enum OutcomeKind begin
     gaussian
@@ -18,8 +18,8 @@ end
 """
     NodeOutcomeSpec(kind; presence_var=nothing, intensity_var=nothing)
 
-Metadata for how a temporal node is observed in wide panels. For
-[`hurdle`](@ref), `presence_var` and `intensity_var` name the
+Metadata for how a temporal node is observed in wide panels. For hurdle
+outcomes (`OutcomeKind.hurdle`), `presence_var` and `intensity_var` name the
 wide-table base symbols (time suffix added via [`panel_column_name`](@ref)).
 """
 struct NodeOutcomeSpec
