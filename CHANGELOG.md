@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   CausalTargeted engine choice ([#15](https://github.com/SimonAB/CausalDynamics.jl/issues/15),
   [#19](https://github.com/SimonAB/CausalDynamics.jl/issues/19)).
 
+- **OutcomeKind planner:** `OutcomeKind`, `NodeOutcomeSpec`, and
+  `outcome_specs` on `plan_targeted_estimation` route hurdle nodes to
+  `:two_part_discrete_lmtp` with `presence_col` / `intensity_col` for
+  CausalTargeted two-part LMTP ([#22](https://github.com/SimonAB/CausalDynamics.jl/issues/22)).
+
 - **Hierarchical nesting (Phase 1–2):** `RandomEffectSpec`, `assign_cluster_ids`,
   `draw_nested_effects`, `add_nested_effects!`, `simulate_hierarchical_panel`,
   and synthetic `simulate_hierarchical_intercept_ate`. Hierarchical DAG unroll

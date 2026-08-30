@@ -36,6 +36,8 @@ identification_report
 temporal_adjustment_columns
 adjustment_columns
 query_panel_columns
+OutcomeKind
+NodeOutcomeSpec
 EstimationPlan
 plan_targeted_estimation
 identification_support

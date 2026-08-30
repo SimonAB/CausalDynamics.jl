@@ -119,7 +119,7 @@ function _mi_knn(Xp::AbstractMatrix{<:Real}, Yp::AbstractMatrix{<:Real}, k::Inte
         nY[i] = ny
     end
     idN = (nX .!= 0) .& (nY .!= 0)
-    count(idN) == 0 && return 0.0
+    Base.count(idN) == 0 && return 0.0
     nX_ok = nX[idN]
     nY_ok = nY[idN]
     mean_ψx = sum(_digamma_int, nX_ok) / length(nX_ok)

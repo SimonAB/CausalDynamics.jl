@@ -4,11 +4,14 @@
     OutcomeKind
 
 Outcome family for a DAG node when planning targeted estimation.
+
+Use [`count_outcome`](@ref) for nonnegative count nodes (Poisson / negative
+binomial routing is reserved for a later planner release).
 """
 @enum OutcomeKind begin
     gaussian
     binary
-    count
+    count_outcome
     hurdle
 end
 
