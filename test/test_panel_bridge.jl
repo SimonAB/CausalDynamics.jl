@@ -1,5 +1,5 @@
 using CausalDynamics
-using CausalDynamics: hurdle, NodeOutcomeSpec, check_occasion_resolution
+using CausalDynamics: hurdle, NodeOutcomeSpec, binary, count_outcome, check_occasion_resolution, MissingnessSpec
 using DataFrames
 using Test
 
@@ -112,6 +112,53 @@ end
     @test gaussian_plan.outcome === :fec2
     @test gaussian_plan.presence_col === nothing
     @test gaussian_plan.intensity_col === nothing
+    @test gaussian_plan.family_outcome === nothing
+end
+
+@testset "count_outcome planner (#24)" begin
+    spec = TemporalDAGSpec(
+        [:grid_type, :fec],
+        [(:grid_type, :fec, 0)],
+    )
+    u = unroll_temporal_dag(spec, 4)
+    query = TemporalEffectQuery(:grid_type, :fec, 2, 2)
+    wide_cols = [:mouse_id, :grid_type, :fec1, :fec2, :fec3, :fec4]
+    outcome_specs = Dict(:fec => NodeOutcomeSpec(count_outcome))
+    plan = plan_targeted_estimation(
+        u, query, wide_cols;
+        unit_level = [:grid_type],
+        outcome_specs = outcome_specs,
+    )
+    @test plan.engine === :discrete_lmtp
+    @test plan.outcome === :fec2
+    @test plan.family_outcome === :negbin
+
+    plan_pois = plan_targeted_estimation(
+        u, query, wide_cols;
+        unit_level = [:grid_type],
+        outcome_specs = outcome_specs,
+        count_family = :poisson,
+    )
+    @test plan_pois.family_outcome === :poisson
+end
+
+@testset "binary outcome planner (#44)" begin
+    spec = TemporalDAGSpec(
+        [:grid_type, :infected],
+        [(:grid_type, :infected, 0)],
+    )
+    u = unroll_temporal_dag(spec, 4)
+    query = TemporalEffectQuery(:grid_type, :infected, 2, 2)
+    wide_cols = [:mouse_id, :grid_type, :infected1, :infected2]
+    outcome_specs = Dict(:infected => NodeOutcomeSpec(binary))
+    plan = plan_targeted_estimation(
+        u, query, wide_cols;
+        unit_level = [:grid_type],
+        outcome_specs = outcome_specs,
+    )
+    @test plan.engine === :discrete_lmtp
+    @test plan.outcome === :infected2
+    @test plan.family_outcome === :binomial
 end
 
 @testset "identification_support" begin
@@ -151,4 +198,51 @@ end
     )
     @test length(issues) == 1
     @test issues[1].variable === :fec
+end
+
+@testset "session slice and plan (#25)" begin
+    spec = TemporalDAGSpec([:grid_type, :fec], [(:grid_type, :fec, 0)])
+    u = unroll_temporal_dag(spec, 4)
+    query = TemporalEffectQuery(:grid_type, :fec, 2, 2)
+    df_long = DataFrame(
+        id = vcat(fill(1, 2), fill(2, 2)),
+        session = [1, 2, 1, 2],
+        grid_type = fill("R", 4),
+        fec_2 = [1.0, 3.0, 2.0, 4.0],
+        weight_2 = [0.1, 0.2, 0.3, 0.4],
+    )
+    slice = session_slice(df_long, 2; session_col = :session)
+    @test nrow(slice) == 2
+
+    wide_cols = [:id, :grid_type, :fec2, :weight2]
+    plan = plan_session_estimation(
+        u, query, 2, wide_cols;
+        unit_level = [:grid_type],
+    )
+    @test plan.engine === :discrete_lmtp
+    @test plan.outcome === :fec2
+end
+
+@testset "missingness planner (#26)" begin
+    spec = TemporalDAGSpec([:grid_type, :fec], [(:grid_type, :fec, 0)])
+    u = unroll_temporal_dag(spec, 4)
+    query = TemporalEffectQuery(:grid_type, :fec, 2, 4)
+    wide_cols = [:mouse_id, :grid_type, :fec1, :fec2, :fec3]
+    miss = MissingnessSpec(:fec; regime = :mnar, time_indexed = true)
+    plan = plan_targeted_estimation(
+        u, query, wide_cols;
+        unit_level = [:grid_type],
+        missingness = miss,
+    )
+    @test plan.estimability === :structural_skip
+    @test !isempty(plan.missingness_note)
+
+    query_ok = TemporalEffectQuery(:grid_type, :fec, 2, 2)
+    plan_ok = plan_targeted_estimation(
+        u, query_ok, wide_cols;
+        unit_level = [:grid_type],
+        missingness = miss,
+    )
+    @test plan_ok.estimability !== :structural_skip
+    @test plan_ok.outcome === :fec2
 end

@@ -2,7 +2,7 @@ name = "CausalDynamics"
 uuid = "823b1367-efac-4af0-bbfc-73ee462bce07"
 license = "MIT"
 authors = ["Simon A. Babayan <simon.babayan@glasgow.ac.uk>"]
-version = "0.4.3"
+version = "0.4.6"
 repo = "https://github.com/SimonAB/CausalDynamics.jl.git"
 
 [deps]

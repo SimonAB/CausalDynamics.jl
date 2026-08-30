@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.6] - 2026-08-30
+
+### Added
+
+- **Missingness in planner ([#26](https://github.com/SimonAB/CausalDynamics.jl/issues/26)):**
+  `EstimationPlan` carries `missingness_note`, `capture_conditioned`, and
+  `:structural_skip` estimability when the outcome (or hurdle presence) column
+  is absent from the panel.
+
+## [0.4.5] - 2026-08-30
+
+### Added
+
+- **Session-slice planner ([#25](https://github.com/SimonAB/CausalDynamics.jl/issues/25)):**
+  `plan_session_estimation` and `session_slice` (DataFrames extension) for
+  long-capture → single-occasion estimation hand-off.
+
+## [0.4.4] - 2026-08-30
+
+### Added
+
+- **`EstimationPlan.family_outcome` ([#24](https://github.com/SimonAB/CausalDynamics.jl/issues/24)):**
+  `OutcomeKind.binary` → `:binomial`; `count_outcome` → `:negbin` / `:poisson`
+  (`count_family` kw).
+
 ## [0.4.3] - 2026-08-30
 
 ### Added

@@ -5,8 +5,9 @@
 
 Outcome family for a DAG node when planning targeted estimation.
 
-Use `OutcomeKind.count_outcome` for nonnegative count nodes (Poisson /
-negative binomial routing is reserved for a later planner release).
+Use `OutcomeKind.count_outcome` for nonnegative count nodes (planner sets
+`family_outcome` to `:negbin` or `:poisson` on [`EstimationPlan`](@ref)).
+Use `OutcomeKind.binary` for presence endpoints (`family_outcome = :binomial`).
 """
 @enum OutcomeKind begin
     gaussian
@@ -154,6 +155,7 @@ struct EstimationPlan
     outcome::Symbol
     presence_col::Union{Nothing, Symbol}
     intensity_col::Union{Nothing, Symbol}
+    family_outcome::Union{Nothing, Symbol}
     baseline::Vector{Symbol}
     query::TemporalEffectQuery
     identifiable::Bool
@@ -162,6 +164,8 @@ struct EstimationPlan
     missing_columns::Vector{Symbol}
     min_complete_n::Union{Nothing, Int}
     estimability::Union{Nothing, Symbol}
+    missingness_note::String
+    capture_conditioned::Bool
 end
 
 function EstimationPlan(
@@ -176,25 +180,46 @@ function EstimationPlan(
     missing_columns::Vector{Symbol};
     presence_col::Union{Nothing, Symbol} = nothing,
     intensity_col::Union{Nothing, Symbol} = nothing,
+    family_outcome::Union{Nothing, Symbol} = nothing,
     min_complete_n::Union{Nothing, Int} = nothing,
     estimability::Union{Nothing, Symbol} = nothing,
+    missingness_note::String = "",
+    capture_conditioned::Bool = false,
 )
     return EstimationPlan(
-        engine, treatment, outcome, presence_col, intensity_col,
+        engine, treatment, outcome, presence_col, intensity_col, family_outcome,
         baseline, query, identifiable, strategy,
         adjustment_columns, missing_columns,
-        min_complete_n, estimability,
+        min_complete_n, estimability, missingness_note, capture_conditioned,
     )
 end
 
 function Base.show(io::IO, plan::EstimationPlan)
     hurdle = plan.presence_col !== nothing ? ", hurdle" : ""
+    fam = plan.family_outcome === nothing ? "" : ", family=$(plan.family_outcome)"
     power = plan.estimability === :underpowered ? " [underpowered]" :
-        plan.estimability === :empty ? " [empty]" : ""
+        plan.estimability === :empty ? " [empty]" :
+        plan.estimability === :structural_skip ? " [structural_skip]" : ""
     print(io, "EstimationPlan(", plan.engine, ", ",
-        plan.treatment, " → ", plan.outcome, hurdle,
+        plan.treatment, " → ", plan.outcome, hurdle, fam,
         ", baseline=", length(plan.baseline), " cols",
         plan.identifiable ? "" : " [not identifiable]", power, ")")
+end
+
+"""Map planner outcome kind to CausalTargeted `family_outcome` hint."""
+function _family_outcome_for_spec(
+    spec::NodeOutcomeSpec;
+    count_family::Symbol = :negbin,
+)
+    if spec.kind == binary
+        return :binomial
+    elseif spec.kind == count_outcome
+        count_family in (:poisson, :negbin) || throw(ArgumentError(
+            "count_family must be :poisson or :negbin; got $count_family",
+        ))
+        return count_family
+    end
+    return nothing
 end
 
 """
@@ -232,6 +257,8 @@ contrasts; set `false` for continuous shift LMTP.
 
 `outcome_specs` maps DAG node symbols to [`NodeOutcomeSpec`](@ref); hurdle nodes
 populate `presence_col` and `intensity_col` for two-part LMTP runners.
+`OutcomeKind.binary` sets `family_outcome = :binomial`; `count_outcome` sets
+`:negbin` by default or `count_family = :poisson`.
 
 Pass `data=` (wide `NamedTuple` or table-like object) to attach empirical
 `min_complete_n` and `estimability` from [`identification_support`](@ref) on
@@ -247,6 +274,7 @@ function plan_targeted_estimation(
     name_fn = panel_column_name,
     discrete_treatment::Bool = true,
     outcome_specs::Dict{Symbol, NodeOutcomeSpec} = Dict{Symbol, NodeOutcomeSpec}(),
+    count_family::Symbol = :negbin,
     data = nothing,
     min_n::Int = 10,
 )
@@ -274,8 +302,27 @@ function plan_targeted_estimation(
         intensity_col = hurdle_cols.intensity
     end
     engine = _targeted_engine_for_query(query, discrete_treatment, outcome_spec)
+    family_outcome = _family_outcome_for_spec(outcome_spec; count_family = count_family)
     min_complete_n = nothing
     estimability = nothing
+    missingness_note = ""
+    capture_conditioned = false
+    cert = result.missingness
+    if cert !== nothing
+        missingness_note = cert.note
+        capture_conditioned = cert.time_indexed
+    end
+    if !(qcols.outcome in avail)
+        estimability = :structural_skip
+        if isempty(missingness_note)
+            missingness_note = "outcome column :$(qcols.outcome) absent from panel"
+        end
+    elseif presence_col !== nothing && !(presence_col in avail)
+        estimability = :structural_skip
+        if isempty(missingness_note)
+            missingness_note = "presence column :$(presence_col) absent from panel"
+        end
+    end
     if data !== nothing
         analysis_cols = unique(vcat(
             [qcols.treatment, qcols.outcome],
@@ -285,7 +332,9 @@ function plan_targeted_estimation(
         ))
         sup = identification_support(data, analysis_cols; min_n = min_n)
         min_complete_n = sup.min_complete_n
-        estimability = sup.estimability
+        if estimability !== :structural_skip
+            estimability = sup.estimability
+        end
     end
     return EstimationPlan(
         engine,
@@ -299,8 +348,11 @@ function plan_targeted_estimation(
         missing_cols;
         presence_col = presence_col,
         intensity_col = intensity_col,
+        family_outcome = family_outcome,
         min_complete_n = min_complete_n,
         estimability = estimability,
+        missingness_note = missingness_note,
+        capture_conditioned = capture_conditioned,
     )
 end
 
@@ -357,3 +409,40 @@ function _column_vec(data, col::Symbol)
 end
 
 export identification_support
+
+"""
+    plan_session_estimation(unrolling, query, session; kwargs...) -> EstimationPlan
+
+Like [`plan_targeted_estimation`](@ref) for a **single session slice** from long
+capture data. When `query.t_outcome != session`, runs
+[`check_occasion_resolution`](@ref) and warns if resolution mismatches.
+
+Pass `data=` as the **session slice** (see [`session_slice`](@ref)), not the
+full long panel.
+"""
+function plan_session_estimation(
+    unrolling::TemporalUnrolling,
+    query::TemporalEffectQuery,
+    session::Integer,
+    column_names;
+    measured_at::AbstractDict{Symbol, Int} = Dict{Symbol, Int}(),
+    kwargs...,
+)
+    session = Int(session)
+    if query.t_outcome != session
+        mat = isempty(measured_at) ?
+            Dict(query.outcome => session) :
+            merge(Dict(query.outcome => session), measured_at)
+        issues = check_occasion_resolution(query, mat; warn = false)
+        if !isempty(issues)
+            @warn "plan_session_estimation: query occasion $(query.t_outcome) " *
+                  "≠ slice session $session ($(issues[1].message))"
+        end
+    end
+    return plan_targeted_estimation(unrolling, query, column_names; kwargs...)
+end
+
+export plan_session_estimation
+# `session_slice(::DataFrame, ...)` is implemented in CausalDynamicsDataFramesExt.
+function session_slice end
+export session_slice

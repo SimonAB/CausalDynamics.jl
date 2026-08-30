@@ -40,4 +40,43 @@ function CausalDynamics.encode_to_panel(
     return out
 end
 
+"""
+    session_slice(df, session; id=:id, session_col=nothing, rename_occasion=true) -> DataFrame
+
+Extract one capture occasion from a long table (one row per unit × session). When
+`session_col` is set, filter rows where that column equals `session`. With
+`rename_occasion=true`, strip a trailing session suffix from column names
+(e.g. `fec_4` → `fec`).
+"""
+function CausalDynamics.session_slice(
+    df::DataFrame,
+    session::Integer;
+    id::Symbol = :id,
+    session_col::Union{Nothing, Symbol} = nothing,
+    rename_occasion::Bool = true,
+)
+    session = Int(session)
+    out = if session_col === nothing
+        copy(df)
+    else
+        mask = [v == session for v in df[!, session_col]]
+        df[mask, :]
+    end
+    if rename_occasion && session_col !== nothing
+        suffix = string(session)
+        for col in propertynames(out)
+            col == id && continue
+            col == session_col && continue
+            scol = string(col)
+            if endswith(scol, suffix)
+                new_name = Symbol(scol[1:(end - length(suffix))])
+                if !(new_name in propertynames(out))
+                    rename!(out, col => new_name)
+                end
+            end
+        end
+    end
+    return out
+end
+
 end
