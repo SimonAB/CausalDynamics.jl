@@ -1,10 +1,9 @@
-# Hierarchical DGP ↔ MixedModels concordance (application recipe)
+# Hierarchical DGP ↔ MixedModels concordance
 
 CausalDynamics owns **generative** nested ``U`` (`simulate_hierarchical_intercept_ate`,
-`RandomEffectSpec`). Fitting an LMM / BLUP is an **application** concern:
-do not add MixedModels.jl to CausalDynamics or CausalTargeted.
-
-This note is a concordance checklist for apps (e.g. Sheep_VaccineCDCS, AgeSCM).
+`RandomEffectSpec`). Fitting an LMM / BLUP or MixedModels-based g-computation is an
+**estimation** concern in **CausalTargeted** (optional `CausalTargetedMixedModelsExt`:
+`fit_profiled_nb2`, `mixed_g_computation`). Do not add MixedModels.jl to CausalDynamics.
 
 ## 1. Simulate under Dynamics
 
@@ -16,7 +15,7 @@ cols, truth = simulate_hierarchical_intercept_ate(
 # cols: :cluster, :W, :A, :Y  — truth.ate is the causal ATE
 ```
 
-## 2. Optional: cluster-robust MSM (CausalTargeted)
+## 2. Cluster-robust MSM (CausalTargeted)
 
 Same estimand ``E[Y\\mid do(A=1)]-E[Y\\mid do(A=0)]`` with cluster sandwich Σ:
 
@@ -27,24 +26,17 @@ df = DataFrame(cols)
 # run_repeated_outcome_msm(...; cluster = :cluster)
 ```
 
-## 3. MixedModels partial pooling (application only)
-
-Install MixedModels in the **application** environment. A typical check is that
-the fixed effect of `A` recovers `truth.ate` under a correctly specified
-random-intercept model, while BLUPs shrink cluster means — a **different**
-object from the MSM profile.
+## 3. Optional MixedModels / profiled NB2 (CausalTargeted weakdep)
 
 ```julia
-# Application Project.toml: MixedModels = "…"
-using MixedModels, DataFrames
+using CausalTargeted, MixedModels, FastGaussQuadrature, NLopt, SpecialFunctions, DataFrames
 df = DataFrame(cols)
-# Illustrative formula — adjust coding as needed in the app:
-# m = fit(MixedModel, @formula(Y ~ 1 + A + W + (1 | cluster)), df)
-# compare coef(m) for A to truth.ate
+# Illustrative: fit(MixedModel, @formula(Y ~ 1 + A + W + (1 | cluster)), df)
+# or fit_profiled_nb2 / mixed_g_computation for repeated outcomes — see CausalTargeted docs
 ```
 
 ## Do not
 
-- Replace MSM ``\\tau(t)`` silently with BLUPs in CausalTargeted
-- Add MixedModels as a CausalDynamics / CausalTargeted dependency
+- Replace MSM ``\\tau(t)`` silently with BLUPs
+- Add MixedModels as a CausalDynamics dependency
 - Treat LMM coefficients as `do(·)` effects without stating the estimand
