@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Panel bridge:** `temporal_adjustment_columns`, `adjustment_columns`,
+  `query_panel_columns`, `EstimationPlan`, and `plan_targeted_estimation` map
+  temporal identification certificates to wide-panel column names and a default
+  CausalTargeted engine choice ([#15](https://github.com/SimonAB/CausalDynamics.jl/issues/15),
+  [#19](https://github.com/SimonAB/CausalDynamics.jl/issues/19)).
+
 - **Hierarchical nesting (Phase 1–2):** `RandomEffectSpec`, `assign_cluster_ids`,
   `draw_nested_effects`, `add_nested_effects!`, `simulate_hierarchical_panel`,
   and synthetic `simulate_hierarchical_intercept_ate`. Hierarchical DAG unroll

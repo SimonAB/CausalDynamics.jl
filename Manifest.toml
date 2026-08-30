@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.12.6"
+julia_version = "1.12.7"
 manifest_format = "2.0"
-project_hash = "5010218cddcab3353bd7c8436abcf8037473ccab"
+project_hash = "bb0a4671d6182a395b02bdfa58d5e63e7f16e043"
 
 [[deps.AbstractTrees]]
 git-tree-sha1 = "2d9c9a55f9c93e8887ad391fbae72f8ef55e1177"
@@ -101,24 +101,34 @@ uuid = "9718e550-a3fa-408a-8086-8db961cd8217"
 version = "0.1.1"
 
 [[deps.CausalDynamics]]
-deps = ["CausalInference", "Graphs", "Random"]
+deps = ["CausalInference", "Graphs", "LinearAlgebra", "Random"]
 path = "."
 uuid = "823b1367-efac-4af0-bbfc-73ee462bce07"
-version = "0.3.4"
+version = "0.4.2"
 
     [deps.CausalDynamics.extensions]
     CausalDynamicsAssociationsExt = ["Associations", "DataFrames"]
     CausalDynamicsDAGMakieExt = "DAGMakie"
+    CausalDynamicsDataFramesExt = "DataFrames"
+    CausalDynamicsDataInterpolationsExt = "DataInterpolations"
+    CausalDynamicsLuxExt = ["Lux", "ComponentArrays", "Optimization", "OptimizationOptimisers"]
     CausalDynamicsRxInfer = ["GraphPPL", "RxInfer", "DataFrames"]
     CausalDynamicsSciMLExt = "OrdinaryDiffEq"
+    CausalDynamicsSensitivityExt = ["OrdinaryDiffEq", "SciMLSensitivity"]
 
     [deps.CausalDynamics.weakdeps]
     Associations = "614afb3a-e278-4863-8805-9959372b9ec2"
+    ComponentArrays = "b0b7db55-cfe3-40fc-9ded-d10e2dbeff66"
     DAGMakie = "4e3bd891-6b6d-4d36-a31e-f0404dd10c7d"
     DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+    DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"
     GraphPPL = "b3f8163a-e979-4e85-b43e-1f63d8c8b42c"
+    Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
+    Optimization = "7f7a1694-90dd-40f0-9382-eb1efda571ba"
+    OptimizationOptimisers = "42dfb2eb-d2b4-4451-abcd-913932933ac1"
     OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
     RxInfer = "86711068-29c9-4ff7-b620-ae75d7495b3d"
+    SciMLSensitivity = "1ed8b502-d754-442c-8d5d-10ac956f44a1"
 
 [[deps.CausalInference]]
 deps = ["CliqueTrees", "Combinatorics", "Distances", "Distributions", "Graphs", "LRUCache", "LinearAlgebra", "LogarithmicNumbers", "Memoization", "MetaGraphs", "NearestNeighbors", "OffsetArrays", "PrecompileTools", "ProgressMeter", "Random", "Requires", "SpecialFunctions", "Statistics", "Tables", "TabularDisplay", "ThreadsX"]
@@ -200,7 +210,7 @@ version = "0.2.11"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.3.0+1"
+version = "1.3.1+2"
 
 [[deps.CompositionsBase]]
 git-tree-sha1 = "802bb88cd69dfd1509f6670416bd4434015693ad"
@@ -585,7 +595,7 @@ version = "0.8.7+0"
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.5.4+0"
+version = "3.5.6+0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl"]

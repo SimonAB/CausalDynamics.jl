@@ -62,5 +62,13 @@ using Test
         @test length(ppl_data.y) == n
         @test ppl_data.n_conf == 1
         @test length(ppl_data.y) == n
+
+        # Rank-deficient Frisch–Waugh when n < number of design columns
+        n_small = 4
+        @test_throws ArgumentError CausalDynamics.residualise_backdoor(
+            randn(n_small),
+            randn(n_small),
+            [randn(n_small), randn(n_small), randn(n_small), randn(n_small)],
+        )
     end
 end
