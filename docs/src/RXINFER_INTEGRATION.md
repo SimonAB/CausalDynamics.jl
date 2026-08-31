@@ -53,9 +53,13 @@ Package APIs stay in Pearl / SciML vocabulary. For a process-metaphysics gloss u
 
 ## Dependencies
 
-Optional weak dependencies: `GraphPPL`, `RxInfer`. They are **not** required for core CausalDynamics or the CDCS book `Project.toml`.
+Optional weak dependencies: `GraphPPL`, `RxInfer`. They are **not** required for core CausalDynamics.
 
-If `Pkg.resolve()` fails after adding RxInfer, cap **Graphs** at `1.13` in your application environment (RxInfer 5.x vs DataStructures 0.19). See AgeSCM `docs/RXINFER_DEPS.md` for a resolved stack example.
+On Julia 1.12, `CausalTargeted` + `CausalDynamics` + `RxInfer` 4+ resolve together from General; **PrettyTables** enters only transitively (via `DataFrames` / MLJ) at **2.x**, matching RxInfer’s weak `PrettyTablesExt`. Neither owned package pins PrettyTables.
+
+The CDCS book environment lists `RxInfer` explicitly and is the reference unified stack for stress notebooks ([CausalTargeted stress validation](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/stress_validation.md)).
+
+If `Pkg.resolve()` still fails in an older or heavily pinned application env, check for stale Manifest pins (PrettyTables 1.x) or cap **Graphs** at `1.13` when RxInfer 5.x clashes with `DataStructures` 0.19. See AgeSCM `docs/RXINFER_DEPS.md` for a resolved stack example.
 
 ## Further reading
 
