@@ -1,8 +1,8 @@
 name = "CausalDynamics"
 uuid = "823b1367-efac-4af0-bbfc-73ee462bce07"
 license = "MIT"
-authors = ["Simon A. Babayan <simon.babayan@glasgow.ac.uk>"]
 version = "0.4.6"
+authors = ["Simon A. Babayan <simon.babayan@glasgow.ac.uk>"]
 repo = "https://github.com/SimonAB/CausalDynamics.jl.git"
 
 [deps]
@@ -27,9 +27,9 @@ SciMLSensitivity = "1ed8b502-d754-442c-8d5d-10ac956f44a1"
 
 [extensions]
 CausalDynamicsAssociationsExt = ["Associations", "DataFrames"]
+CausalDynamicsDAGMakieExt = "DAGMakie"
 CausalDynamicsDataFramesExt = "DataFrames"
 CausalDynamicsDataInterpolationsExt = "DataInterpolations"
-CausalDynamicsDAGMakieExt = "DAGMakie"
 CausalDynamicsLuxExt = ["Lux", "ComponentArrays", "Optimization", "OptimizationOptimisers"]
 CausalDynamicsRxInfer = ["GraphPPL", "RxInfer", "DataFrames"]
 CausalDynamicsSciMLExt = "OrdinaryDiffEq"
@@ -41,7 +41,7 @@ CausalInference = "0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19"
 ComponentArrays = "0.15"
 DAGMakie = "0.1"
 DataFrames = "1"
-DataInterpolations = "6, 7, 8, 9"
+DataInterpolations = "6, 7, 8, 9, 10"
 GraphPPL = "4.6"
 Graphs = "1"
 LinearAlgebra = "1"
@@ -56,8 +56,8 @@ julia = "1.12"
 
 [[author_details]]
 name = "Simon A. Babayan"
-orcid = "0000-0002-4949-1117"
 email = "simon.babayan@glasgow.ac.uk"
+orcid = "0000-0002-4949-1117"
 
 [extras]
 Associations = "614afb3a-e278-4863-8805-9959372b9ec2"
