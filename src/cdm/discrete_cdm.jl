@@ -362,13 +362,18 @@ Monte Carlo g-computation summary for an outcome under a fixed intervention.
 - `std`: standard deviation across replicates
 - `n`: number of replicates
 - `samples`: terminal outcome per replicate
+- `provenance`: optional semantic manifest for the analysis
 """
 struct GComputationResult
     mean::Float64
     std::Float64
     n::Int
     samples::Vector{Float64}
+    provenance::Union{Nothing, CDMProvenance}
 end
+
+GComputationResult(mean, std, n, samples) =
+    GComputationResult(Float64(mean), Float64(std), Int(n), Float64.(samples), nothing)
 
 """
     g_computation(cdm, T, outcome; intervention, n=1000, rng=..., reduce=last)
@@ -398,6 +403,7 @@ function g_computation(
     n::Integer = 1000,
     rng::Random.AbstractRNG = Random.default_rng(),
     reduce = last,
+    provenance::Union{Nothing, CDMProvenance} = nothing,
 )
     n = Int(n)
     n < 1 && throw(ArgumentError("n must be ≥ 1, got $n"))
@@ -413,7 +419,7 @@ function g_computation(
 
     m = sum(samples) / n
     s = n > 1 ? sqrt(sum(abs2, samples .- m) / (n - 1)) : 0.0
-    return GComputationResult(m, s, n, samples)
+    return GComputationResult(m, s, n, samples, provenance)
 end
 
 export AbstractCDM, DiscreteTimeCDM, CDMTrajectory

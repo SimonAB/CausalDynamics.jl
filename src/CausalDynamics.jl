@@ -39,6 +39,7 @@ module CausalDynamics
 using Graphs
 using CausalInference
 using Random
+using SHA
 
 # Re-export commonly used types from Graphs.jl
 import Graphs: DiGraph, SimpleDiGraph, inneighbors, outneighbors, vertices, add_edge!, has_edge
@@ -46,6 +47,7 @@ export DiGraph, SimpleDiGraph
 
 # Shared intervention hierarchy (SCM / discrete CDM / continuous CDM)
 include("interventions/abstract.jl")
+include("cdm/provenance.jl")
 
 # Graph operations (order matters - d_separation needs sets, paths needs d_separation)
 include("graphs/validation.jl")
@@ -100,5 +102,7 @@ include("integration/iee.jl")
 include("integration/ode_parents.jl")
 include("integration/sciml.jl")
 include("cdm/mechanism.jl")
+include("interventions/contracts.jl")
+include("cdm/causal_abstraction.jl")
 
 end # module

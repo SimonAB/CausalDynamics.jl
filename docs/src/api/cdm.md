@@ -150,6 +150,38 @@ control = g_computation(cdm, 20, :y; intervention = do_sequence(:a, 0.0), n = 50
 effect = treated.mean - control.mean
 ```
 
+## Auditable intervention and abstraction declarations
+
+[`InterventionDescriptor`](@ref) records a declared intervention's target,
+replacement identifier, timing, scope, stochasticity, and cointerventions. It is
+metadata, not a solver-backed SDE surgery. Scalar `DoIntervention` values are
+recorded directly; policies and other functions require a caller-supplied stable
+identifier before they can be fingerprinted.
+
+`CDMProvenance` also accepts optional `estimand`, `identification`, `estimator`,
+`positivity`, and `sensitivity` identifiers. These fields let an analysis
+certificate record the query and its evidential qualifications alongside the
+model semantics. They remain caller-supplied identifiers rather than hashes of
+arbitrary executable code.
+
+[`CausalAbstractionSpec`](@ref) compares supplied interventional results. It does
+not compute push-forward distributions or discover a state map. `exact` means zero
+declared discrepancy; `accepted` means the discrepancy is within the declared
+tolerance.
+
+```@docs
+InterventionDescriptor
+intervention_descriptor
+canonical_intervention_descriptor
+compose_intervention_descriptors
+CDMProvenance
+provenance_dict
+provenance_fingerprint
+CausalAbstractionSpec
+CausalAbstractionResult
+validate_abstraction
+```
+
 ## Observational panels (estimation hand-off)
 
 [`simulate_panel`](@ref) stacks `n` natural trajectories into a wide
