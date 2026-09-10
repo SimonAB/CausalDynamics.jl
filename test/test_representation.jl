@@ -223,7 +223,7 @@ using Statistics
         @test cert.source === :S
         @test cert.code_names == [:z1, :z2]
         @test cert.n_codes == 2
-        @test cert.encode_type_hash == hash(typeof(encode_mat))
+    @test cert.encode_type_hash == stable_hash64(string(typeof(encode_mat)))
         @test !isempty(cert.encode_type)
 
         @testset "code_names copy is defensive" begin
@@ -449,4 +449,10 @@ using Statistics
         @test cert.code_names == [:z1]
         @test cert.role === :definitional
     end
+end
+
+@testset "Stable identifiers" begin
+    @test stable_hash64("cdcs") == stable_hash64("cdcs")
+    @test stable_seed(:benchmark, 1) == stable_seed(:benchmark, 1)
+    @test stable_seed(:benchmark, 1) != stable_seed(:benchmark, 2)
 end

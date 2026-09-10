@@ -41,6 +41,8 @@ using CausalInference
 using Random
 using SHA
 
+include("utils/stable_hash.jl")
+
 # Re-export commonly used types from Graphs.jl
 import Graphs: DiGraph, SimpleDiGraph, inneighbors, outneighbors, vertices, add_edge!, has_edge
 export DiGraph, SimpleDiGraph

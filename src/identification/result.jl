@@ -43,11 +43,11 @@ end
 """
     graph_fingerprint(g) -> UInt64
 
-Stable hash of directed edges for reproducibility certificates.
+Stable digest of directed edges for reproducibility certificates.
 """
 function graph_fingerprint(g::AbstractGraph)
     edges = sort([(Graphs.src(e), Graphs.dst(e)) for e in Graphs.edges(g)])
-    return hash(edges)
+    return stable_hash64(join(["$src->$dst" for (src, dst) in edges], ";"))
 end
 
 """

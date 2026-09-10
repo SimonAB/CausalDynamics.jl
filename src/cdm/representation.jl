@@ -60,7 +60,7 @@ function representation_certificate(spec::RepresentationSpec)
         source = spec.source,
         code_names = copy(spec.code_names),
         encode_type = string(typeof(spec.encode)),
-        encode_type_hash = hash(typeof(spec.encode)),
+        encode_type_hash = stable_hash64(string(typeof(spec.encode))),
         n_codes = length(spec.code_names),
     )
 end
