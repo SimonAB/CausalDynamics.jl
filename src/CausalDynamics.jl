@@ -49,6 +49,7 @@ export DiGraph, SimpleDiGraph
 
 # Shared intervention hierarchy (SCM / discrete CDM / continuous CDM)
 include("interventions/abstract.jl")
+include("interventions/algebra.jl")
 include("cdm/provenance.jl")
 
 # Graph operations (order matters - d_separation needs sets, paths needs d_separation)

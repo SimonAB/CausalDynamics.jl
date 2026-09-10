@@ -152,6 +152,25 @@ function apply_intervention(scm::GraphSCM, interventions::Vector{DoIntervention}
     return result
 end
 
+"""Apply a typed state intervention through the canonical model-surgery entry point."""
+function apply_intervention(scm::GraphSCM, intervention::SetState)
+    intervention.interval === :all || throw(ArgumentError("GraphSCM state surgery requires interval=:all"))
+    return apply_intervention(scm, DoIntervention(intervention.target, intervention.value))
+end
+
+"""Apply a simultaneous typed intervention to a GraphSCM."""
+function apply_intervention(scm::GraphSCM, intervention::Simultaneous)
+    result = scm
+    for child in intervention.interventions
+        result = apply_intervention(result, child)
+    end
+    return result
+end
+
+function apply_intervention(::GraphSCM, intervention::AbstractTypedIntervention)
+    throw(ArgumentError("$(intervention_kind(intervention)) interventions are not implemented for GraphSCM"))
+end
+
 """
     simulate_scm(scm::GraphSCM, exogenous_values::Dict{Int, <:Any})
 

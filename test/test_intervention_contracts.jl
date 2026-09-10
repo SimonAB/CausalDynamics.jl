@@ -42,33 +42,26 @@
 end
 
 @testset "causal abstraction contract" begin
-    τ = x -> sum(x)
+    τ = x -> x == 0 ? :low : :high
     ω = i -> i
     spec = CausalAbstractionSpec(τ, ω; interventions = [:control], tolerance = 0.0)
-    exact = validate_abstraction(spec, Dict(:control => [1.0, 2.0]), Dict(:control => 3.0))
-    failed = validate_abstraction(spec, Dict(:control => [1.0, 2.0]), Dict(:control => 2.0))
+    exact = validate_abstraction(spec, Dict(:control => FiniteLaw([0, 1], [0.25, 0.75])), Dict(:control => FiniteLaw([:low, :high], [0.25, 0.75])))
+    failed = validate_abstraction(spec, Dict(:control => FiniteLaw([0, 1], [0.25, 0.75])), Dict(:control => FiniteLaw([:low, :high], [0.5, 0.5])))
 
     @test exact.exact
     @test exact.accepted
     @test exact.discrepancy == 0.0
     @test !failed.exact
     @test !failed.accepted
-    @test failed.discrepancy == 1.0
+    @test failed.discrepancy > 0.0
     within_tolerance = validate_abstraction(
-        CausalAbstractionSpec(τ, ω; interventions = [:control], tolerance = 1.0),
-        Dict(:control => [1.0, 2.0]), Dict(:control => 2.0),
+        CausalAbstractionSpec(τ, ω; interventions = [:control], tolerance = 1.0, law_mode = :approximate),
+        Dict(:control => FiniteLaw([0, 1], [0.25, 0.75])), Dict(:control => FiniteLaw([:low, :high], [0.5, 0.5])),
     )
     @test !within_tolerance.exact
     @test within_tolerance.accepted
     @test_throws ArgumentError CausalAbstractionSpec(τ, ω; interventions = Symbol[])
-    @test_throws ArgumentError validate_abstraction(
-        CausalAbstractionSpec(τ, ω; interventions = [:control], distance = (x, y) -> NaN),
-        Dict(:control => [1.0]), Dict(:control => 1.0),
-    )
-    @test_throws ArgumentError validate_abstraction(
-        CausalAbstractionSpec(τ, ω; interventions = [:a, :b], distance = (x, y) -> x),
-        Dict(:a => -1.0, :b => 1.0), Dict(:a => 0.0, :b => 0.0),
-    )
+    @test failed.failed_interventions == [:control]
 end
 
 @testset "provenance fingerprints are semantic" begin

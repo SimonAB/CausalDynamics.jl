@@ -148,7 +148,7 @@ If you have a scenario that should be harder to pass (tighter oracle bounds, mes
 
 ## Documentation
 
-Certificates use the versioned `cdcs.certificate.v1` schema. Semantic identity
+Certificates use the versioned `cdcs.certificate.v2` schema. Semantic identity
 (graph, mechanisms, observation, intervention, estimand and identification) is
 kept separate from runtime metadata such as Julia version, threads and solver
 details. Use `certificate_envelope` when passing `CDMProvenance` between

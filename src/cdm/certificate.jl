@@ -1,6 +1,6 @@
 """Versioned, machine-readable certificates for CDCS analyses."""
 
-const CDCS_CERTIFICATE_SCHEMA = "cdcs.certificate.v1"
+const CDCS_CERTIFICATE_SCHEMA = "cdcs.certificate.v2"
 
 """Return the current certificate schema identifier."""
 certificate_schema_version() = CDCS_CERTIFICATE_SCHEMA

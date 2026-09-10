@@ -164,9 +164,9 @@ certificate record the query and its evidential qualifications alongside the
 model semantics. They remain caller-supplied identifiers rather than hashes of
 arbitrary executable code.
 
-[`CausalAbstractionSpec`](@ref) compares supplied interventional results. It does
-not compute push-forward distributions or discover a state map. `exact` means zero
-declared discrepancy; `accepted` means the discrepancy is within the declared
+[`CausalAbstractionSpec`](@ref) compares finite interventional laws after
+push-forward through the declared state map. `exact` means equality of the
+canonicalised laws; `accepted` is controlled by `law_mode` and the declared
 tolerance.
 
 ```@docs
@@ -176,6 +176,7 @@ canonical_intervention_descriptor
 compose_intervention_descriptors
 ComposedIntervention
 compose_intervention_bundle
+intervention_fingerprint
 CDMProvenance
 provenance_dict
 provenance_fingerprint

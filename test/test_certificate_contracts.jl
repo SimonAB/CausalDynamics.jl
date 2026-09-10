@@ -13,7 +13,7 @@
     )
     certificate = certificate_envelope(provenance; environment = (julia = VERSION,))
     encoded = certificate_dict(certificate)
-    @test encoded["schema_version"] == "cdcs.certificate.v1"
+    @test encoded["schema_version"] == "cdcs.certificate.v2"
     @test encoded["semantic"]["graph"] == "g-1"
     @test encoded["environment"][:julia] == VERSION
 end
