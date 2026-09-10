@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: julia-actions/setup-julia@v3
         with:
-          version: '1.12'
+          version: '1.13'
       - uses: julia-actions/cache@v3
       - name: Install dependencies
         run: |
@@ -33,7 +33,7 @@ jobs:
             Pkg.add("CausalInference")
             # DAGMakie is already declared in docs/Project.toml (and its
             # [sources] entry pins the documentation-compatible repository).
-            # Re-adding it here can make Julia 1.12 retain a stale path entry
+            # Re-adding it here can make Julia 1.13 retain a stale path entry
             # from a developer Manifest and fail before Documenter starts.
             Pkg.resolve()
             Pkg.instantiate()'

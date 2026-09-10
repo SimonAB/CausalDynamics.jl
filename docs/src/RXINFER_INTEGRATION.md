@@ -95,7 +95,7 @@ Package APIs stay in Pearl / SciML vocabulary. For a process-metaphysics gloss u
 
 Optional weak dependencies: `GraphPPL`, `RxInfer`. They are **not** required for core CausalDynamics.
 
-On Julia 1.12, `CausalTargeted` + `CausalDynamics` + `RxInfer` 4+ resolve together from General; **PrettyTables** enters only transitively (via `DataFrames` / MLJ) at **2.x**, matching RxInfer’s weak `PrettyTablesExt`. Neither owned package pins PrettyTables.
+On Julia 1.13, `CausalTargeted` + `CausalDynamics` + `RxInfer` 4+ resolve together from General; Julia 1.12 remains supported by the package compat bounds. **PrettyTables** enters only transitively (via `DataFrames` / MLJ) at **2.x**, matching RxInfer’s weak `PrettyTablesExt`. Neither owned package pins PrettyTables.
 
 The CDCS book environment lists `RxInfer` explicitly and is the reference unified stack for stress notebooks ([CausalTargeted stress validation](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/stress_validation.md)).
 

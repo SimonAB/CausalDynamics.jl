@@ -23,7 +23,7 @@ OrdinaryDiffEq). Chunks use `#| warning: false`.
 ## Last render
 
 - **Date:** 2026-08-21
-- **Julia:** 1.12.7 (`release` via CDCS `Project.toml`, Quarto `--project=../../../../`)
+- **Julia:** 1.13.0 (`release` via CDCS `Project.toml`, Quarto `--project=../../../../`; Julia 1.12 remains supported by package compat)
 - **Artefact:** `docs/stress/deep_scm_stress.html` (local; gitignored)
 - **Scope:** synthetic spectra + Lux CNN stub; ODE residual; generative L3;
   no UniversalDiffEq / Flux-in-core / full MIRS cohort

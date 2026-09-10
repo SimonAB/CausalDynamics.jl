@@ -112,7 +112,7 @@ Full matrices: [ECOSYSTEM_COMPARISON.md](ECOSYSTEM_COMPARISON.md) ·
 
 ## Testing and validation
 
-CI runs `Pkg.test()` on Julia **1.12** (macOS and Ubuntu). Package `test/` is the merge gate; Quarto stress notebooks are pre-ship / methods probes (see [STRESS.md](STRESS.md)).
+CI runs `Pkg.test()` on Julia **1.13** (macOS and Ubuntu). Package `test/` is the merge gate; Quarto stress notebooks are pre-ship / methods probes (see [STRESS.md](STRESS.md)). Julia **1.12** remains within the declared compatibility range.
 
 | Guardrail | What we exercise | Where |
 |-----------|------------------|-------|
