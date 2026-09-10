@@ -33,16 +33,25 @@ probabilities(law::FiniteLaw) = law.probabilities
 """Map a finite law through a deterministic state map."""
 pushforward(map, law::FiniteLaw) = FiniteLaw(map.(law.support), law.probabilities)
 
-"""Exact equality for finite laws with optional numerical tolerance."""
-function law_equal(lhs::FiniteLaw, rhs::FiniteLaw; atol::Real = 0.0)
-    lhs.support == rhs.support || return false
-    return all(isapprox.(lhs.probabilities, rhs.probabilities; atol = atol, rtol = 0.0))
+"""Return a mass map that ignores support order."""
+function _mass_map(law::FiniteLaw{T}) where {T}
+    return Dict{T, Float64}(atom => mass for (atom, mass) in zip(law.support, law.probabilities))
 end
 
-"""Total-variation distance for finite laws on a common support."""
+"""Exact equality for finite laws with optional numerical tolerance."""
+function law_equal(lhs::FiniteLaw, rhs::FiniteLaw; atol::Real = 0.0)
+    left = _mass_map(lhs)
+    right = _mass_map(rhs)
+    keys(left) == keys(right) || return false
+    return all(isapprox(left[atom], right[atom]; atol = atol, rtol = 0.0) for atom in keys(left))
+end
+
+"""Total-variation distance for finite laws, aligning atoms independently of order."""
 function law_distance(lhs::FiniteLaw, rhs::FiniteLaw, _ = :total_variation)
-    lhs.support == rhs.support || return 1.0
-    return 0.5 * sum(abs, lhs.probabilities .- rhs.probabilities)
+    left = _mass_map(lhs)
+    right = _mass_map(rhs)
+    atoms = union(keys(left), keys(right))
+    return 0.5 * sum(abs(get(left, atom, 0.0) - get(right, atom, 0.0)) for atom in atoms)
 end
 
 struct CausalAbstractionSpec{T, W, I, D}
@@ -71,10 +80,13 @@ function validate_abstraction(spec::CausalAbstractionSpec, micro_interventions::
         macro_i = spec.ω(intervention)
         haskey(macro_interventions, macro_i) || throw(ArgumentError("missing macro intervention $macro_i"))
         pushed = pushforward(spec.τ, micro_interventions[intervention]); pushed_laws[intervention] = pushed
-        discrepancy = Float64(spec.distance(pushed, macro_interventions[macro_i]))
+        macro_law = macro_interventions[macro_i]
+        discrepancy = Float64(spec.distance(pushed, macro_law))
         isfinite(discrepancy) && discrepancy >= 0 || throw(ArgumentError("abstraction discrepancy must be finite and non-negative"))
         discrepancies[intervention] = discrepancy
-        (!law_equal(pushed, macro_interventions[macro_i]) && spec.law_mode === :exact || discrepancy > spec.tolerance) && push!(failed, intervention)
+        failed_exact = spec.law_mode === :exact && !law_equal(pushed, macro_law)
+        failed_tolerance = discrepancy > spec.tolerance
+        (failed_exact || failed_tolerance) && push!(failed, intervention)
     end
     discrepancy = maximum(values(discrepancies))
     exact = isempty(failed) && all(law_equal(pushed_laws[i], macro_interventions[spec.ω(i)]) for i in spec.interventions)

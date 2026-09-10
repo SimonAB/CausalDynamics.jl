@@ -13,10 +13,56 @@ function stable_hash64(value)
     return parse(UInt64, bytes2hex(digest[1:8]); base = 16)
 end
 
+"""Return a type-tagged, length-stable encoding of a literal intervention value."""
+function _canonical_literal(value::Symbol)
+    return "Symbol=$(value)"
+end
+
+function _canonical_literal(value::AbstractString)
+    return "String=$(value)"
+end
+
+function _canonical_literal(value::Integer)
+    return "$(nameof(typeof(value)))=$(value)"
+end
+
+function _canonical_literal(value::AbstractFloat)
+    return "$(nameof(typeof(value)))=$(value)"
+end
+
+function _canonical_literal(value::UnitRange)
+    return "UnitRange=$(_canonical_literal(value.start)):$(_canonical_literal(value.stop))"
+end
+
+function _canonical_literal(value)
+    text = string(value)
+    return "$(nameof(typeof(value)))=$(ncodeunits(text)):$(text)"
+end
+
+"""Join canonical field strings with length prefixes."""
+function _canonical_fields(xs)
+    return join(["$(ncodeunits(string(x))):$(x)" for x in xs], "|")
+end
+
+"""Encode the shared intervention-descriptor field tuple."""
+function _canonical_descriptor_fields(target, replacement, replacement_id, interval, scope,
+    stochasticity, cointerventions)
+    cointervention_text = join(
+        ["$(ncodeunits(string(x))):$(x)" for x in sort(collect(cointerventions))],
+        "|",
+    )
+    fields = (
+        string(target), string(replacement), string(replacement_id),
+        _canonical_literal(interval), string(scope), string(stochasticity),
+        cointervention_text,
+    )
+    return _canonical_fields(fields)
+end
+
 """Return a length-prefixed representation of one seed component."""
 function _canonical_seed_component(part)
     type_text = string(typeof(part))
-    value_text = repr(part)
+    value_text = _canonical_literal(part)
     return "$(ncodeunits(type_text)):$type_text$(ncodeunits(value_text)):$value_text"
 end
 

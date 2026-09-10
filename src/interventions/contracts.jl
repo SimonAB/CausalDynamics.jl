@@ -48,7 +48,7 @@ function intervention_descriptor(intervention::DoIntervention)
 end
 
 """Return a stable literal identifier for a scalar or immutable replacement value."""
-_literal_intervention_id(value) = repr(value)
+_literal_intervention_id(value) = _canonical_literal(value)
 
 """Return one descriptor for each assignment in a discrete-time `do` sequence."""
 function intervention_descriptor(intervention::DoSequence; replacement_ids::AbstractDict = Dict{Symbol, String}())
@@ -91,12 +91,11 @@ encodes metadata only; it does not serialise or fingerprint arbitrary Julia
 functions. Use an explicit versioned `replacement_id` for functional policies.
 """
 function canonical_intervention_descriptor(descriptor::InterventionDescriptor)
-    fields = (
-        string(descriptor.target), string(descriptor.replacement), descriptor.replacement_id,
-        repr(descriptor.interval), string(descriptor.scope), string(descriptor.stochasticity),
-        join(["$(ncodeunits(string(x))):$(x)" for x in sort(descriptor.cointerventions)], "|"),
+    return _canonical_descriptor_fields(
+        descriptor.target, descriptor.replacement, descriptor.replacement_id,
+        descriptor.interval, descriptor.scope, descriptor.stochasticity,
+        descriptor.cointerventions,
     )
-    return join(["$(ncodeunits(field)):$field" for field in fields], "|")
 end
 
 """
@@ -115,10 +114,11 @@ end
 """
     ComposedIntervention(descriptors; mode=:simultaneous)
 
-An immutable, typed container for a validated intervention composition.  The
-legacy `compose_intervention_descriptors` function remains available and returns
-the descriptor vector; this container makes the intended temporal semantics
-explicit for certificates and downstream execution engines.
+Audit container for a validated intervention composition. Executable algebra
+uses `Simultaneous` and `Sequential`; this type records the same mode for
+certificates. Simultaneous bundles still reject duplicate targets; sequential
+bundles may repeat a target. The vector-returning
+`compose_intervention_descriptors` function remains available.
 """
 struct ComposedIntervention
     descriptors::Vector{InterventionDescriptor}
@@ -131,9 +131,20 @@ function ComposedIntervention(
 )
     mode in (:simultaneous, :sequential) ||
         throw(ArgumentError("intervention composition mode must be :simultaneous or :sequential"))
-    validated = compose_intervention_descriptors(descriptors...)
+    isempty(descriptors) && throw(ArgumentError("an intervention composition must not be empty"))
+    validated = if mode === :simultaneous
+        compose_intervention_descriptors(descriptors...)
+    else
+        collect(descriptors)
+    end
     mode === :simultaneous && _check_intervention_intervals(validated)
     return ComposedIntervention(copy(validated), mode)
+end
+
+"""Encode a composed audit bundle, including sequential repeats on one target."""
+function canonical_intervention_descriptor(bundle::ComposedIntervention)
+    return _canonical_fields((
+        bundle.mode, map(canonical_intervention_descriptor, bundle.descriptors)...))
 end
 
 """Validate that simultaneous descriptors do not overlap on one target."""
@@ -183,6 +194,88 @@ function intervention_descriptor(interventions::ContinuousInterventionSet; repla
     end
     return descriptors
 end
+
+"""Return the audit descriptor for a typed state assignment."""
+function intervention_descriptor(intervention::SetState)
+    return InterventionDescriptor(
+        intervention.target;
+        replacement = :constant,
+        replacement_id = _canonical_literal(intervention.value),
+        interval = intervention.interval,
+        scope = intervention.scope,
+    )
+end
+
+function intervention_descriptor(intervention::SetInitialCondition)
+    return InterventionDescriptor(
+        intervention.target;
+        replacement = :initial_condition,
+        replacement_id = _canonical_literal(intervention.value),
+        scope = intervention.scope,
+    )
+end
+
+function intervention_descriptor(intervention::ReplacePolicy)
+    return InterventionDescriptor(
+        intervention.target;
+        replacement = :policy,
+        replacement_id = intervention.replacement_id,
+        interval = intervention.interval,
+        scope = intervention.scope,
+    )
+end
+
+function intervention_descriptor(intervention::ReplaceParameter)
+    return InterventionDescriptor(
+        intervention.target;
+        replacement = :parameter,
+        replacement_id = intervention.replacement_id,
+        scope = intervention.scope,
+    )
+end
+
+function intervention_descriptor(intervention::ReplaceMechanism)
+    return InterventionDescriptor(
+        intervention.target;
+        replacement = :rhs,
+        replacement_id = intervention.replacement_id,
+        interval = intervention.interval,
+        scope = intervention.scope,
+    )
+end
+
+function _as_descriptor_vector(intervention)
+    descriptor = intervention_descriptor(intervention)
+    descriptor isa InterventionDescriptor && return InterventionDescriptor[descriptor]
+    descriptor isa AbstractVector && return InterventionDescriptor[descriptor...]
+    descriptor isa ComposedIntervention && return copy(descriptor.descriptors)
+    throw(ArgumentError("cannot encode $(typeof(intervention)) as an intervention descriptor"))
+end
+
+function intervention_descriptor(intervention::Simultaneous)
+    return ComposedIntervention(
+        reduce(vcat, _as_descriptor_vector.(intervention.interventions); init = InterventionDescriptor[]);
+        mode = :simultaneous,
+    )
+end
+
+function intervention_descriptor(intervention::Sequential)
+    return ComposedIntervention(
+        reduce(vcat, _as_descriptor_vector.(intervention.interventions); init = InterventionDescriptor[]);
+        mode = :sequential,
+    )
+end
+
+_provenance_intervention_id(intervention::InterventionDescriptor) =
+    canonical_intervention_descriptor(intervention)
+
+function _provenance_intervention_id(intervention::AbstractVector{<:InterventionDescriptor})
+    descriptors = sort(canonical_intervention_descriptor.(intervention))
+    return join(["$(ncodeunits(x)):$x" for x in descriptors], "")
+end
+
+_provenance_intervention_id(intervention::ComposedIntervention) =
+    canonical_intervention_descriptor(intervention)
 
 export InterventionDescriptor, intervention_descriptor, canonical_intervention_descriptor,
     compose_intervention_descriptors, ComposedIntervention, compose_intervention_bundle

@@ -6,6 +6,9 @@
     @test bundle.descriptors == [d₁, d₂]
     @test_throws ArgumentError compose_intervention_bundle(d₁, d₁)
     @test_throws ArgumentError compose_intervention_bundle(d₁; mode = :invalid)
+    sequential_bundle = compose_intervention_bundle(d₁, d₁; mode = :sequential)
+    @test sequential_bundle.mode === :sequential
+    @test length(sequential_bundle.descriptors) == 2
 
     provenance = CDMProvenance(
         graph = "g-1", mechanisms = "f-1", observation = "h-1", policy = "π-1",

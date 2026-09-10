@@ -167,6 +167,15 @@ function apply_intervention(scm::GraphSCM, intervention::Simultaneous)
     return result
 end
 
+"""Apply a sequential typed intervention to a GraphSCM, in declared order."""
+function apply_intervention(scm::GraphSCM, intervention::Sequential)
+    result = scm
+    for child in intervention.interventions
+        result = apply_intervention(result, child)
+    end
+    return result
+end
+
 function apply_intervention(::GraphSCM, intervention::AbstractTypedIntervention)
     throw(ArgumentError("$(intervention_kind(intervention)) interventions are not implemented for GraphSCM"))
 end

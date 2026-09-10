@@ -19,4 +19,9 @@
     @test_throws ArgumentError FiniteLaw([:a], [-1.0])
     @test_throws ArgumentError CausalAbstractionSpec(identity, identity;
         interventions = [:x], law_mode = :invalid)
+
+    permuted = FiniteLaw([:b, :a], [0.3, 0.7])
+    @test law_equal(law, permuted)
+    @test law_distance(law, permuted) ≈ 0.0
+    @test law_distance(law, FiniteLaw([:a, :b], [1.0, 0.0])) ≈ 0.3
 end

@@ -62,16 +62,10 @@ function CDMProvenance(
     )
 end
 
-function _provenance_intervention_id(intervention)
-    if isdefined(@__MODULE__, :InterventionDescriptor) && intervention isa InterventionDescriptor
-        return canonical_intervention_descriptor(intervention)
-    elseif isdefined(@__MODULE__, :InterventionDescriptor) &&
-           intervention isa AbstractVector && all(x -> x isa InterventionDescriptor, intervention)
-        descriptors = sort(canonical_intervention_descriptor.(intervention))
-        return join(["$(ncodeunits(x)):$x" for x in descriptors], "")
-    end
-    return string(intervention)
-end
+_provenance_intervention_id(intervention::AbstractTypedIntervention) =
+    canonical_intervention(intervention)
+
+_provenance_intervention_id(intervention) = string(intervention)
 
 """Return canonical serialisable provenance metadata."""
 function provenance_dict(provenance::CDMProvenance)

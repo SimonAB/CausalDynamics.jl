@@ -166,8 +166,14 @@ arbitrary executable code.
 
 [`CausalAbstractionSpec`](@ref) compares finite interventional laws after
 push-forward through the declared state map. `exact` means equality of the
-canonicalised laws; `accepted` is controlled by `law_mode` and the declared
-tolerance.
+laws as mass maps (support order does not matter); `accepted` is controlled by
+`law_mode` and the declared tolerance.
+
+[`SetState`](@ref) is the typed form of [`DoIntervention`](@ref) on a
+[`GraphSCM`](@ref) and of a constant [`DoSequence`](@ref) on a
+[`DiscreteTimeCDM`](@ref). [`ReplacePolicy`](@ref) is the auditable form of
+[`Policy`](@ref) when a `rule` is supplied. [`apply_intervention`](@ref) on a
+CDM bakes that surgery into `initialise` and `step`.
 
 ```@docs
 InterventionDescriptor

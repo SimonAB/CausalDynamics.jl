@@ -190,12 +190,112 @@ function intervention_value(intervention::Policy, variable::Symbol, t::Int, obse
     return intervention.rules[variable](state, t)
 end
 
+function intervention_value(intervention::SetState, variable::Symbol, t::Int, observational_value)
+    intervention.target === variable || return observational_value
+    _in_interval(intervention.interval, t) || return observational_value
+    return _setstate_value(intervention.value, t)
+end
+
+function intervention_value(intervention::SetInitialCondition, variable::Symbol, t::Int, observational_value)
+    intervention.target === variable && t == 1 ? intervention.value : observational_value
+end
+
+function intervention_value(intervention::SetInitialCondition, variable::Symbol, t::Int,
+    observational_value, ::Any)
+    return intervention_value(intervention, variable, t, observational_value)
+end
+
+function intervention_value(intervention::SetState, variable::Symbol, t::Int, observational_value, ::Any)
+    return intervention_value(intervention, variable, t, observational_value)
+end
+
+function intervention_value(::ReplacePolicy, variable::Symbol, t::Int, observational_value)
+    throw(ArgumentError(
+        "ReplacePolicy assignment for :$variable needs the current state; " *
+        "call intervention_value(intervention, variable, t, observational_value, state)",
+    ))
+end
+
+function intervention_value(intervention::ReplacePolicy, variable::Symbol, t::Int, observational_value, state)
+    intervention.target === variable || return observational_value
+    _in_interval(intervention.interval, t) || return observational_value
+    intervention.rule === nothing && throw(ArgumentError(
+        "ReplacePolicy $(intervention.replacement_id) needs a rule for CDM surgery",
+    ))
+    state === nothing && throw(ArgumentError(
+        "ReplacePolicy assignment for :$variable needs the current state",
+    ))
+    return intervention.rule(state, t)
+end
+
+function intervention_value(intervention::Union{Simultaneous, Sequential}, variable::Symbol, t::Int,
+    observational_value)
+    return intervention_value(intervention, variable, t, observational_value, nothing)
+end
+
+function intervention_value(intervention::Simultaneous, variable::Symbol, t::Int, observational_value, state)
+    for child in intervention.interventions
+        _cdm_assignment_applies(child, variable, t) || continue
+        return intervention_value(child, variable, t, observational_value, state)
+    end
+    return observational_value
+end
+
+function intervention_value(intervention::Sequential, variable::Symbol, t::Int, observational_value, state)
+    value = observational_value
+    for child in intervention.interventions
+        value = intervention_value(child, variable, t, value, state)
+    end
+    return value
+end
+
+function _cdm_assignment_applies(intervention::SetState, variable::Symbol, t::Int)
+    return intervention.target === variable && _in_interval(intervention.interval, t)
+end
+
+_cdm_assignment_applies(intervention::SetInitialCondition, variable::Symbol, t::Int) =
+    intervention.target === variable && t == 1
+
+function _cdm_assignment_applies(intervention::ReplacePolicy, variable::Symbol, t::Int)
+    return intervention.target === variable && _in_interval(intervention.interval, t)
+end
+
+function _cdm_assignment_applies(intervention::DoSequence, variable::Symbol, ::Int)
+    return haskey(intervention.values, variable)
+end
+
+function _cdm_assignment_applies(intervention::Policy, variable::Symbol, ::Int)
+    return haskey(intervention.rules, variable)
+end
+
+_cdm_assignment_applies(::AbstractCausalIntervention, ::Symbol, ::Int) = false
+
+_intervention_targets(x::DoSequence) = collect(keys(x.values))
+_intervention_targets(x::Policy) = collect(keys(x.rules))
+
+function _canonical_assignment(assignment::ConstantAssignment)
+    return _canonical_literal(assignment.value)
+end
+function _canonical_assignment(assignment::SeriesAssignment)
+    return join(_canonical_literal.(assignment.values), ",")
+end
+_canonical_assignment(::TimedAssignment) = "TimedAssignment"
+
+function canonical_intervention(x::DoSequence)
+    parts = ["$(target)=$(_canonical_assignment(x.values[target]))" for target in sort!(collect(keys(x.values)))]
+    return _canonical_fields((:do_sequence, parts...))
+end
+
+function canonical_intervention(x::Policy)
+    return _canonical_fields((:policy, sort!(string.(collect(keys(x.rules))))...))
+end
+
 """
     _apply_do_to_state(state, intervention, t)
 
 Return a `NamedTuple` copy of `state` with any `DoSequence` assignments at time `t`.
 """
-function _apply_do_to_state(state::NamedTuple, intervention::Union{Nothing, AbstractIntervention}, t::Int)
+function _apply_do_to_state(state::NamedTuple, intervention::Union{Nothing, AbstractCausalIntervention}, t::Int)
     intervention === nothing && return state
     return NamedTuple{keys(state)}(
         ntuple(i -> begin
@@ -242,6 +342,32 @@ function DiscreteTimeCDM(
 end
 
 """
+    apply_intervention(cdm::DiscreteTimeCDM, intervention)
+
+Return a CDM whose initial state and step close over `intervention`, so later
+[`simulate`](@ref) calls apply that surgery without passing it again.
+"""
+function apply_intervention(cdm::DiscreteTimeCDM, intervention::ReplacePolicy)
+    intervention.rule === nothing && throw(ArgumentError(
+        "ReplacePolicy $(intervention.replacement_id) needs a rule for CDM surgery",
+    ))
+    return _bake_cdm_intervention(cdm, intervention)
+end
+
+function apply_intervention(cdm::DiscreteTimeCDM, intervention::AbstractCausalIntervention)
+    intervention isa Union{SetState, SetInitialCondition, ReplacePolicy, Simultaneous, Sequential,
+        DoSequence, Policy} || throw(ArgumentError(
+            "$(intervention_kind(intervention)) interventions are not implemented for DiscreteTimeCDM"))
+    return _bake_cdm_intervention(cdm, intervention)
+end
+
+function _bake_cdm_intervention(cdm::DiscreteTimeCDM, intervention)
+    initialise = rng -> _apply_do_to_state(cdm.initialise(rng), intervention, 1)
+    step = (state, t, noise, _) -> cdm.step(state, t, noise, intervention)
+    return DiscreteTimeCDM(cdm.variables; initialise = initialise, sample_noise = cdm.sample_noise, step = step)
+end
+
+"""
     CDMTrajectory
 
 Result of simulating a [`DiscreteTimeCDM`](@ref).
@@ -285,7 +411,7 @@ function simulate(
     cdm::DiscreteTimeCDM,
     T::Integer;
     rng::Random.AbstractRNG = Random.default_rng(),
-    intervention::Union{Nothing, AbstractIntervention} = nothing,
+    intervention::Union{Nothing, AbstractCausalIntervention} = nothing,
 )
     T = Int(T)
     T < 1 && throw(ArgumentError("T must be ≥ 1, got $T"))
@@ -323,7 +449,7 @@ Resimulate `cdm` under `intervention` using fixed exogenous draws `noise`
 function counterfactual(
     cdm::DiscreteTimeCDM,
     noise::Dict{Symbol, <:AbstractVector};
-    intervention::AbstractIntervention,
+    intervention::AbstractCausalIntervention,
     initial::Union{Nothing, NamedTuple} = nothing,
 )
     isempty(noise) && throw(ArgumentError("noise dictionary is empty"))
@@ -399,7 +525,7 @@ function g_computation(
     cdm::DiscreteTimeCDM,
     T::Integer,
     outcome::Symbol;
-    intervention::AbstractIntervention,
+    intervention::AbstractCausalIntervention,
     n::Integer = 1000,
     rng::Random.AbstractRNG = Random.default_rng(),
     reduce = last,
