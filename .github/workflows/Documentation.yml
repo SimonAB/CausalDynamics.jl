@@ -31,7 +31,11 @@ jobs:
             Pkg.develop(PackageSpec(path=pwd()))
             # CausalInference ≥0.19.4 (General) allows GraphMakie 0.5–0.6.
             Pkg.add("CausalInference")
-            Pkg.add("DAGMakie")
+            # DAGMakie is already declared in docs/Project.toml (and its
+            # [sources] entry pins the documentation-compatible repository).
+            # Re-adding it here can make Julia 1.12 retain a stale path entry
+            # from a developer Manifest and fail before Documenter starts.
+            Pkg.resolve()
             Pkg.instantiate()'
       - name: Build and deploy documentation
         env:
