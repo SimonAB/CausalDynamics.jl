@@ -417,7 +417,7 @@ Like [`plan_targeted_estimation`](@ref) for a **single session slice** from long
 capture data. When `query.t_outcome != session`, runs
 [`check_occasion_resolution`](@ref) and warns if resolution mismatches.
 
-Pass `data=` as the **session slice** (see [`session_slice`](@ref)), not the
+Pass `data=` as the **session slice** (see `session_slice`), not the
 full long panel.
 """
 function plan_session_estimation(
