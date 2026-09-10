@@ -71,9 +71,23 @@ function residualise_backdoor(args...; kwargs...)
     return ext.residualise_backdoor(args...; kwargs...)
 end
 
+"""
+    infer_bistable_state_space(y, a, c, r; kwargs...) -> NonlinearStateSpaceResult
+
+Run optional RxInfer variational inference for the nonlinear bistable state-space
+model. The transition is represented as an explicit nonlinear Delta factor and
+RxInfer applies local linearisation to pass Gaussian messages. This is an
+inference operation only; intervention semantics remain supplied by the caller.
+"""
+function infer_bistable_state_space(args...; kwargs...)
+    ext = _require_rxinfer!(:infer_bistable_state_space)
+    return ext.infer_bistable_state_space(args...; kwargs...)
+end
+
 export has_rxinfer,
     infer_backdoor_effect,
     backdoor_graphppl_model,
     ppl_data_from_spec,
     posterior_mean_τ,
-    residualise_backdoor
+    residualise_backdoor,
+    infer_bistable_state_space

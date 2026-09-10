@@ -2,6 +2,35 @@
 
 CausalDynamics.jl handles **identification** (backdoor adjustment sets, `prepare_for_rxinfer`). **GraphPPL.jl** specifies the observational generative head; **RxInfer.jl** runs variational message-passing inference.
 
+## Nonlinear bistable state-space inference
+
+The extension also provides `infer_bistable_state_space`, an explicit nonlinear
+state-space model for the CDCS bistable benchmark. Its transition is represented
+as a GraphPPL Delta factor:
+
+```julia
+μ[t] ~ bistable_transition(x[t], a[t], c[t], r[t], Δt) where {
+    meta = DeltaMeta(method = Linearization())
+}
+```
+
+RxInfer therefore performs Gaussian variational message passing with local
+linearisation of the cubic drift; this is a nonlinear factor rather than a
+pre-filtered observed proxy. The result exposes posterior state means and
+variances through `state_means` and `state_variances`.
+
+```julia
+result = infer_bistable_state_space(y, a, c, r; iterations = 20)
+result.state_means
+result.state_variances
+```
+
+The method estimates latent states conditional on declared transition and noise
+parameters. It does not by itself identify interventions, learn regime
+mechanisms, or establish causal validity. Compare its posterior predictive and
+interventional rollouts with the particle-filter reference before making policy
+claims.
+
 Load the extension:
 
 ```julia

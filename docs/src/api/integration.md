@@ -18,6 +18,7 @@ Requires `using RxInfer` to load the `CausalDynamicsRxInfer` extension.
 prepare_for_rxinfer
 has_rxinfer
 infer_backdoor_effect
+infer_bistable_state_space
 backdoor_graphppl_model
 ppl_data_from_spec
 prepare_for_turing

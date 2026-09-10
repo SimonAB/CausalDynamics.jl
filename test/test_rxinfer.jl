@@ -70,5 +70,23 @@ using Test
             randn(n_small),
             [randn(n_small), randn(n_small), randn(n_small), randn(n_small)],
         )
+
+        # Nonlinear Delta-factor state-space backend (GraphPPL v4 syntax).
+        n_ssm = 10
+        y_ssm = randn(n_ssm)
+        a_ssm = zeros(n_ssm)
+        c_ssm = zeros(n_ssm)
+        r_ssm = zeros(Int, n_ssm)
+        state_result = CausalDynamics.infer_bistable_state_space(
+            y_ssm, a_ssm, c_ssm, r_ssm; iterations = 3,
+        )
+        @test state_result.n == n_ssm
+        @test length(state_result.state_means) == n_ssm
+        @test length(state_result.state_variances) == n_ssm
+        @test all(isfinite, state_result.state_means)
+        @test all(>(0), state_result.state_variances)
+        @test_throws ArgumentError CausalDynamics.infer_bistable_state_space(
+            randn(3), randn(2), randn(3), randn(3),
+        )
     end
 end

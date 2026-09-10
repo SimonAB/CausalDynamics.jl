@@ -14,14 +14,26 @@ using CausalDynamics: CausalDynamics,
 using DataFrames: DataFrames
 using GraphPPL: GraphPPL
 using LinearAlgebra: rank
-using RxInfer: RxInfer, @model, infer, Normal, KeepLast
+using RxInfer: RxInfer, @model, infer, Normal, KeepLast, DeltaMeta, Linearization
 
 export BackdoorInferenceResult,
+    NonlinearStateSpaceResult,
     backdoor_graphppl_model,
     infer_backdoor_effect,
     ppl_data_from_spec,
     posterior_mean_τ,
-    residualise_backdoor
+    residualise_backdoor,
+    infer_bistable_state_space
+
+"""Result of nonlinear RxInfer state-space inference."""
+struct NonlinearStateSpaceResult{T}
+    state_posterior::T
+    state_means::Vector{Float64}
+    state_variances::Vector{Float64}
+    n::Int
+    iterations::Int
+    raw::Any
+end
 
 """
     BackdoorInferenceResult
@@ -98,6 +110,88 @@ function residualise_backdoor(y::AbstractVector{<:Real}, x::AbstractVector{<:Rea
     β_y = design \ y
     β_x = design \ x
     return y .- design * β_y, x .- design * β_x
+end
+
+"""Nonlinear bistable drift used by the RxInfer Delta factor."""
+function bistable_transition(x, a, c, r, Δt)
+    return x + Δt * (x - x^3 + a - 0.55 * c - 0.65 * r)
+end
+
+# GraphPPL model with an explicit nonlinear transition factor.  The model
+# macro emits several generated methods, so documenting the public wrapper
+# below avoids attaching a docstring to the generated expression.
+@model function bistable_state_space_model(y, a, c, r, Δt, process_variance, observation_variance)
+    x[1] ~ Normal(mean = 0.65, var = 1.0)
+    for t in 1:(length(y) - 1)
+        μ[t] ~ bistable_transition(x[t], a[t], c[t], r[t], Δt) where {
+            meta = DeltaMeta(method = Linearization())
+        }
+        x[t + 1] ~ Normal(mean = μ[t], var = process_variance * Δt)
+    end
+    for t in eachindex(y)
+        y[t] ~ Normal(mean = x[t], var = observation_variance)
+    end
+end
+
+"""Return the mean and variance encoded by a Gaussian RxInfer marginal."""
+function _normal_marginal_summary(marginal)
+    precision = Float64(marginal.w)
+    return (mean = Float64(marginal.xi / precision), variance = inv(precision))
+end
+
+"""
+    infer_bistable_state_space(y, a, c, r; Δt, process_variance,
+        observation_variance, iterations, showprogress)
+
+Fit the nonlinear bistable state-space model with RxInfer. The model uses a
+Gaussian variational family and local linearisation of the nonlinear drift.
+"""
+function infer_bistable_state_space(
+    y::AbstractVector{<:Real},
+    a::AbstractVector{<:Real},
+    c::AbstractVector{<:Real},
+    r::AbstractVector{<:Real};
+    Δt::Real = 0.08,
+    process_variance::Real = 0.18^2,
+    observation_variance::Real = 0.30^2,
+    iterations::Int = 20,
+    showprogress::Bool = false,
+    kwargs...,
+)
+    n = length(y)
+    n ≥ 2 || throw(ArgumentError("at least two observations are required"))
+    all(length(v) == n for v in (a, c, r)) || throw(ArgumentError(
+        "y, a, c and r must have equal lengths",
+    ))
+    raw = infer(
+        model = bistable_state_space_model(
+            Δt = Float64(Δt),
+            process_variance = Float64(process_variance),
+            observation_variance = Float64(observation_variance),
+        ),
+        # The transition factor is defined for t = 1:(n - 1); passing only
+        # those covariate entries keeps GraphPPL datavar sizes explicit.
+        data = (
+            y = Float64.(y),
+            a = Float64.(a[1:(n - 1)]),
+            c = Float64.(c[1:(n - 1)]),
+            r = Float64.(r[1:(n - 1)]),
+        ),
+        iterations = iterations,
+        showprogress = showprogress,
+        returnvars = (x = KeepLast(),),
+        kwargs...,
+    )
+    posterior = raw.posteriors[:x]
+    summaries = _normal_marginal_summary.(posterior)
+    return NonlinearStateSpaceResult(
+        posterior,
+        [summary.mean for summary in summaries],
+        [summary.variance for summary in summaries],
+        n,
+        iterations,
+        raw,
+    )
 end
 
 """
