@@ -176,6 +176,17 @@ canonical_intervention_descriptor
 compose_intervention_descriptors
 ComposedIntervention
 compose_intervention_bundle
+SetState
+SetInitialCondition
+ReplacePolicy
+ReplaceParameter
+ReplaceMechanism
+Simultaneous
+Sequential
+intervention_kind
+intervention_target
+intervention_interval
+canonical_intervention
 intervention_fingerprint
 CDMProvenance
 provenance_dict
