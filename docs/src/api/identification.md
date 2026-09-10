@@ -40,6 +40,7 @@ OutcomeKind
 NodeOutcomeSpec
 EstimationPlan
 plan_targeted_estimation
+plan_session_estimation
 identification_support
 ```
 
