@@ -174,9 +174,15 @@ InterventionDescriptor
 intervention_descriptor
 canonical_intervention_descriptor
 compose_intervention_descriptors
+ComposedIntervention
+compose_intervention_bundle
 CDMProvenance
 provenance_dict
 provenance_fingerprint
+certificate_schema_version
+CertificateEnvelope
+certificate_envelope
+certificate_dict
 CausalAbstractionSpec
 CausalAbstractionResult
 validate_abstraction
