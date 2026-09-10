@@ -5,6 +5,9 @@ Optional plotting requires [DAGMakie.jl](https://simonab.github.io/DAGMakie.jl)
 for layout, themes, and path-highlighting conventions.
 
 ```@docs
+stable_hash64
+stable_seed
+stable_rng_seed
 has_dagmakie
 plot_causal_graph
 plot_with_adjustment_set
