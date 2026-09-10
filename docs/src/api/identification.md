@@ -30,7 +30,6 @@ IdentificationError
 MissingnessSpec
 MissingnessCertificate
 certify_missingness
-certificate_dict
 graph_fingerprint
 identification_report
 temporal_adjustment_columns
