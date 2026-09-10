@@ -8,6 +8,8 @@ module CausalDynamicsRxInfer
 
 using CausalDynamics: CausalDynamics,
     prepare_for_rxinfer,
+    CDMProvenance,
+    provenance_fingerprint,
     AbstractGraph,
     CausalGraph,
     Graphs
@@ -33,6 +35,7 @@ struct NonlinearStateSpaceResult{T}
     n::Int
     iterations::Int
     raw::Any
+    certificate::NamedTuple
 end
 
 """
@@ -139,6 +142,32 @@ function _normal_marginal_summary(marginal)
     return (mean = Float64(marginal.xi / precision), variance = inv(precision))
 end
 
+"""Create semantic provenance for one nonlinear RxInfer fit."""
+function _rxinfer_certificate(Δt, process_variance, observation_variance, iterations)
+    provenance = CDMProvenance(
+        graph = "X_t,A_t,C_t,R_t -> X_{t+1}; X_t -> Y_t",
+        mechanisms = "Euler transition with cubic bistable drift",
+        observation = "Y_t = X_t + Normal(0, observation_variance)",
+        policy = "actions and covariates supplied by caller",
+        exogenous = "Gaussian process and observation noise",
+        intervention = "none; latent-state inference only",
+        scale_map = "unit-level latent trajectory",
+        numerical = "Δt=$(Float64(Δt)), iterations=$(iterations)",
+        coupling = "single-world variational posterior",
+        estimand = "latent state posterior",
+        identification = "not a causal identification operation",
+        estimator = "RxInfer Delta factor with Linearization",
+        positivity = "not applicable",
+        sensitivity = "process_variance=$(Float64(process_variance)), observation_variance=$(Float64(observation_variance))",
+    )
+    return (
+        backend = :rxinfer,
+        factor = :nonlinear_delta,
+        method = :linearization,
+        fingerprint = provenance_fingerprint(provenance),
+    )
+end
+
 """
     infer_bistable_state_space(y, a, c, r; Δt, process_variance,
         observation_variance, iterations, showprogress)
@@ -195,6 +224,7 @@ function infer_bistable_state_space(
         n,
         iterations,
         raw,
+        _rxinfer_certificate(Δt, process_variance, observation_variance, iterations),
     )
 end
 

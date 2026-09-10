@@ -31,6 +31,17 @@ mechanisms, or establish causal validity. Compare its posterior predictive and
 interventional rollouts with the particle-filter reference before making policy
 claims.
 
+### Choosing an inference backend
+
+Use the RxInfer backend when the transition and observation factors admit a
+smooth local linearisation and fast repeated posterior updates matter. Use the
+Laplace or assumed-density filter for a lightweight baseline, particle filtering
+when the posterior is strongly non-Gaussian or multimodal, and Turing/NUTS when
+joint parameter uncertainty or a richer likelihood is the primary target. The
+certificate returned by `infer_bistable_state_space` records the backend,
+factor type, linearisation method and numerical settings so these choices remain
+auditable.
+
 Load the extension:
 
 ```julia

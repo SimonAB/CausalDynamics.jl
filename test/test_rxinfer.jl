@@ -85,6 +85,9 @@ using Test
         @test length(state_result.state_variances) == n_ssm
         @test all(isfinite, state_result.state_means)
         @test all(>(0), state_result.state_variances)
+        @test state_result.certificate.backend == :rxinfer
+        @test state_result.certificate.factor == :nonlinear_delta
+        @test length(state_result.certificate.fingerprint) == 64
         @test_throws ArgumentError CausalDynamics.infer_bistable_state_space(
             randn(3), randn(2), randn(3), randn(3),
         )
