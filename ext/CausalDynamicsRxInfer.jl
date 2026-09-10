@@ -163,6 +163,10 @@ function infer_bistable_state_space(
     all(length(v) == n for v in (a, c, r)) || throw(ArgumentError(
         "y, a, c and r must have equal lengths",
     ))
+    Δt > 0 || throw(ArgumentError("Δt must be positive"))
+    process_variance > 0 || throw(ArgumentError("process_variance must be positive"))
+    observation_variance > 0 || throw(ArgumentError("observation_variance must be positive"))
+    iterations ≥ 1 || throw(ArgumentError("iterations must be at least one"))
     raw = infer(
         model = bistable_state_space_model(
             Δt = Float64(Δt),

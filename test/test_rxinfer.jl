@@ -88,5 +88,8 @@ using Test
         @test_throws ArgumentError CausalDynamics.infer_bistable_state_space(
             randn(3), randn(2), randn(3), randn(3),
         )
+        @test_throws ArgumentError CausalDynamics.infer_bistable_state_space(
+            randn(3), zeros(3), zeros(3), zeros(3); Δt = 0,
+        )
     end
 end
