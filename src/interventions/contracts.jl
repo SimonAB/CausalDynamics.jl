@@ -112,6 +112,41 @@ function compose_intervention_descriptors(descriptors::InterventionDescriptor...
     return collect(descriptors)
 end
 
+"""
+    ComposedIntervention(descriptors; mode=:simultaneous)
+
+An immutable, typed container for a validated intervention composition.  The
+legacy `compose_intervention_descriptors` function remains available and returns
+the descriptor vector; this container makes the intended temporal semantics
+explicit for certificates and downstream execution engines.
+"""
+struct ComposedIntervention
+    descriptors::Vector{InterventionDescriptor}
+    mode::Symbol
+end
+
+function ComposedIntervention(
+    descriptors::AbstractVector{<:InterventionDescriptor};
+    mode::Symbol = :simultaneous,
+)
+    mode in (:simultaneous, :sequential) ||
+        throw(ArgumentError("intervention composition mode must be :simultaneous or :sequential"))
+    validated = compose_intervention_descriptors(descriptors...)
+    mode === :simultaneous && _check_intervention_intervals(validated)
+    return ComposedIntervention(copy(validated), mode)
+end
+
+"""Validate that simultaneous descriptors do not overlap on one target."""
+function _check_intervention_intervals(descriptors)
+    # Duplicate targets are already rejected.  This hook deliberately remains
+    # conservative: interval-specific overlap rules belong to typed schedulers.
+    return descriptors
+end
+
+"""Return a typed composition while retaining the legacy vector API."""
+compose_intervention_bundle(descriptors::InterventionDescriptor...; mode::Symbol = :simultaneous) =
+    ComposedIntervention(collect(descriptors); mode)
+
 function intervention_descriptor(intervention::DoPin)
     return InterventionDescriptor(intervention.variable;
         replacement = :pin, replacement_id = _literal_intervention_id(intervention.value),
@@ -150,4 +185,4 @@ function intervention_descriptor(interventions::ContinuousInterventionSet; repla
 end
 
 export InterventionDescriptor, intervention_descriptor, canonical_intervention_descriptor,
-    compose_intervention_descriptors
+    compose_intervention_descriptors, ComposedIntervention, compose_intervention_bundle

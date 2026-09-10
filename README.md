@@ -148,6 +148,12 @@ If you have a scenario that should be harder to pass (tighter oracle bounds, mes
 
 ## Documentation
 
+Certificates use the versioned `cdcs.certificate.v1` schema. Semantic identity
+(graph, mechanisms, observation, intervention, estimand and identification) is
+kept separate from runtime metadata such as Julia version, threads and solver
+details. Use `certificate_envelope` when passing `CDMProvenance` between
+packages.
+
 - [Documenter site](https://simonab.github.io/CausalDynamics.jl/dev/) (API, examples, live DAGMakie figures)
 - [References](https://simonab.github.io/CausalDynamics.jl/dev/references/) — DOIs / BibTeX keys
 - [Deep SCM stress](STRESS.md) — Quarto ([qmd](docs/stress/deep_scm_stress.qmd)); encode / CNN stub / mechanisms / L3; [Documenter](https://simonab.github.io/CausalDynamics.jl/dev/stress_deep_scm/)

@@ -106,5 +106,6 @@ include("integration/sciml.jl")
 include("cdm/mechanism.jl")
 include("interventions/contracts.jl")
 include("cdm/causal_abstraction.jl")
+include("cdm/certificate.jl")
 
 end # module
