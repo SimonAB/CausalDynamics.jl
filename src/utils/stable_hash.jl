@@ -13,19 +13,35 @@ function stable_hash64(value)
     return parse(UInt64, bytes2hex(digest[1:8]); base = 16)
 end
 
-"""Derive a deterministic seed from declared primitive components."""
+"""Return a length-prefixed representation of one seed component."""
+function _canonical_seed_component(part)
+    type_text = string(typeof(part))
+    value_text = repr(part)
+    return "$(ncodeunits(type_text)):$type_text$(ncodeunits(value_text)):$value_text"
+end
+
+"""
+    stable_seed(parts...) -> UInt
+
+Derive a deterministic seed from declared primitive or otherwise canonically
+represented components. Length prefixes prevent delimiter collisions.
+"""
 function stable_seed(parts...)
-    canonical = join(["$(typeof(part)):$(repr(part))" for part in parts], "|")
+    canonical = join(_canonical_seed_component.(parts), "")
     return UInt(stable_hash64(canonical))
 end
 
-"""Return a reproducible seed from a copy of an RNG without advancing it."""
+"""
+    stable_rng_seed(rng) -> UInt
+
+Derive a seed from a copy of `rng` without advancing the supplied generator.
+Cross-version stability depends on the RNG implementation; use an RNG with an
+explicit stability guarantee, such as `StableRNG`, when persisted results must
+reproduce across Julia releases.
+"""
 function stable_rng_seed(rng::AbstractRNG)
-    try
-        return UInt(rand(copy(rng), UInt))
-    catch
-        return stable_seed(typeof(rng), repr(rng))
-    end
+    copied_rng = copy(rng)
+    return UInt(rand(copied_rng, UInt64))
 end
 
 export stable_hash64, stable_seed, stable_rng_seed

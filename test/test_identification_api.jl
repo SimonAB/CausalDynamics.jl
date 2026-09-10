@@ -15,6 +15,7 @@ using Test
     @test res.strategy == :backdoor
     @test res.adjustment == [:Z]
     @test res.graph_hash == graph_fingerprint(g)
+    @test graph_fingerprint(DiGraph(2)) != graph_fingerprint(DiGraph(3))
 
     conf, ok = prepare_for_tmle(g, 2, 3; node_names = names)
     @test ok

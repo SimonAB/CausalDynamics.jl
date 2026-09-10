@@ -47,7 +47,8 @@ Stable digest of directed edges for reproducibility certificates.
 """
 function graph_fingerprint(g::AbstractGraph)
     edges = sort([(Graphs.src(e), Graphs.dst(e)) for e in Graphs.edges(g)])
-    return stable_hash64(join(["$src->$dst" for (src, dst) in edges], ";"))
+    edge_text = join(["$src->$dst" for (src, dst) in edges], ";")
+    return stable_hash64("vertices=$(Graphs.nv(g));edges=$edge_text")
 end
 
 """
