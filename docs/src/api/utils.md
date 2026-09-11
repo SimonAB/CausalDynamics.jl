@@ -13,8 +13,10 @@ plot_causal_graph
 plot_with_adjustment_set
 plot_backdoor_paths
 plot_identification_result
-dagplot_temporal
 ```
+
+Temporal unrollings are plotted with [`DAGMakie.dagplot_temporal`](https://simonab.github.io/DAGMakie.jl/dev/)
+(CausalDynamics extension method on `TemporalUnrolling`).
 
 ## Live example
 

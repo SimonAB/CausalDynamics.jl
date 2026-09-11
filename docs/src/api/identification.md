@@ -64,6 +64,19 @@ CausalDynamics.is_valid_adjustment_set
 minimal_adjustment_set
 ```
 
+## Boosted control functions
+
+The reference implementation of boosted control functions fits the linear
+SIMDG/control-function construction described by Gnecco et al. (2026). It is
+intended for prediction under shifts induced by exogenous variables, not as a
+replacement for graph-based causal effect identification.
+
+```@docs
+BoostedControlFunctionFit
+boosted_control_function
+predict
+```
+
 ## Column resolvers
 
 Map graph node labels to data columns after identification.

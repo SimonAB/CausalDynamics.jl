@@ -23,7 +23,7 @@ See also per-package notes: [CausalDynamics.jl/DESIGN.md](CausalDynamics.jl/DESI
 
 - **Use idiomatic Julia:** multiple dispatch, parametric types where they clarify intent, `Struct`/`@kwdef` for configuration, and the type system for invalid states.
 - **Embrace the ecosystem:** `Graphs.jl` for DAGs, `DataFrames.jl` for tabular workflows, `Makie` for graphics, `SciML` for differential equations—not transliterations of foreign APIs.
-- **APIs speak standard causal vocabulary** (`do(·)`, backdoor adjustment, LMTP, EIF). Process-philosophy gloss belongs in the **book**, not in package docstrings or exports.
+- **APIs speak Pearl/SciML for identification and estimation** (`do(·)`, backdoor adjustment, LMTP, EIF). Do not rename those exports. **Temporal identity** may use a closed lexicon when the words name distinct objects: **occasion**, **enduring**, **constitution**, **constitutive**, **influence**, **onset**, **replacement**, **deployment**. Whitehead glossary terms (prehension, creative advance, concrescence, superject, and Table 4 coinages) stay in the **book**. Documenter defines a lexicon term in one sentence, then uses the ordinary causal gloss. Lexicon names attach to existing types (`TemporalNodeSpec`, `LaggedEdge` roles, `Policy`); they do not justify a parallel semantic pipeline.
 - **Unicode in code** is welcome when it matches surrounding mathematical notation (e.g. `σ_w`, `β`, `δ`).
 
 ## 3. Efficient

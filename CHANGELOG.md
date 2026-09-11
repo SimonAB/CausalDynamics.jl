@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Temporal identity lexicon (docs):** [Terminology](docs/src/terminology.md)
+  records occasion, enduring, constitution, constitutive, influence, onset,
+  replacement, and deployment on existing types. Pearl identification names are
+  unchanged; Whitehead glossary stays in the CDCS book.
+
+- **Temporal edge provenance:** `temporal_edge_role` and
+  `temporal_edge_records` distinguish constitution, recurrent influence, and
+  occasion-to-occasion influence in unrolled graphs.
+
+- **Structural constraint declarations:** `StructuralConstraintSpec` records
+  auditable invariance, feasibility, viability, and cross-embodiment claims;
+  `constraint_certificate` provides deterministic metadata without adding graph
+  nodes, causal parents, agents, or empirical validation.
+
+- **Enduring vs occasion nodes ([#29](https://github.com/SimonAB/CausalDynamics.jl/issues/29)):**
+  `TemporalNodeSpec` with `temporal_mode = :enduring | :occasion` (optional
+  `causal_role`, `onset_time`); `TemporalDAGSpec(; entity, nodes, edges)` retains
+  the all-occasion `TemporalDAGSpec(variables, edges)` shorthand. Unrolling keeps
+  one node per enduring attribute; panel-column helpers map enduring symbols to
+  bare columns without requiring `unit_level` (legacy override still accepted).
+  Plotting uses `DAGMakie.dagplot_temporal` (extension method on
+  `TemporalUnrolling`; rounded rectangles vs circles). CausalDynamics no longer
+  exports a separate `dagplot_temporal` binding (avoids a name clash with DAGMakie).
+
 ## [0.4.6] - 2026-08-30
 
 ### Added

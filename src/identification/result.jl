@@ -18,7 +18,7 @@ struct IdentificationResult{T}
     strategy::Symbol
     identifiable::Bool
     assumptions::Vector{Symbol}
-    temporal_nodes::Vector{Tuple{T, Int}}
+    temporal_nodes::Vector{Tuple{T, Union{Nothing, Int}}}
     missingness::Union{Nothing, MissingnessCertificate}
 end
 
@@ -31,12 +31,15 @@ function IdentificationResult(;
     strategy::Symbol,
     identifiable::Bool,
     assumptions::Vector{Symbol} = Symbol[],
-    temporal_nodes::Vector{Tuple{T, Int}} = Tuple{T, Int}[],
+    temporal_nodes = Tuple{T, Int}[],
     missingness::Union{Nothing, MissingnessCertificate} = nothing,
 ) where {T}
+    temporal_node_pairs = Tuple{T, Union{Nothing, Int}}[
+        (pair[1], pair[2]) for pair in temporal_nodes
+    ]
     return IdentificationResult{T}(
         query, graph_hash, adjustment, mediators, moc,
-        strategy, identifiable, assumptions, temporal_nodes, missingness,
+        strategy, identifiable, assumptions, temporal_node_pairs, missingness,
     )
 end
 

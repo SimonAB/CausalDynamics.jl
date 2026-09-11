@@ -61,7 +61,7 @@ using Test
 
         u = unroll_temporal_dag(spec, 4)
         @test is_dag(u.graph)
-        @test temporal_node(u, :x1, 1) == 1
+        @test temporal_node_label(u, temporal_node(u, :x1, 1)) == "x1[1]"
         @test has_edge(u.graph, temporal_node(u, :x1, 1), temporal_node(u, :x2, 2))
     end
 

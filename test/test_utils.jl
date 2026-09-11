@@ -60,8 +60,20 @@ using Test
 
             spec = TemporalDAGSpec([:x, :y], [(:x, :y, 1)])
             u = unroll_temporal_dag(spec, 3)
-            fig_t, ax_t, p_t = dagplot_temporal(u; figure_size = (500, 280))
+            fig_t, ax_t, p_t = DAGMakie.dagplot_temporal(u; figure_size = (500, 280))
             @test fig_t !== nothing
+
+            mixed_spec = TemporalDAGSpec(
+                nodes = [
+                    TemporalNodeSpec(:diagnosis),
+                    TemporalNodeSpec(:pasture; temporal_mode = :enduring, onset_time = 1),
+                    TemporalNodeSpec(:weight),
+                ],
+                edges = [(:diagnosis, :pasture, 0), (:pasture, :weight, 0)],
+            )
+            mixed_u = unroll_temporal_dag(mixed_spec, 1)
+            _fig_mixed, _ax_mixed, p_mixed = DAGMakie.dagplot_temporal(mixed_u)
+            @test p_mixed[:node_marker][][enduring_node(mixed_u, :pasture)] == DAGMakie.enduring_node_marker()
         else
             @test_throws ErrorException plot_causal_graph(g)
             try

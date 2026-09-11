@@ -53,6 +53,29 @@ using Test
     @test lag_plan.outcome === :fec2
 end
 
+@testset "panel bridge maps enduring nodes" begin
+    spec = TemporalDAGSpec(
+        nodes = [
+            TemporalNodeSpec(:diagnosis),
+            TemporalNodeSpec(:site; temporal_mode = :enduring),
+            TemporalNodeSpec(:pasture; temporal_mode = :enduring, onset_time = 1),
+            TemporalNodeSpec(:weight),
+        ],
+        edges = [
+            (:diagnosis, :pasture, 1),
+            (:site, :pasture, 0),
+            (:site, :weight, 0),
+            (:pasture, :weight, 0),
+        ],
+    )
+    u = unroll_temporal_dag(spec, 2)
+    query = TemporalEffectQuery(:pasture, :weight, 1, 2)
+    columns = query_panel_columns(u, query)
+    @test columns == (treatment = :pasture, outcome = :weight2)
+    result = identify(u, query)
+    @test :pasture in temporal_adjustment_columns(result, u)
+end
+
 @testset "Apodemus-style discrete LMTP planner" begin
     spec = TemporalDAGSpec(
         [:grid_type, :fec],
@@ -245,4 +268,34 @@ end
     )
     @test plan_ok.estimability !== :structural_skip
     @test plan_ok.outcome === :fec2
+end
+
+@testset "enduring TemporalNodeSpec panel path (#29)" begin
+    spec = TemporalDAGSpec(
+        nodes = [
+            TemporalNodeSpec(:grid_type; temporal_mode = :enduring, causal_role = :assigned),
+            TemporalNodeSpec(:fec; temporal_mode = :occasion),
+            TemporalNodeSpec(:weight; temporal_mode = :occasion),
+        ],
+        edges = [
+            LaggedEdge(:grid_type, :fec, 0),
+            LaggedEdge(:weight, :fec, 0),
+            LaggedEdge(:fec, :fec, 1),
+        ],
+    )
+    u = unroll_temporal_dag(spec, 4)
+    query = TemporalEffectQuery(:grid_type, :fec, 2, 2)
+    qcols = query_panel_columns(u, query)
+    @test qcols.treatment === :grid_type
+    @test qcols.outcome === :fec2
+
+    wide_cols = [
+        :mouse_id, :grid_type,
+        :fec1, :fec2, :fec3, :fec4,
+        :weight1, :weight2, :weight3, :weight4,
+    ]
+    plan = plan_targeted_estimation(u, query, wide_cols)
+    @test plan.engine === :discrete_lmtp
+    @test plan.treatment === :grid_type
+    @test plan.outcome === :fec2
 end

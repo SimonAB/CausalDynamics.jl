@@ -169,6 +169,20 @@ push-forward through the declared state map. `exact` means equality of the
 laws as mass maps (support order does not matter); `accepted` is controlled by
 `law_mode` and the declared tolerance.
 
+## Structural constraint declarations
+
+[`StructuralConstraintSpec`](@ref) records an auditable claim about an
+invariance, feasibility condition, viability condition, or relation across
+embodiments. It names the variables or mechanisms to which the claim applies,
+the predicted consequences, and the identifiers of proposed tests. The
+corresponding [`constraint_certificate`](@ref) is deterministic metadata, not
+an empirical validation result.
+
+These declarations deliberately remain outside the DAG and simulation
+semantics. They do not add a causal parent, graph node, attractor, or agent.
+Pair them with a [`MechanismLibrary`](@ref), a [`CausalAbstractionSpec`](@ref),
+and typed intervention descriptors when the analysis supplies those artefacts.
+
 [`SetState`](@ref) is the typed form of [`DoIntervention`](@ref) on a
 [`GraphSCM`](@ref) and of a constant [`DoSequence`](@ref) on a
 [`DiscreteTimeCDM`](@ref). [`ReplacePolicy`](@ref) is the auditable form of
@@ -204,6 +218,8 @@ certificate_dict
 CausalAbstractionSpec
 CausalAbstractionResult
 validate_abstraction
+StructuralConstraintSpec
+constraint_certificate
 ```
 
 ## Observational panels (estimation hand-off)

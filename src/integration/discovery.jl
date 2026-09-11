@@ -107,7 +107,10 @@ function oce_parents_to_temporal_spec(
             push!(edges, LaggedEdge(parent, child, lag))
         end
     end
-    return TemporalDAGSpec(collect(Symbol, variables), edges)
+    return TemporalDAGSpec(
+        nodes = [TemporalNodeSpec(variable) for variable in variables],
+        edges = edges,
+    )
 end
 
 function _discovery_field(x, field::Symbol)

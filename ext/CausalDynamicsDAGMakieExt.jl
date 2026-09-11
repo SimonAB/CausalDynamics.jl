@@ -186,22 +186,28 @@ end
 
 Plot a [`TemporalUnrolling`](@ref) with time left→right and variables as rows.
 
-Labels use [`temporal_node_label`](@ref). Layout matches
-[`DAGMakie.dagplot_time_indexed`](@ref) / CausalDynamics `unroll_temporal_dag` order.
+Labels use [`temporal_node_label`](@ref). Occasion nodes are circles and
+enduring nodes are rounded rectangles, positioned at their onset time.
+This method extends [`DAGMakie.dagplot_temporal`](@ref).
 """
-function dagplot_temporal(
+function DAGMakie.dagplot_temporal(
     unrolling::TemporalUnrolling;
     dx::Real = 2.0,
     dy::Real = 1.5,
     kwargs...,
 )
-    n_variables = length(unrolling.spec.variables)
     labels = [temporal_node_label(unrolling, i) for i in 1:nv(unrolling.graph)]
-    return dagplot_time_indexed(
+    modes = [time === nothing ? :enduring : :occasion for (_variable, time) in unrolling.index_node]
+    onsets = [
+        time === nothing ? first(node.onset_time for node in unrolling.spec.nodes if node.name == variable) : time
+        for (variable, time) in unrolling.index_node
+    ]
+    return DAGMakie.dagplot_temporal(
         unrolling.graph,
-        n_variables,
-        unrolling.T;
+        unrolling.index_node;
         nlabels = labels,
+        temporal_modes = modes,
+        onset_times = onsets,
         dx = dx,
         dy = dy,
         kwargs...,

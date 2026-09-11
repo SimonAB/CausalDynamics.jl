@@ -22,6 +22,7 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "Scope" => "scope.md",
+        "Terminology" => "terminology.md",
         "Comparison" => "comparison.md",
         "Getting Started" => "getting-started.md",
         "Hierarchical / nested units" => "hierarchy.md",

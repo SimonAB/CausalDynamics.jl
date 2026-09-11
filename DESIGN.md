@@ -56,6 +56,10 @@ New integrations follow the same pattern: narrow API in `src/integration/`, impl
 
 Keep simulation and identification **orthogonal**: the same `IdentificationResult` should feed sequential LMTP, TMLE, RxInfer, or custom estimators. Identification does not branch on whether `A` is a factor or a float; numeric vs recode policies live in CausalTargeted (`ShiftPolicy` / `DiscreteTreatmentPolicy`). Generative duals here are `DoSequence` and `Policy` (including integer-coded recodes such as `2 → 1` on `A_t`; do not store String treatments on `CDMPanel`).
 
+### Temporal identity lexicon
+
+Pearl/SciML names stay on identification and surgery (`identify`, `do_surgery`, `DoIntervention`, `DoSequence`). Where static causal vocabulary is overloaded, this package may export or document the closed lexicon from [DESIGN_PRINCIPLES.md](DESIGN_PRINCIPLES.md): **occasion**, **enduring**, **constitution**, **constitutive**, **influence**, **onset**, **replacement**, **deployment**. Prefer attaching those words to existing objects (`TemporalNodeSpec`, `temporal_edge_role` / `LaggedEdge`, `Policy`, `onset_time`) rather than a second graph or event-store API. Targeted and Mediation consume the roles; they do not re-derive them. Whitehead glossary terms stay out of exports and Documenter.
+
 ### Julia native types
 
 - Graphs are **`Graphs.jl`** `SimpleDiGraph` or `CausalGraph` wrappers—not string dagitty at runtime.
@@ -69,7 +73,7 @@ Keep simulation and identification **orthogonal**: the same `IdentificationResul
 ### What not to add
 
 - Cross-fitted nuisances, LMTP grids, or manuscript registry loaders.
-- Process-philosophy renames of Pearl APIs (`do_surgery`, `backdoor_adjustment_set` stay as they are).
+- Renames of Pearl APIs (`do_surgery`, `backdoor_adjustment_set` stay as they are). Temporal-identity lexicon terms are allowed as above; they are not aliases for `do(·)`.
 - Full symbolic do-calculus until there is a complete, tested implementation—avoid stub exports that imply completeness.
 
 ### Experimental (quarantined)

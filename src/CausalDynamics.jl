@@ -38,8 +38,10 @@ module CausalDynamics
 
 using Graphs
 using CausalInference
+using LinearAlgebra
 using Random
 using SHA
+using Statistics
 
 include("utils/stable_hash.jl")
 
@@ -69,6 +71,7 @@ include("identification/resolver.jl")
 include("identification/backdoor.jl")
 include("identification/frontdoor.jl")
 include("identification/instruments.jl")
+include("identification/boosted_control_functions.jl")
 include("identification/adjustment.jl")
 include("identification/do_calculus.jl")
 include("identification/identify.jl")
@@ -107,6 +110,7 @@ include("integration/sciml.jl")
 include("cdm/mechanism.jl")
 include("interventions/contracts.jl")
 include("cdm/causal_abstraction.jl")
+include("cdm/structural_constraints.jl")
 include("cdm/certificate.jl")
 
 end # module

@@ -1,21 +1,25 @@
 # Terminology
 
-CausalDynamics.jl keeps standard Pearl and SciML names (`DoIntervention`, `backdoor_adjustment_set`, `d_separated`, …). The table below gives a **process** reading—causality as relations between occasions, not substances with intrinsic natures.
+Identification and estimation keep Pearl and SciML names (`DoIntervention`,
+`backdoor_adjustment_set`, `d_separated`, `Policy`, …). Those exports are not
+renamed.
 
-| API / Pearl term | Process reading (when useful) |
-|------------------|-------------------------------|
-| DAG / SCM graph | **Prehensive structure**: who prehends whom |
-| Parent in an equation | **Physical prehension** of past or neighbouring occasions |
-| Exogenous `U` in `simulate_scm` | **Creative advance** for this unit (fixed noise realisation) |
-| `do_intervention`, `apply_intervention` | **Physical prehension**: impose a value, negate incoming prehensions |
-| `GraphSCM` + integer node index | Executable SCM path used in book examples (`simulate_scm`, counterfactuals) |
-| `do_intervention(:name, …)` on `GraphSCM` | Not yet supported — use node indices until symbol/name maps land |
-| `d_separated` | Associative dependence blocked (Level 1) |
-| `backdoor_adjustment_set` | Occasions to condition on so confounding prehension paths close |
-| `compute_counterfactual` with shared `U` | **Alternative concrescences** for the same unit |
-| Endogenous output of `simulate_scm` | What the occasion **leaves** for successors (**superject**) |
-| `prepare_for_rxinfer` | Centrifugal bridge: adjustment set for the observable generative head |
-| GraphPPL `@model` (extension) | **Form of relatedness** for backdoor-adjusted outcomes |
-| `infer_backdoor_effect` (RxInfer) | **Epistemic concrescence**: VI over `τ` given presentational data |
+**Temporal identity** may use a closed lexicon when the words name distinct
+objects on existing types (`TemporalNodeSpec`, `LaggedEdge` roles, `Policy`,
+`onset_time`). Whitehead glossary terms (prehension, creative advance,
+concrescence, superject) belong in the
+[CDCS book Concept Reference](https://simonab.github.io/causal-dynamics-book/concept-reference-tables.html),
+not in this manual.
 
-Use process terms in prose and docstrings where they clarify; keep function names familiar to the causal-inference literature.
+| Term | Meaning in this package |
+|------|-------------------------|
+| **Occasion** | One node per observation step (`temporal_mode = :occasion`) |
+| **Enduring** | One node per entity across the horizon (`temporal_mode = :enduring`) |
+| **Onset** | Time at which an enduring node is constituted (`onset_time`) |
+| **Constitution / constitutive** | Assignment into persistence; `temporal_edge_role` `:constitutive` |
+| **Influence** | Later use of an enduring node, or occasion-to-occasion dependence |
+| **Replacement** | Successor enduring instance after a realised prefix (not in-place overwrite) |
+| **Deployment** | Where, when, and to whom a constituted policy applies; not the rule \(d(\cdot)\) itself |
+
+Replacement and deployment are lexicon for identity and applicability. They are
+not a second intervention algebra beside `DoSequence` and `Policy`.

@@ -87,9 +87,12 @@ See `examples/rxinfer_backdoor.jl` in the package root.
 | `infer_backdoor_effect` | Full identify + partial + infer pipeline |
 | `posterior_mean_τ` | Scalar mean from `τ_posterior` marginals |
 
-## Process vs Pearl naming
+## Naming
 
-Package APIs stay in Pearl / SciML vocabulary. For a process-metaphysics gloss used in the CDCS book, see the book’s Concept Reference (Table 8), not this package manual.
+Identification and RxInfer façades stay in Pearl / SciML vocabulary. Temporal
+identity may use the closed lexicon on [Terminology](terminology.md). Whitehead
+glossary terms used in the CDCS book belong in the book’s Concept Reference, not
+this page.
 
 ## Dependencies
 

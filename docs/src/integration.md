@@ -280,7 +280,7 @@ These packages enable symbolic computation for advanced causal inference tasks.
 
 CausalDynamics.jl identifies backdoor adjustment sets; **GraphPPL.jl** specifies a Gaussian linear outcome model; **RxInfer.jl** runs variational inference for the treatment effect `τ`.
 
-See [RxInfer / GraphPPL](RXINFER_INTEGRATION.md) for installation, dependency notes, and process terminology.
+See [RxInfer / GraphPPL](RXINFER_INTEGRATION.md) for installation and dependency notes.
 
 ```julia
 using CausalDynamics, RxInfer, Graphs, DataFrames

@@ -5,9 +5,12 @@ models for **Causal Dynamical Models (CDMs)**, including time-indexed simulation
 `do(·)`, and shared-`U` counterfactual trajectories.
 
 The [CDCS book](https://simonab.github.io/causal-dynamics-book/) uses these
-exported APIs in narrative chapters. Process/Whitehead gloss lives in the book
-([Concept Reference Table 8](https://simonab.github.io/causal-dynamics-book/concept-reference-tables.html));
-package names stay Pearl/SciML-facing.
+exported APIs in narrative chapters. Identification and estimation names stay
+Pearl/SciML. Temporal identity may use the closed lexicon in
+[Terminology](terminology.md) (occasion, enduring, constitution, constitutive,
+influence, onset, replacement, deployment). Whitehead glossary terms live in the
+book
+([Concept Reference](https://simonab.github.io/causal-dynamics-book/concept-reference-tables.html)).
 
 ## What is in core (v0.1–v0.2)
 
@@ -21,12 +24,13 @@ package names stay Pearl/SciML-facing.
 | Hierarchical nesting | Cluster→unit exogenous draws; plate unroll for ID | `RandomEffectSpec`, `simulate_hierarchical_panel`, `unroll_hierarchical_dag`, `attach_hierarchy_assumptions` |
 | Latent → observed bridge | Filter/smoother outputs → panel columns | `ObservationBridge`, `panel_from_latent_series`, `simulate_observed_panel` |
 | Representation bridge | High-dim tensor → low-dim codes for ID/estimation | `RepresentationSpec`, `encode_to_panel`, `representation_certificate` |
+| Structural constraints | Auditable declared invariance, feasibility, viability, or cross-embodiment claim | `StructuralConstraintSpec`, `constraint_certificate` |
 | Deep mechanisms | Parent-constrained Lux ``f_i`` / ODE residuals | `MechanismSpec`, `MechanismLibrary`, `build_ode_rhs`, `train_mechanisms!` (Lux weakdep) |
 | Generative L3 | Additive-noise abduction on codes | `abduce_noise`, `mechanism_counterfactual` (`:generative`) |
 | Soft interventions | State-dependent treatment rules | `Policy`, `policy` |
 | Interventional means | Monte Carlo g-computation (discrete) | `g_computation` on `DiscreteTimeCDM` |
 | Continuous functionals | Monte Carlo g-computation (SciML) | `ContinuousEffectFunctional`, `g_computation` on `ContinuousCDMSpec` |
-| Time-indexed ID | Unrolled lag DAGs | `TemporalDAGSpec`, `unroll_temporal_dag`, `temporal_backdoor_adjustment_set` |
+| Time-indexed ID | Unrolled lag DAGs; enduring vs occasion nodes | `TemporalNodeSpec`, `TemporalDAGSpec`, `unroll_temporal_dag`, `temporal_backdoor_adjustment_set` |
 | Transport ID | Domain covariates in adjustment | `TransportQuery` → `:transport_backdoor` |
 
 **Hard dependencies** stay lean: `Graphs` and `CausalInference` (d-separation, backdoor, and frontdoor adjustment via `gensearch`). IV, path enumeration, SCM/CDM simulation, and estimation bridges are owned here.

@@ -297,7 +297,10 @@ function identify(
     temporal_nodes = temporal_backdoor_adjustment_nodes(
         unrolling, query.treatment, query.t_treat, query.outcome, query.t_outcome,
     )
-    # Expose baseline symbols (variable component of temporal nodes)
+    # Expose baseline symbols (variable component of temporal nodes).
+    temporal_nodes = temporal_nodes === nothing ?
+        Tuple{Symbol, Union{Nothing, Int}}[] :
+        Tuple{Symbol, Union{Nothing, Int}}[node for node in temporal_nodes]
     adj_syms = sort!(unique([var for (var, _) in temporal_nodes]))
     miss = _missingness_cert(missingness; graph = g, node_names = nothing)
     return IdentificationResult{Symbol}(
@@ -309,7 +312,7 @@ function identify(
         :temporal_backdoor,
         identifiable,
         [:no_unmeasured_confounding, :correct_lag_structure],
-        collect(temporal_nodes),
+        temporal_nodes,
         miss,
     )
 end

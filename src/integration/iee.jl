@@ -335,7 +335,10 @@ function iee_to_temporal_spec(
             end
         end
     end
-    return TemporalDAGSpec(collect(Symbol, variables), edges)
+    return TemporalDAGSpec(
+        nodes = [TemporalNodeSpec(variable) for variable in variables],
+        edges = edges,
+    )
 end
 
 """

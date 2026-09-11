@@ -9,9 +9,11 @@ CausalDynamics
 ```
 
 CausalDynamics provides causal graph operations and identification for structural
-and discrete-time dynamical models (CDMs). Names follow Pearl-style conventions
-(`d_separated`, `backdoor_adjustment_set`, `do_intervention`, `DiscreteTimeCDM`, …).
-See [Scope](scope.md) for what is in core versus deferred.
+and discrete-time dynamical models (CDMs). Identification and estimation names
+follow Pearl-style conventions (`d_separated`, `backdoor_adjustment_set`,
+`do_intervention`, `DiscreteTimeCDM`, …). Temporal identity may use the closed
+lexicon on [Terminology](terminology.md). See [Scope](scope.md) for what is in
+core versus deferred.
 
 The package covers d-separation and path finding; backdoor, frontdoor, and
 instrumental-variable criteria; static `GraphSCM` simulation with `do(·)` and
