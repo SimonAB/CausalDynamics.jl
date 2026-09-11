@@ -54,6 +54,13 @@ function law_distance(lhs::FiniteLaw, rhs::FiniteLaw, _ = :total_variation)
     return 0.5 * sum(abs(get(left, atom, 0.0) - get(right, atom, 0.0)) for atom in atoms)
 end
 
+"""
+    CausalAbstractionSpec(τ, ω; interventions, distance=law_distance, tolerance=0.0, law_mode=:exact)
+
+Compare finite interventional laws after push-forward through state map `τ` and
+intervention map `ω`. `exact` is mass-map equality; `accepted` uses `law_mode`
+and `tolerance`.
+"""
 struct CausalAbstractionSpec{T, W, I, D}
     τ::T; ω::W; interventions::Vector{I}; distance::D; tolerance::Float64; law_mode::Symbol
 end
@@ -66,11 +73,13 @@ function CausalAbstractionSpec(τ, ω; interventions::AbstractVector, distance =
     return CausalAbstractionSpec(τ, ω, collect(interventions), distance, Float64(tolerance), law_mode)
 end
 
+"""Result of [`validate_abstraction`](@ref): exactness, acceptance, and per-intervention discrepancies."""
 struct CausalAbstractionResult{I}
     exact::Bool; accepted::Bool; discrepancy::Float64
     discrepancies::Dict{I, Float64}; failed_interventions::Vector{I}
 end
 
+"""Compare micro and macro interventional laws under a [`CausalAbstractionSpec`](@ref)."""
 function validate_abstraction(spec::CausalAbstractionSpec, micro_interventions::AbstractDict,
     macro_interventions::AbstractDict)
     discrepancies = Dict{eltype(spec.interventions), Float64}(); failed = eltype(spec.interventions)[]

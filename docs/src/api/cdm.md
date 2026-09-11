@@ -208,6 +208,10 @@ intervention_target
 intervention_interval
 canonical_intervention
 intervention_fingerprint
+FiniteLaw
+pushforward
+law_equal
+law_distance
 CDMProvenance
 provenance_dict
 provenance_fingerprint

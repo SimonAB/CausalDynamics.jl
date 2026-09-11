@@ -85,8 +85,10 @@ end
 """
     predict(fit::BoostedControlFunctionFit, X)
 
-Predict outcomes with a fitted boosted control function. New rows of `X` must
-have the same covariate ordering and number of columns as the training data.
+Predict outcomes with a fitted boosted control function. Call
+`CausalDynamics.predict(fit, X)` (`predict` is not exported, to avoid clashing
+with StatsAPI / GLM). New rows of `X` must have the same covariate ordering
+and number of columns as the training data.
 """
 function predict(fit::BoostedControlFunctionFit, X::AbstractMatrix{<:Real})
     size(X, 2) == length(fit.x_mean) ||
@@ -113,4 +115,4 @@ function _ridge_coefficients(A::AbstractMatrix{T}, y::AbstractVector{T}, ridge::
     return (gram + T(ridge) * I) \ rhs
 end
 
-export BoostedControlFunctionFit, boosted_control_function, predict
+export BoostedControlFunctionFit, boosted_control_function

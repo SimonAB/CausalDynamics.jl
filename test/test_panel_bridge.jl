@@ -73,7 +73,7 @@ end
     columns = query_panel_columns(u, query)
     @test columns == (treatment = :pasture, outcome = :weight2)
     result = identify(u, query)
-    @test :pasture in temporal_adjustment_columns(result, u)
+    @test :site in temporal_adjustment_columns(result, u)
 end
 
 @testset "Apodemus-style discrete LMTP planner" begin

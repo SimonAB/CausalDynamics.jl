@@ -7,36 +7,53 @@ struct InterventionConflict <: Exception
 end
 Base.showerror(io::IO, error::InterventionConflict) = print(io, error.message)
 
+"""
+    SetState(target, value; interval=:all, scope=:unit)
+
+Typed assignment of `target` to `value` on a stated interval. On a `GraphSCM`
+this is `DoIntervention`; on a `DiscreteTimeCDM` it is a constant `DoSequence`.
+"""
 struct SetState{V, I} <: AbstractTypedIntervention
     target::Union{Int, Symbol}; value::V; interval::I; scope::Symbol
 end
 SetState(target, value; interval = :all, scope::Symbol = :unit) = SetState(target, value, interval, scope)
 
+"""Typed initial-condition assignment for a continuous or discrete-time CDM."""
 struct SetInitialCondition{V} <: AbstractTypedIntervention
     target::Union{Int, Symbol}; value::V; scope::Symbol
 end
 SetInitialCondition(target, value; scope::Symbol = :coordinate) = SetInitialCondition(target, value, scope)
 
+"""
+    ReplacePolicy(target, id; interval=:all, scope=:unit, rule=nothing)
+
+Successor policy instance with a stable replacement identifier. Supply `rule`
+to execute CDM surgery; the identifier is the auditable name of the instance.
+"""
 struct ReplacePolicy{R} <: AbstractTypedIntervention
     target::Union{Int, Symbol}; replacement_id::String; interval; scope::Symbol; rule::R
 end
 ReplacePolicy(target, id::AbstractString; interval = :all, scope::Symbol = :unit, rule = nothing) =
     ReplacePolicy(target, String(id), interval, scope, rule)
 
+"""Replace a named parameter with a successor identifier (metadata until bound)."""
 struct ReplaceParameter <: AbstractTypedIntervention
     target::Union{Int, Symbol}; replacement_id::String; scope::Symbol
 end
 ReplaceParameter(target, id::AbstractString; scope::Symbol = :model) = ReplaceParameter(target, String(id), scope)
 
+"""Replace a named mechanism on a stated interval (metadata until bound)."""
 struct ReplaceMechanism <: AbstractTypedIntervention
     target::Union{Int, Symbol}; replacement_id::String; interval; scope::Symbol
 end
 ReplaceMechanism(target, id::AbstractString; interval = :all, scope::Symbol = :mechanism) = ReplaceMechanism(target, String(id), interval, scope)
 
+"""Simultaneous bundle of typed interventions; conflicting targets throw."""
 struct Simultaneous <: AbstractTypedIntervention
     interventions::Vector{AbstractCausalIntervention}
 end
 
+"""Sequential composition of typed interventions."""
 struct Sequential <: AbstractTypedIntervention
     interventions::Vector{AbstractCausalIntervention}
 end
@@ -73,6 +90,7 @@ function _assert_no_simultaneous_conflict(values)
     return values
 end
 
+"""Return the semantic kind of a typed intervention (`:state`, `:policy`, …)."""
 intervention_kind(::SetState) = :state
 intervention_kind(::SetInitialCondition) = :initial_condition
 intervention_kind(::ReplacePolicy) = :policy
@@ -81,12 +99,15 @@ intervention_kind(::ReplaceMechanism) = :mechanism
 intervention_kind(::Simultaneous) = :simultaneous
 intervention_kind(::Sequential) = :sequential
 
+"""Return the assignment target, or `nothing` for a composition."""
 intervention_target(intervention::Union{SetState, SetInitialCondition, ReplacePolicy, ReplaceParameter, ReplaceMechanism}) = intervention.target
 intervention_target(::Union{Simultaneous, Sequential}) = nothing
+"""Return the occasion interval on which the intervention applies."""
 intervention_interval(intervention::Union{SetState, ReplacePolicy, ReplaceMechanism}) = intervention.interval
 intervention_interval(::SetInitialCondition) = :initial
 intervention_interval(::ReplaceParameter) = :all
 
+"""Return a stable canonical tuple encoding of a typed intervention."""
 canonical_intervention(x::SetState) = _canonical_descriptor_fields(
     x.target, :constant, _canonical_literal(x.value), x.interval, x.scope, :deterministic, Symbol[])
 canonical_intervention(x::SetInitialCondition) = _canonical_descriptor_fields(

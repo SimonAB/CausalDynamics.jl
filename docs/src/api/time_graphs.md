@@ -24,7 +24,7 @@ temporal_backdoor_adjustment_nodes
 ## Enduring attributes (#29)
 
 ```@example time-graphs-enduring
-using CausalDynamics
+using CausalDynamics, Graphs
 
 spec = TemporalDAGSpec(
     entity = :sheep,
@@ -54,7 +54,7 @@ reuses an enduring node as a parent of later occasions; an occasion influence
 edge connects time-indexed nodes. These roles describe the temporal semantics
 of the graph and do not add a second causal system alongside it.
 
-```@example time-graphs-provenance
+```@example time-graphs-enduring
 records = temporal_edge_records(u)
 filter(record -> record.role === :constitutive, records)
 ```

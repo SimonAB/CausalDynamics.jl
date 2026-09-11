@@ -16,8 +16,8 @@ using LinearAlgebra
     @test size(fit.M) == (2, 1)
     @test size(fit.V) == size(X)
     @test size(fit.R, 1) == 2
-    @test length(predict(fit, X)) == n
-    @test all(isfinite, predict(fit, X))
+    @test length(CausalDynamics.predict(fit, X)) == n
+    @test all(isfinite, CausalDynamics.predict(fit, X))
 end
 
 @testset "Boosted control function validation" begin

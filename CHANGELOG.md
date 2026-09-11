@@ -14,6 +14,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   replacement, and deployment on existing types. Pearl identification names are
   unchanged; Whitehead glossary stays in the CDCS book.
 
+- BCF `predict` is no longer exported (call `CausalDynamics.predict`); avoids
+  StatsAPI / GLM / Associations name clashes in tests and downstream packages.
+
+### Fixed
+
+- Enduring panel-bridge test checks the confounder `:site` in the adjustment
+  set, not the treatment `:pasture`.
+- Time-graph Documenter examples import `Graphs` and share the named `@example`
+  module so `nv` / `temporal_edge_records` resolve.
+- Docstrings for typed interventions, `FiniteLaw`, and `CausalAbstractionSpec`
+  so `checkdocs` and `@ref` succeed.
+- Declare `Statistics = "1"` in `[compat]` so Julia 1.13 loads the stdlib as a
+  real dependency.
+
 - **Temporal edge provenance:** `temporal_edge_role` and
   `temporal_edge_records` distinguish constitution, recurrent influence, and
   occasion-to-occasion influence in unrolled graphs.
