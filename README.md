@@ -112,7 +112,7 @@ Full matrices: [ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/causal-dynam
 
 ## Testing and validation
 
-CI runs `Pkg.test()` on Julia **1.13** (macOS and Ubuntu). Package `test/` is the merge gate; Quarto stress notebooks are pre-ship / methods probes (see [STRESS.md](STRESS.md)). Julia **1.12** remains within the declared compatibility range.
+CI runs `Pkg.test()` on Julia **1.13** (macOS and Ubuntu). Package `test/` is the merge gate; Quarto stress notebooks are pre-ship / methods probes (see [STRESS.md](STRESS.md)). Julia **1.12** remains within the declared compatibility range. Default `Pkg.test` is contract-focused; set `UNIT_STRESS=1` to also run large-panel / Monte Carlo representation recovery in `test/test_representation.jl`.
 
 | Guardrail | What we exercise | Where |
 |-----------|------------------|-------|
@@ -120,7 +120,8 @@ CI runs `Pkg.test()` on Julia **1.13** (macOS and Ubuntu). Package `test/` is th
 | **Synthetic recovery** | SCM intervention vs factual, OLS slope checks, linear representation oracle, Lux mechanism training, incomplete panels | `test/test_scm.jl`, `test/test_representation.jl`, `test/test_mechanism*.jl`, `test/test_cdm.jl` |
 | **Integration / extensions** | TMLE bridge, CausalInference frontdoor, SciML ODE parents, RxInfer (optional), Associations / PC discovery, Lux weakdep | `test/test_integration.jl`, `test/test_frontdoor_ci.jl`, `test/test_sciml.jl`, `test/test_rxinfer.jl`, `test/test_discovery.jl` |
 | **Reference concordance** | Interventional embedding entropy vs MATLAB reference port | `test/test_iee.jl`, `test/reference_iee_matlab.jl` |
-| **Edge / contract tests** | Invalid inputs, MNAR refusal, certificate separation, dense frontdoor graphs | `test/test_missingness_*.jl`, `test/test_best_practices.jl` |
+| **Edge / contract tests** | Invalid inputs, MNAR refusal, certificate separation, dense frontdoor graphs | `test/test_missingness_*.jl`, `test/test_clarity_surface.jl` |
+| **Opt-in unit stress** | Large $n\times p$ encode and Monte Carlo oracle rates (`UNIT_STRESS=1`) | `test/test_representation.jl` |
 | **Stress (pre-ship)** | Wide panels, Lux 1D-CNN encoder stub, ODE residuals under `do`, generative L3 abduction | [docs/stress/deep_scm_stress.qmd](docs/stress/deep_scm_stress.qmd) |
 | **Estimation hand-off** | Codes → LMTP / mediation / missing $Y$ (sibling notebook) | [CausalTargeted deep SCM estimation stress](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/stress/deep_scm_estimation_stress.qmd) |
 
