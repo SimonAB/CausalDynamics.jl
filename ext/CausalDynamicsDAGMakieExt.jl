@@ -14,7 +14,12 @@ using CausalDynamics: CausalDynamics,
     TotalEffectQuery,
     MediationQuery,
     TemporalUnrolling,
-    temporal_node_label
+    temporal_node_label,
+    PointwiseSupport,
+    PointSupport,
+    IntervalSupport,
+    FromOnsetSupport,
+    GlobalSupport
 using DAGMakie
 using Graphs: nv, has_edge
 
@@ -198,6 +203,32 @@ function DAGMakie.dagplot_temporal(
 )
     labels = [temporal_node_label(unrolling, i) for i in 1:nv(unrolling.graph)]
     modes = [time === nothing ? :enduring : :occasion for (_variable, time) in unrolling.index_node]
+    supports = [
+        begin
+            descriptor = first(
+                node for node in unrolling.spec.nodes if node.name == variable
+            )
+            support = descriptor.temporal_support
+            if support isa PointwiseSupport
+                :pointwise
+            elseif support isa PointSupport
+                :point
+            elseif support isa IntervalSupport
+                :interval
+            elseif support isa FromOnsetSupport
+                :from_onset
+            elseif support isa GlobalSupport
+                :global
+            else
+                :unspecified
+            end
+        end
+        for (variable, _time) in unrolling.index_node
+    ]
+    representations = [
+        first(node for node in unrolling.spec.nodes if node.name == variable).value_representation
+        for (variable, _time) in unrolling.index_node
+    ]
     onsets = [
         time === nothing ? first(node.onset_time for node in unrolling.spec.nodes if node.name == variable) : time
         for (variable, time) in unrolling.index_node
@@ -208,6 +239,9 @@ function DAGMakie.dagplot_temporal(
         nlabels = labels,
         temporal_modes = modes,
         onset_times = onsets,
+        temporal_supports = supports,
+        value_representations = representations,
+        graph_kind = unrolling.spec.graph_kind,
         dx = dx,
         dy = dy,
         kwargs...,

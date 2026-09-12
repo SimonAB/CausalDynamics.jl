@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- DAGMakie extension passes `temporal_supports`, `value_representations`, and `graph_kind` into `dagplot_temporal`.
 - Deprecated `temporal_mode = :occasion | :enduring` as a construction switch;
   it maps to `PointwiseSupport` / `FromOnsetSupport` and does not set ontology.
 - Temporal `identify` uses the causal projection and refuses non-time-unrolled

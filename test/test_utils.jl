@@ -74,6 +74,20 @@ using Test
             mixed_u = unroll_temporal_dag(mixed_spec, 1)
             _fig_mixed, _ax_mixed, p_mixed = DAGMakie.dagplot_temporal(mixed_u)
             @test p_mixed[:node_marker][][enduring_node(mixed_u, :pasture)] == DAGMakie.enduring_node_marker()
+
+            representation_spec = TemporalDAGSpec(
+                nodes = [
+                    TemporalNodeSpec(
+                        :burden_summary;
+                        temporal_support = PointwiseSupport(),
+                        value_representation = :interval_summary,
+                    ),
+                ],
+            )
+            representation_u = unroll_temporal_dag(representation_spec, 0)
+            _fig_representation, _ax_representation, p_representation =
+                DAGMakie.dagplot_temporal(representation_u)
+            @test p_representation[:node_marker][][1] == DAGMakie.enduring_node_marker()
         else
             @test_throws ErrorException plot_causal_graph(g)
             try
