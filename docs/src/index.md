@@ -70,7 +70,8 @@ See [REGISTRATION.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/REG
 
 ## Documentation
 
-- [Scope](scope.md) · [Comparison](comparison.md) · [Getting Started](getting-started.md) · [Missingness](missingness.md) · [API](api/graphs.md)
+- [Scope](scope.md) · [Terminology](terminology.md) · [Comparison](comparison.md) · [Getting Started](getting-started.md) · [Missingness](missingness.md) · [API](api/graphs.md)
+- Design: [DESIGN.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/DESIGN.md) · [BOUNDARIES.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/BOUNDARIES.md) · [ecosystem principles](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/DESIGN_PRINCIPLES.md)
 - [References](references.md) — Pearl, g-methods, discovery, temporal ID (DOIs / BibTeX keys)
 - Estimation layer: [CausalTargeted.jl references](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/references.md)
 - Narrative companion: [CDCS Book](https://simonab.github.io/causal-dynamics-book/)

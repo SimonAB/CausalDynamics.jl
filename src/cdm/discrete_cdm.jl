@@ -114,6 +114,14 @@ function do_sequence(pairs::Pair{Symbol, <:Any}...)
 end
 
 """
+    AbstractAvailability
+
+Marker for objects that can supply a time-indexed information set ``ℋ_t`` to a
+[`Policy`](@ref) (for example an [`ObservationBridge`](@ref)).
+"""
+abstract type AbstractAvailability end
+
+"""
     Policy
 
 State-dependent (soft) intervention. Each key is an endogenous variable symbol;
@@ -136,8 +144,6 @@ time ``ℋ_t`` (non-anticipation). It may be
 Rules that need a symbol outside ``ℋ_t`` fail with a field-access error rather
 than silently reading future or unobserved information.
 """
-abstract type AbstractAvailability end
-
 struct Policy <: AbstractIntervention
     rules::Dict{Symbol, Function}
     information_set::Union{Nothing, Set{Symbol}, AbstractAvailability}

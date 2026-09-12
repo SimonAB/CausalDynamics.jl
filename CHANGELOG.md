@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Getting-started walk-through for from-onset attributes vs
+  `:interval_summary` glyphs (`ReferentSpec` + `dagplot_temporal`).
+- Index links to [BOUNDARIES.md](BOUNDARIES.md) and shared design principles.
 - **Orthogonal temporal semantics:** typed `TemporalSupport`
   (`PointwiseSupport`, `PointSupport`, `IntervalSupport`, `FromOnsetSupport`,
   `GlobalSupport`), `value_representation`, `ReferentSpec` (carrying

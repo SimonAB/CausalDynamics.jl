@@ -70,6 +70,7 @@ AbstractDoAssignment
 ConstantAssignment
 SeriesAssignment
 TimedAssignment
+AbstractAvailability
 Policy
 policy
 intervention_value

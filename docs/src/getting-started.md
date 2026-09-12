@@ -229,6 +229,51 @@ fig
 
 Sequential LMTP estimation: [CausalTargeted getting started](https://simonab.github.io/CausalTargeted.jl/dev/getting-started/#4.-Sequential-LMTP).
 
+### From-onset attributes and glyphs
+
+Support alone fixes node count. A pasture assignment that begins at onset keeps
+one reused node; its glyph is still a circle unless you declare
+`value_representation = :interval_summary`. Optional ontology lives on a shared
+[`ReferentSpec`](@ref), never on the node constructor.
+
+```@example gs-temporal-onset
+using CausalDynamics
+using CausalDynamics: TemporalDAGSpec, TemporalNodeSpec, LaggedEdge, unroll_temporal_dag,
+    FromOnsetSupport, PointwiseSupport, ReferentSpec, enduring_node
+using DAGMakie, CairoMakie
+
+sheep = ReferentSpec(:sheep; identity_criterion = :administrative_identifier)
+spec = TemporalDAGSpec(;
+    nodes = [
+        TemporalNodeSpec(:diagnosis; temporal_support = PointwiseSupport(),
+            value_representation = :event),
+        TemporalNodeSpec(:pasture; temporal_support = FromOnsetSupport(0),
+            value_representation = :attribute, referent = sheep),
+        TemporalNodeSpec(:burden_summary; temporal_support = PointwiseSupport(),
+            value_representation = :interval_summary),
+    ],
+    edges = [
+        LaggedEdge(:diagnosis, :pasture, 0),
+        LaggedEdge(:pasture, :burden_summary, 0),
+    ],
+)
+u = unroll_temporal_dag(spec, 0)  # 𝒯 = {0}: one pointwise node each for diagnosis / burden
+fig, _, p = dagplot_temporal(u;
+    figure_size = (560, 280),
+    fit_node_size_to_labels = false,
+    title = "Attribute circle vs interval-summary glyph",
+)
+pasture_i = enduring_node(u, :pasture)
+burden_i = findfirst(k -> first(k) === :burden_summary, u.index_node)
+(
+    nv(u.graph),
+    p[:node_marker][][pasture_i] == :circle,
+    p[:node_marker][][burden_i] == interval_summary_node_marker(),
+)
+```
+
+Further reading: [Time-indexed graphs](api/time_graphs.md) · [Terminology](terminology.md).
+
 ## 4. CausalDynamics plot façades
 
 Optional helpers wrap DAGMakie when you already hold node indices from
