@@ -101,18 +101,39 @@ using Test
         @test !has_edge(u.graph, enduring_node(u, :pasture), temporal_node(u, :weight, 0))
         @test_throws ArgumentError temporal_node(u, :pasture, 0)
 
-        constitution = temporal_edge_records(u)
-        constitutive = only(filter(record -> record.role === :constitutive, constitution))
-        recurrent = filter(record -> record.role === :recurrent_influence, constitution)
-        @test constitutive.parent == (:diagnosis, 0)
-        @test constitutive.child == (:pasture, nothing)
+        records = temporal_edge_records(u)
+        onset = only(filter(record -> record.role === :onset_assignment, records))
+        recurrent = filter(record -> record.role === :recurrent_influence, records)
+        @test onset.parent == (:diagnosis, 0)
+        @test onset.child == (:pasture, nothing)
         @test length(recurrent) == 2
         @test all(record.parent == (:pasture, nothing) for record in recurrent)
         @test Set(record.child for record in recurrent) == Set([(:weight, 1), (:weight, 2)])
+        @test !any(record.role === :constitutive for record in records)
 
+        # Support pattern never demotes a declared causal edge: the onset
+        # assignment diagnosis[0] → pasture stays in the causal projection.
         proj = causal_projection(u)
-        @test ne(proj.graph) == ne(u.graph) - 1  # constitutive edge excluded
-        @test only(proj.constraints).relation_kind === :constitutive_persistence
+        @test ne(proj.graph) == ne(u.graph)
+        @test isempty(proj.constraints)
+        @test has_edge(proj.graph, temporal_node(u, :diagnosis, 0), enduring_node(u, :pasture))
+
+        # Constitution must be declared to become a constraint.
+        spec_const = TemporalDAGSpec(
+            nodes = spec.nodes,
+            edges = [
+                LaggedEdge(:diagnosis, :pasture, 1; relation_kind = :constitutive_persistence),
+                (:pasture, :weight, 0),
+                (:weight, :weight, 1),
+            ],
+        )
+        u_const = unroll_temporal_dag(spec_const, 2)
+        proj_const = causal_projection(u_const)
+        @test ne(proj_const.graph) == ne(u_const.graph) - 1
+        @test only(proj_const.constraints).relation_kind === :constitutive_persistence
+        @test temporal_edge_role(
+            u_const, temporal_node(u_const, :diagnosis, 0), enduring_node(u_const, :pasture),
+        ) === :constitutive_persistence
     end
 
     @testset "validation errors" begin
@@ -151,7 +172,7 @@ using Test
         )
     end
 
-    @testset "occasion influence records" begin
+    @testset "pointwise influence records" begin
         spec = TemporalDAGSpec(
             nodes = [TemporalNodeSpec(:x), TemporalNodeSpec(:y)],
             edges = [(:x, :y, 0)],
@@ -159,6 +180,7 @@ using Test
         u = unroll_temporal_dag(spec, 1)
         records = temporal_edge_records(u)
         @test length(records) == 2
-        @test all(record.role === :occasion_influence for record in records)
+        # Construction-pattern label only; a timestamp does not make an occasion.
+        @test all(record.role === :pointwise_influence for record in records)
     end
 end

@@ -110,29 +110,34 @@ function constraint_certificate(spec::StructuralConstraintSpec)
 end
 
 """
-    assert_feasibility!(constraints, intervention; justified=false)
+    assert_feasibility!(constraints, intervention; justification=nothing)
 
 Wire `:feasibility` [`StructuralConstraintSpec`](@ref)s into intervention
 gates. Mathematical admissibility and practical availability are separate;
-positivity is none of these. Pass `justified=true` only when a certificate
-records the physical justification.
+positivity is none of these. An intervention on a constrained target passes
+only when `justification` is an [`InterventionJustification`](@ref) of kind
+`:physical_justification` naming that target. The deprecated `justified::Bool`
+bypass is refused.
 """
 function assert_feasibility!(
     constraints,
     intervention;
-    justified::Bool = false,
+    justification::Union{Nothing, InterventionJustification} = nothing,
+    justified::Union{Nothing, Bool} = nothing,
 )
-    justified && return nothing
+    justified === true && _refuse_boolean_justification("assert_feasibility!", "justified")
     targets = Set(intervention_targets(intervention))
     isempty(targets) && return nothing
     for spec in constraints
         spec.kind === :feasibility || continue
         hit = [t for t in spec.targets if t in targets]
         isempty(hit) && continue
+        unjustified = [t for t in hit if !justifies(justification, t, FEASIBILITY_JUSTIFICATION_KINDS)]
+        isempty(unjustified) && continue
         throw(ArgumentError(
-            "feasibility constraint :$(spec.id) blocks intervention on $hit " *
-            "without physical justification; set feasibility_justified=true only " *
-            "when the certificate records that justification. Claim: $(spec.claim)",
+            "feasibility constraint :$(spec.id) blocks intervention on $unjustified " *
+            "without physical justification; pass an InterventionJustification of kind " *
+            ":physical_justification naming those targets. Claim: $(spec.claim)",
         ))
     end
     return nothing
@@ -143,19 +148,30 @@ end
 
 Combined P0 gate: interval-summary scalar ``do`` refusal and feasibility
 constraints. Call from simulate/identify paths that carry a temporal spec.
+Justifications are [`InterventionJustification`](@ref) records
+(`macro_intervention_justification`, `feasibility_justification`); the
+deprecated Boolean `*_justified` switches are refused.
 """
 function validate_intervention_semantics(
     nodes,
     intervention;
     constraints = StructuralConstraintSpec[],
-    macro_intervention_justified::Bool = false,
-    feasibility_justified::Bool = false,
+    macro_intervention_justification::Union{Nothing, InterventionJustification} = nothing,
+    feasibility_justification::Union{Nothing, InterventionJustification} = nothing,
+    macro_intervention_justified::Union{Nothing, Bool} = nothing,
+    feasibility_justified::Union{Nothing, Bool} = nothing,
 )
+    macro_intervention_justified === true && _refuse_boolean_justification(
+        "validate_intervention_semantics", "macro_intervention_justified",
+    )
+    feasibility_justified === true && _refuse_boolean_justification(
+        "validate_intervention_semantics", "feasibility_justified",
+    )
     assert_interval_summary_do!(
-        nodes, intervention; justified = macro_intervention_justified,
+        nodes, intervention; justification = macro_intervention_justification,
     )
     assert_feasibility!(
-        constraints, intervention; justified = feasibility_justified,
+        constraints, intervention; justification = feasibility_justification,
     )
     return nothing
 end

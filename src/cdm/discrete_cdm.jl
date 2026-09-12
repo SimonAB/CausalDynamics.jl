@@ -122,12 +122,25 @@ each value is a `Function` rule `(state, t) -> value` evaluated against the
 the system, where [`DoSequence`](@ref) fixes a value independently of state.
 
 Optional `information_set` declares which symbols are available at decision
-time ``ℋ_t`` (non-anticipation). When set, rules may only read those symbols
-from `state`.
+time ``ℋ_t`` (non-anticipation). It may be
+
+- a collection of symbols: a static ``ℋ`` — rules may only read those symbols
+  from `state`; or
+- an [`ObservationBridge`](@ref): a time-varying ``ℋ_t`` derived from the
+  bridge's `mapping` and `availability`. At decision time `t` the rule sees
+  only the state variables whose observed counterpart is `available_at(bridge,
+  observed, t)`; unmapped (unobserved) variables are never visible. Availability
+  is declared on the observation side and consumed here — it is not re-derived
+  from the state.
+
+Rules that need a symbol outside ``ℋ_t`` fail with a field-access error rather
+than silently reading future or unobserved information.
 """
+abstract type AbstractAvailability end
+
 struct Policy <: AbstractIntervention
     rules::Dict{Symbol, Function}
-    information_set::Union{Nothing, Set{Symbol}}
+    information_set::Union{Nothing, Set{Symbol}, AbstractAvailability}
 
     function Policy(
         rules::AbstractDict{<:Symbol};
@@ -142,6 +155,8 @@ struct Policy <: AbstractIntervention
         end
         info = if information_set === nothing
             nothing
+        elseif information_set isa AbstractAvailability
+            information_set
         else
             Set{Symbol}(Symbol(s) for s in information_set)
         end
@@ -166,6 +181,24 @@ Build a [`Policy`](@ref) from `variable => rule` pairs, each `rule(state, t)`.
 function policy(pairs::Pair{Symbol, <:Any}...; information_set = nothing)
     return Policy(Dict{Symbol, Any}(pairs...); information_set = information_set)
 end
+
+"""
+    policy_information_set(policy, t) -> Union{Nothing, Set{Symbol}}
+
+State symbols the policy may read at decision time `t` (``ℋ_t``). Returns
+`nothing` when the policy declares no information set (unrestricted), the
+declared static set, or — for an [`ObservationBridge`](@ref) — the latent
+variables whose observed counterparts are available at `t`.
+"""
+function policy_information_set(intervention::Policy, t::Integer)
+    info = intervention.information_set
+    info === nothing && return nothing
+    info isa Set{Symbol} && return info
+    return _information_set_at(info, Int(t))
+end
+
+# Implemented per availability declaration (see `cdm/observation.jl`).
+function _information_set_at end
 
 """
     intervention_value(intervention, variable, t, observational_value)
@@ -201,7 +234,7 @@ end
 function intervention_value(intervention::Policy, variable::Symbol, t::Int, observational_value, state)
     haskey(intervention.rules, variable) || return observational_value
     if intervention.information_set !== nothing
-        allowed = intervention.information_set
+        allowed = policy_information_set(intervention, t)
         keys_allowed = Tuple(s for s in keys(state) if s in allowed)
         restricted = NamedTuple{keys_allowed}(
             Tuple(getproperty(state, s) for s in keys_allowed)
@@ -572,6 +605,6 @@ end
 export AbstractCDM, DiscreteTimeCDM, CDMTrajectory
 export AbstractIntervention, DoSequence, do_sequence, intervention_value
 export AbstractDoAssignment, ConstantAssignment, SeriesAssignment, TimedAssignment
-export Policy, policy
+export Policy, policy, policy_information_set, AbstractAvailability
 export GComputationResult, g_computation
 export simulate, counterfactual

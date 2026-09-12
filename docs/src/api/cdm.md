@@ -30,6 +30,7 @@ attach_hierarchy_assumptions
 ObservationBridge
 available_at
 information_set_at
+policy_information_set
 identity_observation
 observe_series
 observe_trajectory

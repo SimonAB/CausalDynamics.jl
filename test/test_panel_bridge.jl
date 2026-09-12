@@ -275,9 +275,14 @@ end
 @testset "enduring TemporalNodeSpec panel path (#29)" begin
     spec = TemporalDAGSpec(
         nodes = [
-            TemporalNodeSpec(:grid_type; temporal_mode = :enduring, causal_role = :assigned),
-            TemporalNodeSpec(:fec; temporal_mode = :occasion),
-            TemporalNodeSpec(:weight; temporal_mode = :occasion),
+            TemporalNodeSpec(
+                :grid_type;
+                temporal_support = FromOnsetSupport(0),
+                value_representation = :attribute,
+                causal_role = :assigned,
+            ),
+            TemporalNodeSpec(:fec; temporal_support = PointwiseSupport()),
+            TemporalNodeSpec(:weight; temporal_support = PointwiseSupport()),
         ],
         edges = [
             LaggedEdge(:grid_type, :fec, 0),

@@ -19,7 +19,7 @@ Declare how latent (or endogenous) series become estimation columns.
   decision time ``t`` at which the quantity enters ``ℋ_t``. A quantity may
   describe an earlier realisation and become available later.
 """
-struct ObservationBridge
+struct ObservationBridge <: AbstractAvailability
     mapping::Dict{Symbol, Symbol}
     measure::Any
     availability::Union{Nothing, Dict{Symbol, Int}}
@@ -64,6 +64,21 @@ function information_set_at(bridge::ObservationBridge, decision_t::Integer)
     vars = Set{Symbol}(values(bridge.mapping))
     bridge.availability === nothing && return vars
     return Set{Symbol}(v for v in vars if available_at(bridge, v, decision_t))
+end
+
+"""
+    _information_set_at(bridge, decision_t) -> Set{Symbol}
+
+Latent (state) symbols a [`Policy`](@ref) may read at `decision_t` under this
+bridge: mapped source variables whose observed counterpart is
+[`available_at`](@ref). Availability may be declared against either the panel
+symbol or the source symbol. Unmapped variables are never in ``ℋ_t``.
+"""
+function _information_set_at(bridge::ObservationBridge, decision_t::Int)
+    return Set{Symbol}(
+        source for (source, observed) in bridge.mapping
+        if available_at(bridge, observed, decision_t) && available_at(bridge, source, decision_t)
+    )
 end
 
 """

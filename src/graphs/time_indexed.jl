@@ -90,7 +90,7 @@ function TemporalNodeSpec(
     name::Symbol;
     temporal_mode::Union{Nothing, Symbol} = nothing,
     causal_role::Union{Nothing, Symbol} = nothing,
-    onset_time::Integer = 0,
+    onset_time::Union{Nothing, Integer} = nothing,
     temporal_support = nothing,
     value_representation::Symbol = :unspecified,
     referent_id::Union{Nothing, Symbol} = nothing,
@@ -98,13 +98,41 @@ function TemporalNodeSpec(
     identity_criterion::Union{Nothing, Symbol} = nothing,
     ontological_character::Symbol = :unspecified,
 )
-    onset = Int(onset_time)
+    # `nothing` means "not declared"; symbol shorthands that need an onset
+    # (`:from_onset`, legacy `:enduring`) must then supply it explicitly.
+    onset = onset_time === nothing ? 0 : Int(onset_time)
+    character = ontological_character
     if referent !== nothing
+        if referent_id !== nothing && referent_id !== referent.id
+            throw(ArgumentError(
+                "referent_id :$referent_id conflicts with referent.id :$(referent.id)",
+            ))
+        end
         referent_id = referent.id
-        identity_criterion = something(identity_criterion, referent.identity_criterion)
+        # Identity criterion is optional: keep `nothing` when neither the node
+        # nor the referent declares one. Conflicting declarations are refused
+        # rather than silently resolved in favour of either side.
+        if identity_criterion === nothing
+            identity_criterion = referent.identity_criterion
+        elseif referent.identity_criterion !== nothing &&
+               identity_criterion !== referent.identity_criterion
+            throw(ArgumentError(
+                "identity_criterion :$identity_criterion conflicts with " *
+                "referent :$(referent.id) declaring :$(referent.identity_criterion)",
+            ))
+        end
+        if character === :unspecified
+            character = referent.ontological_character
+        elseif referent.ontological_character !== :unspecified &&
+               character !== referent.ontological_character
+            throw(ArgumentError(
+                "ontological_character :$character conflicts with " *
+                "referent :$(referent.id) declaring :$(referent.ontological_character)",
+            ))
+        end
     end
     support = if temporal_support !== nothing
-        parse_temporal_support(temporal_support; onset = onset)
+        parse_temporal_support(temporal_support; onset = onset_time)
     elseif temporal_mode !== nothing
         temporal_mode === :occasion || temporal_mode === :enduring ||
             throw(ArgumentError("temporal_mode must be :occasion or :enduring, got :$temporal_mode"))
@@ -113,6 +141,12 @@ function TemporalNodeSpec(
             "declare temporal_support instead. The flag does not set ontological_character.",
             :TemporalNodeSpec,
         )
+        if temporal_mode === :enduring && onset_time === nothing
+            throw(ArgumentError(
+                "temporal_mode=:enduring cannot be migrated without an explicit onset_time; " *
+                "declare temporal_support = FromOnsetSupport(t₀) instead",
+            ))
+        end
         support_from_temporal_mode(temporal_mode, onset)
     else
         PointwiseSupport()
@@ -130,7 +164,7 @@ function TemporalNodeSpec(
         normalise_value_representation(value_representation),
         referent_id,
         identity_criterion,
-        normalise_ontological_character(ontological_character),
+        normalise_ontological_character(character),
     )
 end
 
@@ -412,29 +446,38 @@ end
 """
     temporal_edge_role(unrolling, parent, child) -> Symbol
 
-Classify an edge in a temporal unrolling:
+Return the semantic role of an edge in a temporal unrolling.
 
-- `:constitutive` — pointwise parent assigns into a single-node child
-  (compatibility alias for `:constitutive_persistence`)
+If the edge was declared with a `relation_kind` other than `:causal_influence`
+(`:constitutive_persistence`, `:constitutive_dependence`, `:participation`,
+`:measurement`, …), that declared kind is returned. Otherwise the role is a
+**construction-pattern label** for a causal-influence edge, describing only the
+supports of its endpoints:
+
+- `:onset_assignment` — pointwise parent assigns into a single-node child
 - `:recurrent_influence` — single-node parent influences a pointwise child
-- `:occasion_influence` — pointwise to pointwise
-- `:causal_influence` — single-node to single-node (or other non-constitutive cases)
+- `:pointwise_influence` — pointwise to pointwise
+- `:causal_influence` — single-node to single-node
 
-Derived roles do not alter the unrolled topology used for display.
+Support patterns never make an edge constitutive: an onset assignment is an
+ordinary causal edge unless declared otherwise. Derived roles do not alter
+the unrolled topology used for display.
 """
 function temporal_edge_role(unrolling::TemporalUnrolling, parent::Integer, child::Integer)
     1 ≤ parent ≤ length(unrolling.index_node) || throw(BoundsError(unrolling.index_node, parent))
     1 ≤ child ≤ length(unrolling.index_node) || throw(BoundsError(unrolling.index_node, child))
+    declared = _declared_relation_kind(unrolling, parent, child)
+    declared === :causal_influence || return declared
     parent_time = unrolling.index_node[parent][2]
     child_time = unrolling.index_node[child][2]
     if child_time === nothing && parent_time !== nothing
-        return :constitutive
+        return :onset_assignment
     elseif parent_time === nothing && child_time !== nothing
         return :recurrent_influence
     elseif parent_time === nothing && child_time === nothing
         return :causal_influence
     end
-    return :occasion_influence
+    return :pointwise_influence
 end
 
 """
@@ -470,10 +513,16 @@ end
     causal_projection(unrolling) -> NamedTuple
 
 Return the subgraph of causal-influence edges together with binding
-non-causal constraints (constitution, participation, …) that remain relevant
-for intervention admissibility. Non-`:causal_influence` declarations and
-structurally constitutive pointwise→single-node edges are excluded from the
-identification graph.
+non-causal constraints (constitution, participation, measurement, …) that
+remain relevant for intervention admissibility.
+
+Membership is decided **only** by the declared `relation_kind` of each edge.
+Support patterns (pointwise → single-node onset assignments, and so on) are
+construction facts and never demote a declared causal edge to a constraint:
+a diagnosis that assigns a subsequently maintained treatment is a causal
+parent of that treatment. To record a constitutive relation, declare it with
+`LaggedEdge(...; relation_kind = :constitutive_persistence)` or
+`:constitutive_dependence`.
 """
 function causal_projection(unrolling::TemporalUnrolling)
     g = unrolling.graph
@@ -483,21 +532,14 @@ function causal_projection(unrolling::TemporalUnrolling)
         src = Graphs.src(edge)
         dst = Graphs.dst(edge)
         declared = _declared_relation_kind(unrolling, src, dst)
-        role = temporal_edge_role(unrolling, src, dst)
-        non_causal = declared !== :causal_influence || role === :constitutive
-        if non_causal
-            kind = if declared !== :causal_influence
-                declared
-            else
-                :constitutive_persistence
-            end
+        if declared === :causal_influence
+            Graphs.add_edge!(causal, src, dst)
+        else
             push!(constraints, (
                 parent = unrolling.index_node[src],
                 child = unrolling.index_node[dst],
-                relation_kind = kind,
+                relation_kind = declared,
             ))
-        else
-            Graphs.add_edge!(causal, src, dst)
         end
     end
     return (graph = causal, constraints = constraints)

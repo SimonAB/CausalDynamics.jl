@@ -134,8 +134,10 @@ function simulate_panel(
     name_fn = panel_column_name,
     temporal_spec::Union{Nothing, TemporalDAGSpec} = nothing,
     constraints = StructuralConstraintSpec[],
-    macro_intervention_justified::Bool = false,
-    feasibility_justified::Bool = false,
+    macro_intervention_justification::Union{Nothing, InterventionJustification} = nothing,
+    feasibility_justification::Union{Nothing, InterventionJustification} = nothing,
+    macro_intervention_justified::Union{Nothing, Bool} = nothing,
+    feasibility_justified::Union{Nothing, Bool} = nothing,
 )
     n = Int(n)
     T = Int(T)
@@ -147,12 +149,16 @@ function simulate_panel(
             temporal_spec.nodes,
             intervention;
             constraints = constraints,
+            macro_intervention_justification = macro_intervention_justification,
+            feasibility_justification = feasibility_justification,
             macro_intervention_justified = macro_intervention_justified,
             feasibility_justified = feasibility_justified,
         )
     elseif !isempty(constraints) && intervention !== nothing
         assert_feasibility!(
-            constraints, intervention; justified = feasibility_justified,
+            constraints, intervention;
+            justification = feasibility_justification,
+            justified = feasibility_justified,
         )
     end
 

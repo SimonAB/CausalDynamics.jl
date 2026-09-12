@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `SemanticGraph`), optional `ontological_character`, `LaggedEdge.relation_kind`,
   `causal_projection`, and `semantic_fingerprint`. Node multiplicity follows
   support and graph kind; referent identity does not collapse nodes.
+  Prefer `identity_criterion` and optional `ontological_character` on
+  `ReferentSpec` (inherited by `TemporalNodeSpec(; referent=…)`).
 - **Policy information set:** optional `ℋ_t` on `Policy` so adaptive rules only
   see declared available symbols (non-anticipation).
 - **Observation availability:** `ObservationBridge.availability` records when a
@@ -23,15 +25,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Intervention gates:** `assert_interval_summary_do!`, `assert_feasibility!`,
   and `validate_intervention_semantics` refuse scalar ``do`` on interval
   summaries and wire `:feasibility` constraints into `simulate_panel`.
+  Exceptions are licensed only by an `InterventionJustification(kind, targets,
+  note; source)` record naming the target (macro-intervention kinds
+  `:trajectory_generator`, `:admissible_trajectory_distribution`,
+  `:certificate_note`; feasibility kind `:physical_justification`). The Boolean
+  `justified` / `*_justified = true` bypasses are refused with a migration
+  message; `simulate_panel` and `validate_intervention_semantics` take
+  `macro_intervention_justification` / `feasibility_justification`.
+- **Policy ``ℋ_t`` from observation availability:** `Policy(...;
+  information_set = bridge::ObservationBridge)` derives a time-varying
+  information set from the bridge's `mapping` and `availability`
+  (`policy_information_set(policy, t)`); unmapped variables are never visible
+  and rules that read outside ``ℋ_t`` fail loudly.
 - **Identification status:** `IdentificationResult` carries optional
   `semantic_fingerprint`, `claim_kind`, and `identification_status` while
   preserving `identifiable::Bool`.
 
 ### Changed
 
+- `GlobalSupport` documents a no-finite-window clock property only; it is not
+  unspecified support and not time invariance of a mechanism.
 - DAGMakie extension passes `temporal_supports`, `value_representations`, and `graph_kind` into `dagplot_temporal`.
 - Deprecated `temporal_mode = :occasion | :enduring` as a construction switch;
   it maps to `PointwiseSupport` / `FromOnsetSupport` and does not set ontology.
+  Where the old flag underdetermines new semantics, require clarification rather
+  than inventing defaults. Legacy `temporal_mode = :enduring` and
+  `parse_temporal_support(:from_onset)` now **require an explicit onset**
+  (`onset_time` / `onset`); there is no default onset.
+- **Relation kind is declared, never inferred from support.**
+  `temporal_edge_role` returns the declared non-causal `relation_kind` when one
+  is set; otherwise it reports a construction label:
+  `:onset_assignment` (into a from-onset node at its onset; formerly
+  `:constitutive`), `:recurrent_influence` (out of a single-support node),
+  `:pointwise_influence` (between pointwise nodes; formerly
+  `:occasion_influence`), or `:causal_influence`. `causal_projection` keeps
+  every edge whose declared kind is causal regardless of support pattern; only
+  declared `:constitutive_*`, `:participation`, `:measurement`, … edges become
+  constraints.
+- `TemporalNodeSpec(; referent = ReferentSpec(…))` inherits `referent_id`,
+  `identity_criterion`, and `ontological_character` from the referent and
+  throws on conflicting node-level values; `identity_criterion` stays
+  `nothing` unless declared (no silent identity claim).
 - Temporal `identify` uses the causal projection and refuses non-time-unrolled
   `graph_kind` with `:unsupported_model_class`.
 - [Terminology](docs/src/terminology.md), [Getting Started](docs/src/getting-started.md),
