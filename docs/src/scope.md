@@ -7,9 +7,9 @@ models for **Causal Dynamical Models (CDMs)**, including time-indexed simulation
 The [CDCS book](https://simonab.github.io/causal-dynamics-book/) uses these
 exported APIs in narrative chapters. Identification and estimation names stay
 Pearl/SciML. Temporal identity may use the closed lexicon in
-[Terminology](terminology.md) (occasion, enduring, constitution, constitutive,
-influence, onset, replacement, deployment). Whitehead glossary terms live in the
-book
+[Terminology](terminology.md) (`temporal_support`, `value_representation`,
+`referent_id`, `graph_kind`, `relation_kind`, onset, replacement, deployment).
+Whitehead glossary terms live in the book
 ([Concept Reference](https://simonab.github.io/causal-dynamics-book/concept-reference-tables.html)).
 
 ## What is in core (v0.1–v0.2)
@@ -30,7 +30,7 @@ book
 | Soft interventions | State-dependent treatment rules | `Policy`, `policy` |
 | Interventional means | Monte Carlo g-computation (discrete) | `g_computation` on `DiscreteTimeCDM` |
 | Continuous functionals | Monte Carlo g-computation (SciML) | `ContinuousEffectFunctional`, `g_computation` on `ContinuousCDMSpec` |
-| Time-indexed ID | Unrolled lag DAGs; enduring vs occasion nodes | `TemporalNodeSpec`, `TemporalDAGSpec`, `unroll_temporal_dag`, `temporal_backdoor_adjustment_set` |
+| Time-indexed ID | Unrolled lag DAGs; support-driven node multiplicity | `TemporalNodeSpec`, `TemporalDAGSpec`, `unroll_temporal_dag`, `causal_projection`, `temporal_backdoor_adjustment_set` |
 | Transport ID | Domain covariates in adjustment | `TransportQuery` → `:transport_backdoor` |
 
 **Hard dependencies** stay lean: `Graphs` and `CausalInference` (d-separation, backdoor, and frontdoor adjustment via `gensearch`). IV, path enumeration, SCM/CDM simulation, and estimation bridges are owned here.

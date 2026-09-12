@@ -4,6 +4,7 @@ These records do not infer ontology from names, glyphs, or array size.
 `temporal_mode` is a deprecated constructor alias only.
 """
 
+"""Abstract temporal extent of the value represented by a node."""
 abstract type TemporalSupport end
 
 """Point-supported value at each discrete ``t ∈ 𝒯`` (default unrolling)."""
@@ -28,6 +29,7 @@ end
 """No finite window, or treated as time-invariant within the model."""
 struct GlobalSupport <: TemporalSupport end
 
+"""Allowed `value_representation` symbols (plus aliases normalised elsewhere)."""
 const VALUE_REPRESENTATIONS = (
     :state, :event, :event_indicator, :trajectory, :interval_summary, :attribute, :unspecified,
 )
@@ -38,6 +40,7 @@ const IDENTITY_CRITERIA = (
 
 const ONTOLOGICAL_CHARACTERS = (:occasion, :enduring, :unspecified)
 
+"""Allowed `LaggedEdge.relation_kind` symbols."""
 const RELATION_KINDS = (
     :causal_influence,
     :constitutive_persistence,
@@ -48,6 +51,7 @@ const RELATION_KINDS = (
     :identity_succession,
 )
 
+"""Claim strength labels for certificates and structural constraints."""
 const CLAIM_KINDS = (
     :declared_assumption,
     :structurally_validated,
@@ -56,6 +60,7 @@ const CLAIM_KINDS = (
     :empirically_assessed,
 )
 
+"""Identification outcome labels on `IdentificationResult`."""
 const IDENTIFICATION_STATUSES = (
     :identified,
     :not_identified_by_procedure,
@@ -63,10 +68,16 @@ const IDENTIFICATION_STATUSES = (
     :proved_nonidentifiable,
 )
 
+"""Abstract graph representation class for identification validity."""
 abstract type GraphKind end
 
+"""Time-unrolled causal DAG; nodes indexed by temporal support."""
 struct TimeUnrolledGraph <: GraphKind end
+
+"""Process-level graph; DAG adjustment does not transfer automatically."""
 struct ProcessGraph <: GraphKind end
+
+"""Broader semantic diagram; may mix non-causal relations."""
 struct SemanticGraph <: GraphKind end
 
 """
@@ -126,6 +137,7 @@ function normalise_value_representation(value::Symbol)
     return value
 end
 
+"""Normalise edge relation kinds; `:constitutive` → `:constitutive_persistence`."""
 function normalise_relation_kind(kind::Symbol)
     kind === :constitutive && return :constitutive_persistence
     kind in RELATION_KINDS || throw(ArgumentError(
@@ -134,6 +146,7 @@ function normalise_relation_kind(kind::Symbol)
     return kind
 end
 
+"""Validate optional `ontological_character` metadata."""
 function normalise_ontological_character(character::Symbol)
     character in ONTOLOGICAL_CHARACTERS || throw(ArgumentError(
         "ontological_character must be one of $ONTOLOGICAL_CHARACTERS, got :$character",
@@ -148,6 +161,12 @@ expands_pointwise(::TemporalSupport) = false
 """Return whether the support contributes a single reused graph node."""
 is_single_node_support(support::TemporalSupport) = !expands_pointwise(support)
 
+"""
+    parse_temporal_support(support; onset=0) -> TemporalSupport
+
+Accept a typed support or a symbol shorthand (`:point`, `:from_onset`, `:global`).
+`:interval` is refused: use [`IntervalSupport`](@ref) with an explicit window.
+"""
 function parse_temporal_support(support::TemporalSupport; onset = 0)
     return support
 end
@@ -196,6 +215,11 @@ function semantic_fingerprint(parts...)
     return stable_hash64(string(parts))
 end
 
+"""
+    require_semantics(op, specs; error=false)
+
+Warn (or error) when gated operations lack declared support / representation.
+"""
 function require_semantics(op::Symbol, specs; error::Bool = false)
     missing = Symbol[]
     for spec in specs

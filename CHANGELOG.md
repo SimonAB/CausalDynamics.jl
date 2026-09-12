@@ -33,7 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   it maps to `PointwiseSupport` / `FromOnsetSupport` and does not set ontology.
 - Temporal `identify` uses the causal projection and refuses non-time-unrolled
   `graph_kind` with `:unsupported_model_class`.
-- [Terminology](docs/src/terminology.md) rewritten to the glossary split.
+- [Terminology](docs/src/terminology.md), [Getting Started](docs/src/getting-started.md),
+  [Scope](docs/src/scope.md), and [Time-indexed graphs](docs/src/api/time_graphs.md)
+  retargeted to typed `temporal_support` / `value_representation` /
+  `referent_id` / `graph_kind` (including Documenter `@example`s).
 
 ### Fixed
 

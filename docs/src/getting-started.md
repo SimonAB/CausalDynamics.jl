@@ -171,11 +171,14 @@ Estimation of interventional NDE/NIE under MTP shifts lives in
 
 ## 3. Time-indexed graphs
 
-**Spec.** Two occasions with baseline `w`, treatments `a`, time-varying `l`, outcome `y`.
-The all-occasion constructor treats every listed variable as `:occasion`. For a
-fixed entity attribute (genotype, site, baseline arm), declare
-`TemporalNodeSpec(...; temporal_mode = :enduring)` instead so unrolling keeps
-one node and panel helpers map to a bare column ([#29](https://github.com/SimonAB/CausalDynamics.jl/issues/29)).
+**Spec.** Two times with baseline `w`, treatments `a`, time-varying `l`, outcome `y`.
+The compact `TemporalDAGSpec(variables, edges)` constructor gives every listed
+variable default `PointwiseSupport` (one node per `t ∈ 𝒯`). For a fixed entity
+attribute (genotype, site, baseline arm), declare
+`TemporalNodeSpec(...; temporal_support = FromOnsetSupport(onset))` so unrolling
+keeps one node and panel helpers map to a bare column. Optional
+`ontological_character = :enduring` is metadata only and does not change node
+count ([#29](https://github.com/SimonAB/CausalDynamics.jl/issues/29)).
 
 ```@example gs-temporal
 using CausalDynamics

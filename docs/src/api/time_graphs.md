@@ -1,11 +1,25 @@
 # Time-indexed graphs
 
 Discrete-time CDMs often share a **time-invariant lag structure**. Unroll that
-structure to a static DAG over occasions `t = 0:T`, then apply standard
-identification on the unrolled graph. Enduring entity attributes remain single
-nodes and may be assigned at an explicit onset time.
+structure to a static DAG over times `t = 0:T` under a
+[`TimeUnrolledGraph`](@ref), then apply standard identification on the
+**causal projection**. Node multiplicity follows [`temporal_support`](@ref TemporalSupport)
+and [`graph_kind`](@ref GraphKind), not `ontological_character`. Single-node
+supports (`FromOnsetSupport`, `GlobalSupport`, …) keep one reused node that may
+be assigned at an explicit onset.
 
 ```@docs
+TemporalSupport
+PointwiseSupport
+PointSupport
+IntervalSupport
+FromOnsetSupport
+GlobalSupport
+GraphKind
+TimeUnrolledGraph
+ProcessGraph
+SemanticGraph
+ReferentSpec
 LaggedEdge
 TemporalNodeSpec
 TemporalDAGSpec
@@ -14,14 +28,39 @@ unroll_temporal_dag
 temporal_node
 enduring_node
 temporal_node_label
+is_single_node
 temporal_edge_role
 temporal_edge_records
+causal_projection
 d_separated_temporal
 temporal_backdoor_adjustment_set
 temporal_backdoor_adjustment_nodes
+semantic_fingerprint
+validate_intervention_semantics
+assert_interval_summary_do!
+assert_feasibility!
+intervention_targets
+ObservationSemantics
+expands_pointwise
+is_single_node_support
+legacy_temporal_mode
+support_from_temporal_mode
+normalise_value_representation
+normalise_relation_kind
+normalise_ontological_character
+parse_temporal_support
+require_semantics
+VALUE_REPRESENTATIONS
+RELATION_KINDS
+CLAIM_KINDS
+IDENTIFICATION_STATUSES
 ```
 
-## Enduring attributes (#29)
+## Single-node attributes from onset
+
+Prefer typed support. A pasture assignment that persists from onset uses
+`FromOnsetSupport` (and usually `value_representation = :attribute`). Optional
+`ontological_character = :enduring` is metadata only.
 
 ```@example time-graphs-enduring
 using CausalDynamics, Graphs
@@ -29,9 +68,21 @@ using CausalDynamics, Graphs
 spec = TemporalDAGSpec(
     entity = :sheep,
     nodes = [
-        TemporalNodeSpec(:diagnosis),
-        TemporalNodeSpec(:pasture; temporal_mode = :enduring, onset_time = 1, causal_role = :assigned),
-        TemporalNodeSpec(:weight),
+        TemporalNodeSpec(:diagnosis; value_representation = :state),
+        TemporalNodeSpec(
+            :pasture;
+            temporal_support = FromOnsetSupport(1),
+            value_representation = :attribute,
+            causal_role = :assigned,
+            referent_id = :sheep,
+            identity_criterion = :administrative_identifier,
+        ),
+        TemporalNodeSpec(
+            :weight;
+            value_representation = :state,
+            referent_id = :sheep,
+            identity_criterion = :organisational_continuity,
+        ),
     ],
     edges = [
         (:diagnosis, :pasture, 1),
@@ -43,16 +94,24 @@ u = unroll_temporal_dag(spec, 2)
 nv(u.graph), temporal_node_label(u, enduring_node(u, :pasture))
 ```
 
-Panel mapping follows the mode: enduring variables keep their bare column
-symbol; occasion variables use `panel_column_name`. Prefer declaring
-`temporal_mode` on the DAG rather than a downstream `unit_level` override.
+Panel mapping follows support: single-node variables keep their bare column
+symbol; pointwise variables use `panel_column_name`. Prefer declaring
+`temporal_support` on the DAG rather than a downstream `unit_level` override.
+Deprecated `temporal_mode = :enduring` still maps to `FromOnsetSupport` and
+does **not** set ontology.
 
 The unrolled graph retains edge provenance. Use `temporal_edge_role` for one
 edge and `temporal_edge_records` for an auditable inventory. A constitutive
-edge forms an enduring node from earlier occasions; a recurrent influence edge
-reuses an enduring node as a parent of later occasions; an occasion influence
-edge connects time-indexed nodes. These roles describe the temporal semantics
-of the graph and do not add a second causal system alongside it.
+(pointwise → single-node) edge is an assignment into persistence; a recurrent
+influence edge reuses a single-node parent for later times; an occasion
+influence edge connects pointwise nodes. Declared `relation_kind` values other
+than `:causal_influence` are excluded from [`causal_projection`](@ref) and
+recorded as constraints.
+
+```@example time-graphs-enduring
+proj = causal_projection(u)
+ne(proj.graph), length(proj.constraints)
+```
 
 ```@example time-graphs-enduring
 records = temporal_edge_records(u)
@@ -63,16 +122,19 @@ filter(record -> record.role === :constitutive, records)
 
 With [DAGMakie.jl](https://simonab.github.io/DAGMakie.jl) loaded,
 [`DAGMakie.dagplot_temporal`](https://simonab.github.io/DAGMakie.jl/dev/) places
-occasions left→right and variables as rows. Occasion nodes are circles; enduring
-nodes are rounded rectangles placed at their `onset_time` (shape encodes
-persistence; colour still encodes causal role). The CausalDynamics extension
-adds a `TemporalUnrolling` method automatically.
+times left→right and variables as rows. Pointwise nodes are circles; single-node
+supports use rounded rectangles at their onset (shape encodes support /
+representation when supplied; colour still encodes causal role). The
+CausalDynamics extension adds a `TemporalUnrolling` method automatically.
 
 ```@example time-graphs-plot
 using CausalDynamics, DAGMakie, CairoMakie
 
 spec = TemporalDAGSpec(
-    nodes = [TemporalNodeSpec(:x), TemporalNodeSpec(:y)],
+    nodes = [
+        TemporalNodeSpec(:x; value_representation = :state),
+        TemporalNodeSpec(:y; value_representation = :state),
+    ],
     edges = [(:x, :x, 1), (:y, :y, 1), (:x, :y, 1)],
 )
 u = unroll_temporal_dag(spec, 3)
@@ -91,9 +153,14 @@ using CausalDynamics, DAGMakie, CairoMakie
 spec = TemporalDAGSpec(
     entity = :sheep,
     nodes = [
-        TemporalNodeSpec(:diagnosis),
-        TemporalNodeSpec(:pasture; temporal_mode = :enduring, onset_time = 1, causal_role = :assigned),
-        TemporalNodeSpec(:weight),
+        TemporalNodeSpec(:diagnosis; value_representation = :state),
+        TemporalNodeSpec(
+            :pasture;
+            temporal_support = FromOnsetSupport(1),
+            value_representation = :attribute,
+            causal_role = :assigned,
+        ),
+        TemporalNodeSpec(:weight; value_representation = :state),
     ],
     edges = [
         (:diagnosis, :pasture, 1),
@@ -116,7 +183,7 @@ fig
 using CausalDynamics
 
 spec = TemporalDAGSpec(
-    nodes = [TemporalNodeSpec(v) for v in [:x, :y, :a, :c]],
+    nodes = [TemporalNodeSpec(v; value_representation = :state) for v in [:x, :y, :a, :c]],
     edges = [
         (:c, :c, 1), (:a, :c, 1), (:c, :a, 0),  # confounder dynamics + confounding
         (:x, :x, 1), (:a, :x, 1), (:c, :x, 1),  # state evolution
@@ -133,19 +200,23 @@ adj = temporal_backdoor_adjustment_nodes(u, :a, 2, :x, 2)
 See also [Utilities](utils.md), [Discrete-time CDMs](cdm.md), and the
 [CDCS book Ch. 28](https://simonab.github.io/causal-dynamics-book/part-observable/28-cdms-unified.html).
 
-## Baseline assignment into an enduring attribute
+## Baseline assignment into a from-onset attribute
 
-An occasion can assign a value that persists thereafter. With an enduring
-node onset at `t = 1`, a lag-one edge from `diagnosis` connects
-`diagnosis[0]` to the single `pasture` node:
+A point-supported diagnosis can assign a value that persists thereafter. With
+`FromOnsetSupport(1)`, a lag-one edge from `diagnosis` connects `diagnosis[0]`
+to the single `pasture` node:
 
 ```julia
 spec = TemporalDAGSpec(
     entity = :sheep,
     nodes = [
-        TemporalNodeSpec(:diagnosis),
-        TemporalNodeSpec(:pasture; temporal_mode = :enduring, onset_time = 1),
-        TemporalNodeSpec(:weight),
+        TemporalNodeSpec(:diagnosis; value_representation = :state),
+        TemporalNodeSpec(
+            :pasture;
+            temporal_support = FromOnsetSupport(1),
+            value_representation = :attribute,
+        ),
+        TemporalNodeSpec(:weight; value_representation = :state),
     ],
     edges = [
         (:diagnosis, :pasture, 1),

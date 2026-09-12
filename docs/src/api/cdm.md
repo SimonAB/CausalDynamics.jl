@@ -28,6 +28,8 @@ hierarchical_node
 hierarchical_node_names
 attach_hierarchy_assumptions
 ObservationBridge
+available_at
+information_set_at
 identity_observation
 observe_series
 observe_trajectory
