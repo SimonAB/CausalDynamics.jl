@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit tests: drop duplicate FromOnset planner clones; expand clarity surface
   for `GlobalSupport`, removed unrolling-free `query_panel_columns`, and
   `unit_level` refusal; assert `(var, nothing)` on single-node ID certificates.
+- Slim `test_best_practices` to unique error-message checks; thin frontdoor
+  textbook duplicates vs `test_frontdoor_ci.jl`; gate representation stress
+  behind `UNIT_STRESS=1`.
 
 ### Breaking
 

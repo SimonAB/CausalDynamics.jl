@@ -141,16 +141,8 @@ using DataFrames
         @test confounders isa Vector
         # May or may not be identifiable depending on implementation
         @test identifiable isa Bool
-        
-        # Test with invalid node indices
-        g_valid = DiGraph(3)
-        add_edge!(g_valid, 1, 2)
-        add_edge!(g_valid, 2, 3)
-        
-        # Should error with helpful message for invalid nodes
-        @test_throws ArgumentError prepare_for_tmle(g_valid, 10, 3)  # Node 10 doesn't exist
-        @test_throws ArgumentError prepare_for_tmle(g_valid, 1, 10)   # Node 10 doesn't exist
-        @test_throws ArgumentError prepare_for_tmle(g_valid, 0, 3)    # Invalid index
+        # Invalid indices covered in identification Input Validation; one smoke here
+        @test_throws ArgumentError prepare_for_tmle(g_disconnected, 10, 3)
     end
     
     @testset "Node names handling" begin

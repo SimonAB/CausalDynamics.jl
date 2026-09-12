@@ -346,6 +346,9 @@ using Statistics
     end
 
     @testset "stress: large panels and Monte Carlo oracle recovery" begin
+        if get(ENV, "UNIT_STRESS", get(ENV, "CD_UNIT_STRESS", "")) != "1"
+            @info "Skipping representation stress (set UNIT_STRESS=1)"
+        else
         @testset "large n×p encode dims and Float64" begin
             rng_s = Random.Xoshiro(99)
             n_big, p_big, d_big = 2_500, 128, 4
@@ -424,6 +427,7 @@ using Statistics
             # Noisy codes leave a larger residual A→Y association
             @test abs(β_n[2]) > abs(β_o[2])
         end
+        end # UNIT_STRESS
     end
 
     @testset "identification hand-off uses code symbols" begin

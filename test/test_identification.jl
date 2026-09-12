@@ -56,46 +56,14 @@ using Test
     end
     
     @testset "Frontdoor Criterion" begin
-        # Frontdoor example: U → X → M → Y, U → Y
+        # Thin wrapper check; textbook cases live in test_frontdoor_ci.jl
         g_frontdoor = DiGraph(4)
-        add_edge!(g_frontdoor, 1, 2)  # U → X
-        add_edge!(g_frontdoor, 1, 4)  # U → Y
-        add_edge!(g_frontdoor, 2, 3)  # X → M
-        add_edge!(g_frontdoor, 3, 4)  # M → Y
-        
-        # M should be valid frontdoor adjustment
-        is_valid = frontdoor_adjustment_set(g_frontdoor, 2, 4, [3])
-        @test is_valid == true
-
-        # Find frontdoor mediators
-        mediators = find_frontdoor_mediators(g_frontdoor, 2, 4)
-        @test mediators isa Vector{Set{Int}}
-        @test Set([3]) in mediators
-        
-        # Test input validation (should throw ArgumentError with our validation)
-        @test_throws ArgumentError frontdoor_adjustment_set(g_frontdoor, 10, 4, [3])  # Invalid node
-        @test_throws ArgumentError find_frontdoor_mediators(g_frontdoor, 10, 4)  # Invalid node
-        
-        # Verify error message is helpful
-        try
-            frontdoor_adjustment_set(g_frontdoor, 10, 4, [3])
-        catch e
-            if isa(e, ArgumentError)
-                error_msg = sprint(showerror, e)
-                @test occursin("Node indices", error_msg) || occursin("range", error_msg)
-            end
-        end
-        
-        # Test invalid frontdoor (M has backdoor path)
-        g_invalid_frontdoor = DiGraph(5)
-        add_edge!(g_invalid_frontdoor, 1, 2)  # U → X
-        add_edge!(g_invalid_frontdoor, 1, 4)  # U → Y
-        add_edge!(g_invalid_frontdoor, 2, 3)  # X → M
-        add_edge!(g_invalid_frontdoor, 3, 4)  # M → Y
-        add_edge!(g_invalid_frontdoor, 1, 3)  # U → M (creates backdoor path)
-        
-        is_valid_invalid = frontdoor_adjustment_set(g_invalid_frontdoor, 2, 4, [3])
-        @test is_valid_invalid == false  # M is not valid frontdoor due to backdoor path
+        add_edge!(g_frontdoor, 1, 2)
+        add_edge!(g_frontdoor, 1, 4)
+        add_edge!(g_frontdoor, 2, 3)
+        add_edge!(g_frontdoor, 3, 4)
+        @test frontdoor_adjustment_set(g_frontdoor, 2, 4, [3])
+        @test Set([3]) in find_frontdoor_mediators(g_frontdoor, 2, 4)
     end
 
     @testset "Frontdoor scales on dense DAGs" begin
