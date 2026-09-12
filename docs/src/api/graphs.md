@@ -53,17 +53,6 @@ delete_edge_prop!
 
 ## Hypergraphs
 
-Higher-order edges; not used by `identify` or CDM simulation (see [Scope](../scope.md)).
-
-```@docs
-Hypergraph
-HyperedgeData
-add_hyperedge!
-rem_hyperedge!
-hyperedges
-hyperedge_vertices
-incident_hyperedges
-num_vertices
-num_hyperedges
-to_simple_graph
-```
+Higher-order edges are **experimental** and not exported. Qualify as
+`CausalDynamics.Hypergraph`, `CausalDynamics.add_hyperedge!`, and related
+helpers. They are outside the `identify` / GraphSCM / CDM path.

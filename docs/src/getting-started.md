@@ -239,7 +239,7 @@ one reused node; its glyph is still a circle unless you declare
 ```@example gs-temporal-onset
 using CausalDynamics
 using CausalDynamics: TemporalDAGSpec, TemporalNodeSpec, LaggedEdge, unroll_temporal_dag,
-    FromOnsetSupport, PointwiseSupport, ReferentSpec, enduring_node
+    FromOnsetSupport, PointwiseSupport, ReferentSpec, single_node
 using DAGMakie, CairoMakie
 
 sheep = ReferentSpec(:sheep; identity_criterion = :administrative_identifier)
@@ -263,7 +263,7 @@ fig, _, p = dagplot_temporal(u;
     fit_node_size_to_labels = false,
     title = "Attribute circle vs interval-summary glyph",
 )
-pasture_i = enduring_node(u, :pasture)
+pasture_i = single_node(u, :pasture)
 burden_i = findfirst(k -> first(k) === :burden_summary, u.index_node)
 (
     nv(u.graph),

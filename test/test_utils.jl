@@ -75,7 +75,7 @@ using Test
             _fig_mixed, _ax_mixed, p_mixed = DAGMakie.dagplot_temporal(mixed_u)
             # From-onset support reuses one node; glyph follows value_representation
             # (default :unspecified → circle), never endurance.
-            @test p_mixed[:node_marker][][enduring_node(mixed_u, :pasture)] == :circle
+            @test p_mixed[:node_marker][][single_node(mixed_u, :pasture)] == :circle
 
             representation_spec = TemporalDAGSpec(
                 nodes = [

@@ -50,7 +50,6 @@ function _hurdle_panel_columns(
     query::TemporalEffectQuery,
     unrolling::TemporalUnrolling,
     name_fn,
-    unit_level::Set{Symbol} = Set{Symbol}(),
 )
     pres_var = spec.presence_var
     int_var = spec.intensity_var
@@ -61,16 +60,12 @@ function _hurdle_panel_columns(
         "hurdle NodeOutcomeSpec for :$(query.outcome) requires intensity_var",
     ))
     node_names = _temporal_node_names(unrolling.spec)
-    presence_col = if pres_var in unit_level
-        pres_var
-    elseif pres_var in node_names
+    presence_col = if pres_var in node_names
         _panel_column(unrolling, pres_var, query.t_outcome, name_fn)
     else
         name_fn(pres_var, query.t_outcome)
     end
-    intensity_col = if int_var in unit_level
-        int_var
-    elseif int_var in node_names
+    intensity_col = if int_var in node_names
         _panel_column(unrolling, int_var, query.t_outcome, name_fn)
     else
         name_fn(int_var, query.t_outcome)
@@ -84,18 +79,17 @@ function _panel_column(
     variable::Symbol,
     time::Union{Nothing, Int},
     name_fn,
-    unit_level::Set{Symbol} = Set{Symbol}(),
 )
     descriptor = _temporal_node_spec(unrolling.spec, variable)
     if is_single_node(descriptor)
-        enduring_node(unrolling, variable)
+        single_node(unrolling, variable)
     else
         time === nothing && throw(ArgumentError(
             "pointwise node :$variable requires a time for panel mapping",
         ))
         temporal_node(unrolling, variable, time)
     end
-    return variable in unit_level || is_single_node(descriptor) ?
+    return is_single_node(descriptor) ?
         variable : name_fn(variable, time::Int)
 end
 
@@ -111,17 +105,15 @@ Single-node supports map to their bare symbols; pointwise variables use
 function temporal_adjustment_columns(
     result::IdentificationResult,
     unrolling::TemporalUnrolling;
-    unit_level::AbstractVector{Symbol} = Symbol[],
     skip::AbstractVector{Symbol} = [:sex],
     name_fn = panel_column_name,
 )
-    unit = Set(unit_level)
     omit = Set(skip)
     cols = Symbol[]
     seen = Set{Symbol}()
     for (var, t) in result.temporal_nodes
         var in omit && continue
-        col = _panel_column(unrolling, var, t, name_fn, unit)
+        col = _panel_column(unrolling, var, t, name_fn)
         if col in seen
             continue
         end
@@ -156,40 +148,18 @@ Wide columns for treatment and outcome implied by a temporal query.
 function query_panel_columns(
     unrolling::TemporalUnrolling,
     query::TemporalEffectQuery;
-    unit_level::AbstractVector{Symbol} = Symbol[],
     name_fn = panel_column_name,
     outcome_specs::Dict{Symbol, NodeOutcomeSpec} = Dict{Symbol, NodeOutcomeSpec}(),
 )
-    unit = Set(unit_level)
-    treat_col = _panel_column(unrolling, query.treatment, query.t_treat, name_fn, unit)
+    treat_col = _panel_column(unrolling, query.treatment, query.t_treat, name_fn)
     spec = _outcome_spec(outcome_specs, query.outcome)
     if spec.kind == hurdle
-        hurdle_cols = _hurdle_panel_columns(spec, query, unrolling, name_fn, unit)
+        hurdle_cols = _hurdle_panel_columns(spec, query, unrolling, name_fn)
         out_col = hurdle_cols.presence
     else
-        out_col = _panel_column(unrolling, query.outcome, query.t_outcome, name_fn, unit)
+        out_col = _panel_column(unrolling, query.outcome, query.t_outcome, name_fn)
     end
     return (treatment = treat_col, outcome = out_col)
-end
-
-"""Legacy query-column entry point; prefer the unrolling-aware method."""
-function query_panel_columns(
-    query::TemporalEffectQuery;
-    unit_level::AbstractVector{Symbol} = Symbol[],
-    name_fn = panel_column_name,
-    outcome_specs::Dict{Symbol, NodeOutcomeSpec} = Dict{Symbol, NodeOutcomeSpec}(),
-)
-    unit = Set(unit_level)
-    treatment = query.treatment in unit ? query.treatment : name_fn(query.treatment, query.t_treat)
-    outcome_spec = _outcome_spec(outcome_specs, query.outcome)
-    if outcome_spec.kind == hurdle
-        presence = outcome_spec.presence_var
-        presence === nothing && throw(ArgumentError("hurdle NodeOutcomeSpec requires presence_var"))
-        outcome = presence in unit ? presence : name_fn(presence, query.t_outcome)
-    else
-        outcome = query.outcome in unit ? query.outcome : name_fn(query.outcome, query.t_outcome)
-    end
-    return (treatment = treatment, outcome = outcome)
 end
 
 """
@@ -318,7 +288,6 @@ function plan_targeted_estimation(
     query::TemporalEffectQuery,
     column_names;
     missingness = nothing,
-    unit_level::AbstractVector{Symbol} = Symbol[],
     skip::AbstractVector{Symbol} = [:sex],
     name_fn = panel_column_name,
     discrete_treatment::Bool = true,
@@ -332,13 +301,11 @@ function plan_targeted_estimation(
     qcols = query_panel_columns(
         unrolling,
         query;
-        unit_level = unit_level,
         name_fn = name_fn,
         outcome_specs = outcome_specs,
     )
     baseline = temporal_adjustment_columns(
-        result, unrolling;
-        unit_level = unit_level, skip = skip, name_fn = name_fn,
+        result, unrolling; skip = skip, name_fn = name_fn,
     )
     avail = Set(column_names)
     present = Symbol[c for c in baseline if c in avail]
@@ -346,7 +313,7 @@ function plan_targeted_estimation(
     presence_col = nothing
     intensity_col = nothing
     if outcome_spec.kind == hurdle
-        hurdle_cols = _hurdle_panel_columns(outcome_spec, query, unrolling, name_fn, Set(unit_level))
+        hurdle_cols = _hurdle_panel_columns(outcome_spec, query, unrolling, name_fn)
         presence_col = hurdle_cols.presence
         intensity_col = hurdle_cols.intensity
     end

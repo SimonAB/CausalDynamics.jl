@@ -26,7 +26,7 @@ TemporalDAGSpec
 TemporalUnrolling
 unroll_temporal_dag
 temporal_node
-enduring_node
+single_node
 temporal_node_label
 is_single_node
 temporal_edge_role
@@ -45,9 +45,6 @@ intervention_targets
 ObservationSemantics
 expands_pointwise
 is_single_node_support
-normalise_value_representation
-normalise_relation_kind
-normalise_ontological_character
 parse_temporal_support
 VALUE_REPRESENTATIONS
 RELATION_KINDS
@@ -85,7 +82,7 @@ spec = TemporalDAGSpec(
     ],
 )
 u = unroll_temporal_dag(spec, 2)
-nv(u.graph), temporal_node_label(u, enduring_node(u, :pasture))
+nv(u.graph), temporal_node_label(u, single_node(u, :pasture))
 ```
 
 Panel mapping follows support: single-node variables keep their bare column
@@ -229,5 +226,5 @@ spec = TemporalDAGSpec(
 )
 u = unroll_temporal_dag(spec, 4)
 temporal_node(u, :diagnosis, 0)
-enduring_node(u, :pasture)
+single_node(u, :pasture)
 ```

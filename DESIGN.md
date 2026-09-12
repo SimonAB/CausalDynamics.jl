@@ -2,8 +2,8 @@
 
 This package is the **structural and dynamical core**: graphs, identification, SCMs/CDMs, temporal unrolling, and thin integration façades.
 
-**Shared principles:** [DESIGN_PRINCIPLES.md](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/DESIGN_PRINCIPLES.md)  
-**Scope and architecture:** [docs/src/scope.md](docs/src/scope.md)  
+**Shared principles + Policy taxonomy:** [DESIGN_PRINCIPLES.md](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/DESIGN_PRINCIPLES.md)
+**Scope and architecture:** [docs/src/scope.md](docs/src/scope.md)
 **Boundaries:** [BOUNDARIES.md](BOUNDARIES.md)
 
 ## Role in the stack
@@ -78,10 +78,13 @@ Pearl/SciML names stay on identification and surgery (`identify`, `do_surgery`, 
 
 ### Experimental (quarantined)
 
-Keep these exported for exploration, but do not grow the `identify` pipeline around them until they have a real use path:
+Not exported; qualify as `CausalDynamics.…` when exploring:
 
 - **`Hypergraph`** — orthogonal to DAG identification / CDM simulation.
+- **Symbolic do-calculus stubs** (`is_identifiable`, …) — unexported until implemented.
+- **Constructor-only `normalise_*`** validators — British spelling; not part of the happy path.
 - **`SymbolicSCM`** — MTK placeholder (`system::Any`); prefer `GraphSCM`.
+- **`EstimationPlan`** — Targeted hand-off object; package move deferred.
 
 ## Adding a feature (workflow)
 

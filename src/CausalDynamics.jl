@@ -11,8 +11,10 @@ façades wrap [CausalInference.jl](https://github.com/SimonAB/CausalInference.jl
 Optional extensions load [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl)
 plotting and RxInfer / GraphPPL backdoor inference.
 
-Experimental (exported but outside the `identify` pipeline): `Hypergraph` for
-higher-order edges; `SymbolicSCM` as a ModelingToolkit placeholder.
+Experimental (not exported; qualify as `CausalDynamics.…`): `Hypergraph` for
+higher-order edges; symbolic do-calculus stubs; constructor-only `normalise_*`
+validators. Prefer DAGMakie for figures. `EstimationPlan` remains the hand-off
+object for CausalTargeted (package move deferred).
 
 # Examples
 

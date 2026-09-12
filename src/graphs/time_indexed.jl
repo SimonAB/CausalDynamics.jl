@@ -231,7 +231,7 @@ struct TemporalUnrolling
 end
 
 """Return the node index for a single-node (non-pointwise) variable."""
-function enduring_node(unrolling::TemporalUnrolling, variable::Symbol)
+function single_node(unrolling::TemporalUnrolling, variable::Symbol)
     descriptor = _temporal_node_spec(unrolling.spec, variable)
     is_single_node(descriptor) || throw(ArgumentError(
         ":$variable expands pointwise; it has no single reused node",
@@ -507,6 +507,6 @@ function causal_projection(unrolling::TemporalUnrolling)
 end
 
 export LaggedEdge, TemporalNodeSpec, TemporalDAGSpec, TemporalUnrolling
-export unroll_temporal_dag, temporal_node, enduring_node, temporal_node_label, is_single_node
+export unroll_temporal_dag, temporal_node, single_node, temporal_node_label, is_single_node
 export d_separated_temporal, temporal_backdoor_adjustment_set, temporal_backdoor_adjustment_nodes
 export temporal_edge_role, temporal_edge_records, causal_projection

@@ -93,12 +93,12 @@ using Test
         @test nv(u.graph) == 1 + 3 + 3
         @test is_single_node(spec.nodes[2])
         @test !is_single_node(spec.nodes[3])
-        @test temporal_node(u, :pasture, 1) == enduring_node(u, :pasture)
-        @test temporal_node_label(u, enduring_node(u, :pasture)) == "pasture"
+        @test temporal_node(u, :pasture, 1) == single_node(u, :pasture)
+        @test temporal_node_label(u, single_node(u, :pasture)) == "pasture"
         @test temporal_node_label(u, temporal_node(u, :diagnosis, 0)) == "diagnosis[0]"
-        @test has_edge(u.graph, temporal_node(u, :diagnosis, 0), enduring_node(u, :pasture))
-        @test has_edge(u.graph, enduring_node(u, :pasture), temporal_node(u, :weight, 1))
-        @test !has_edge(u.graph, enduring_node(u, :pasture), temporal_node(u, :weight, 0))
+        @test has_edge(u.graph, temporal_node(u, :diagnosis, 0), single_node(u, :pasture))
+        @test has_edge(u.graph, single_node(u, :pasture), temporal_node(u, :weight, 1))
+        @test !has_edge(u.graph, single_node(u, :pasture), temporal_node(u, :weight, 0))
         @test_throws ArgumentError temporal_node(u, :pasture, 0)
 
         records = temporal_edge_records(u)
@@ -116,7 +116,7 @@ using Test
         proj = causal_projection(u)
         @test ne(proj.graph) == ne(u.graph)
         @test isempty(proj.constraints)
-        @test has_edge(proj.graph, temporal_node(u, :diagnosis, 0), enduring_node(u, :pasture))
+        @test has_edge(proj.graph, temporal_node(u, :diagnosis, 0), single_node(u, :pasture))
 
         # Constitution must be declared to become a constraint.
         spec_const = TemporalDAGSpec(
@@ -132,7 +132,7 @@ using Test
         @test ne(proj_const.graph) == ne(u_const.graph) - 1
         @test only(proj_const.constraints).relation_kind === :constitutive_persistence
         @test temporal_edge_role(
-            u_const, temporal_node(u_const, :diagnosis, 0), enduring_node(u_const, :pasture),
+            u_const, temporal_node(u_const, :diagnosis, 0), single_node(u_const, :pasture),
         ) === :constitutive_persistence
     end
 

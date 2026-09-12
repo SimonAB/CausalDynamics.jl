@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking
+
+- Renamed `enduring_node` → `single_node` (reused temporal node index).
+- Removed `unit_level` panel-bridge override and the unrolling-free
+  `query_panel_columns(query; …)` entry point. Declare
+  `temporal_support = FromOnsetSupport(…)` (or other single-node supports) on
+  the DAG instead.
+- Unexported experimental `Hypergraph` helpers and constructor-only
+  `normalise_*` validators; qualify as `CausalDynamics.…` when needed.
+
 ### Added
 
 - Getting-started walk-through for from-onset attributes vs

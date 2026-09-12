@@ -343,6 +343,6 @@ export GraphKind, TimeUnrolledGraph, ProcessGraph, SemanticGraph
 export ReferentSpec, ObservationSemantics
 export VALUE_REPRESENTATIONS, RELATION_KINDS, IDENTIFICATION_STATUSES
 export expands_pointwise, is_single_node_support, parse_temporal_support
-export normalise_value_representation, normalise_relation_kind, normalise_ontological_character
+# constructor-only validators (British spelling); not public exports
 export semantic_fingerprint
 export intervention_targets, assert_interval_summary_do!
