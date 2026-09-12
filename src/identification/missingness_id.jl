@@ -7,7 +7,7 @@ Structural claim about response indicators for incomplete observation.
 - `response`: outcome (or panel) symbols that may be unobserved (`Y`, `Y1`, …)
 - `regime`: `:mcar`, `:mar`, or `:mnar`
 - `conditioning_set`: covariates claimed for ``P(R=1 \\mid \\cdot)`` under MAR
-- `time_indexed`: whether `response` indexes occasions of a timed process
+- `time_indexed`: whether `response` indexes time steps of a timed process
 - `indicators`: optional explicit `R` node symbols (default: derived as `R_<response>`)
 
 Does not estimate anything; use [`certify_missingness`](@ref) / `identify(...; missingness=)`.

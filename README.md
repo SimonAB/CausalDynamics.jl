@@ -13,7 +13,7 @@ Optional DAG figures via [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl);
 optional variational backdoor inference via RxInfer / GraphPPL.
 
 **Design principles:** [DESIGN.md](DESIGN.md) · [BOUNDARIES.md](BOUNDARIES.md) ·
-[ecosystem](DESIGN_PRINCIPLES.md)
+[ecosystem](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/DESIGN_PRINCIPLES.md)
 
 > On the Julia **General** registry (`Pkg.add("CausalDynamics")`). Requires Julia **1.12+**.
 > Registry tracking: [REGISTRATION.md](REGISTRATION.md).
@@ -107,7 +107,7 @@ intervened = simulate_scm(apply_intervention(scm, do_intervention(2, 10.0)), U)
 
 **Choose this** when you want identification and dynamical simulation to share types with Julia estimation and Makie figures. **Prefer dagitty / DoWhy** for GUI-first or existing Python four-step pipelines.
 
-Full matrices: [ECOSYSTEM_COMPARISON.md](ECOSYSTEM_COMPARISON.md) ·
+Full matrices: [ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/ECOSYSTEM_COMPARISON.md) ·
 [Documenter comparison](https://simonab.github.io/CausalDynamics.jl/dev/comparison/).
 
 ## Testing and validation

@@ -102,7 +102,7 @@ intervention_kind(::Sequential) = :sequential
 """Return the assignment target, or `nothing` for a composition."""
 intervention_target(intervention::Union{SetState, SetInitialCondition, ReplacePolicy, ReplaceParameter, ReplaceMechanism}) = intervention.target
 intervention_target(::Union{Simultaneous, Sequential}) = nothing
-"""Return the occasion interval on which the intervention applies."""
+"""Return the time interval on which the intervention applies."""
 intervention_interval(intervention::Union{SetState, ReplacePolicy, ReplaceMechanism}) = intervention.interval
 intervention_interval(::SetInitialCondition) = :initial
 intervention_interval(::ReplaceParameter) = :all
@@ -123,7 +123,7 @@ canonical_intervention(x::Simultaneous) = _canonical_fields((
 canonical_intervention(x::Sequential) = _canonical_fields((
     :sequential, map(canonical_intervention, x.interventions)...))
 
-"""Whether occasion `t` lies in a typed intervention interval."""
+"""Whether time index `t` lies in a typed intervention interval."""
 function _in_interval(interval::Symbol, ::Int)
     interval === :all && return true
     throw(ArgumentError("unsupported intervention interval :$interval"))
@@ -132,7 +132,7 @@ _in_interval(interval::AbstractUnitRange, t::Int) = t in interval
 _in_interval(interval::Integer, t::Int) = t == Int(interval)
 _in_interval(interval, t::Int) = throw(ArgumentError("unsupported intervention interval $(interval) at t=$t"))
 
-"""Evaluate a SetState payload at occasion `t`."""
+"""Evaluate a SetState payload at time index `t`."""
 function _setstate_value(value::AbstractVector, t::Int)
     t > length(value) && throw(ArgumentError(
         "SetState series has length $(length(value)) but t=$t was requested"))

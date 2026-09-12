@@ -14,7 +14,7 @@ Python four-step pipeline, or discovery-heavy tooling you already trust
 (Associations.jl and causal-learn remain better homes for full discovery).
 
 Stack overview (integration as the product):
-[ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/ECOSYSTEM_COMPARISON.md).
+[ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/ECOSYSTEM_COMPARISON.md).
 
 ```mermaid
 flowchart LR

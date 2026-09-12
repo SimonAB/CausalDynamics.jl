@@ -34,7 +34,7 @@ GraphPPL backdoor inference, and Associations.jl discovery bridges.
 **Choose CausalDynamics** when certificates and trajectories should feed Julia
 estimation and plotting. **Prefer dagitty / DoWhy** for GUI-first or existing
 Python four-step workflows. Details: [Comparison](comparison.md) ·
-[ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/ECOSYSTEM_COMPARISON.md).
+[ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/ECOSYSTEM_COMPARISON.md).
 
 ## Quick start
 
@@ -76,4 +76,4 @@ See [REGISTRATION.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/REG
 - Narrative companion: [CDCS Book](https://simonab.github.io/causal-dynamics-book/)
 
 Compared with R/Python graph tools and the rest of this Julia stack: see [Comparison](comparison.md)
-(summary above) and [ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/ECOSYSTEM_COMPARISON.md).
+(summary above) and [ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/ECOSYSTEM_COMPARISON.md).

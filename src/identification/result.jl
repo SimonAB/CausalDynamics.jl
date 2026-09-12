@@ -9,9 +9,10 @@ Optional `missingness` holds a [`MissingnessCertificate`](@ref) when
 `identify(...; missingness=MissingnessSpec(...))` was used. Causal
 `identifiable` and missingness identification are reported separately.
 
-Optional `semantic_fingerprint`, `claim_kind`, and `identification_status`
-record meaning beyond topology. Defaults preserve the historical
-`identifiable::Bool` contract.
+`identification_status` refines `identifiable::Bool` with the reason
+(`:identified`, `:not_identified_by_procedure`, `:unsupported_model_class`,
+`:proved_nonidentifiable`; see [`IDENTIFICATION_STATUSES`](@ref)). Optional
+`semantic_fingerprint` digests the declared meanings behind the graph.
 """
 struct IdentificationResult{T}
     query::CausalQuery
@@ -25,7 +26,6 @@ struct IdentificationResult{T}
     temporal_nodes::Vector{Tuple{T, Union{Nothing, Int}}}
     missingness::Union{Nothing, MissingnessCertificate}
     semantic_fingerprint::Union{Nothing, UInt64}
-    claim_kind::Symbol
     identification_status::Symbol
 end
 
@@ -41,7 +41,6 @@ function IdentificationResult(;
     temporal_nodes = Tuple{eltype(adjustment), Int}[],
     missingness::Union{Nothing, MissingnessCertificate} = nothing,
     semantic_fingerprint::Union{Nothing, UInt64} = nothing,
-    claim_kind::Symbol = :identified_under_assumptions,
     identification_status::Union{Nothing, Symbol} = nothing,
 ) where {T}
     temporal_node_pairs = Tuple{T, Union{Nothing, Int}}[
@@ -55,13 +54,10 @@ function IdentificationResult(;
     else
         identifiable ? :identified : :not_identified_by_procedure
     end
-    claim_kind in CLAIM_KINDS || throw(ArgumentError(
-        "claim_kind must be one of $CLAIM_KINDS, got :$claim_kind",
-    ))
     return IdentificationResult{T}(
         query, graph_hash, adjustment, mediators, moc,
         strategy, identifiable, assumptions, temporal_node_pairs, missingness,
-        semantic_fingerprint, claim_kind, status,
+        semantic_fingerprint, status,
     )
 end
 
@@ -85,7 +81,6 @@ function IdentificationResult{T}(
         query, graph_hash, adjustment, mediators, moc,
         strategy, identifiable, assumptions, temporal_node_pairs, missingness,
         nothing,
-        :identified_under_assumptions,
         identifiable ? :identified : :not_identified_by_procedure,
     )
 end
@@ -117,7 +112,6 @@ function certificate_dict(result::IdentificationResult)
         :temporal_nodes => result.temporal_nodes,
         :missingness => result.missingness,
         :semantic_fingerprint => result.semantic_fingerprint,
-        :claim_kind => result.claim_kind,
         :identification_status => result.identification_status,
     )
 end

@@ -1,6 +1,6 @@
 # Package boundaries
 
-**Design principles:** [DESIGN.md](DESIGN.md) · [shared](DESIGN_PRINCIPLES.md)
+**Design principles:** [DESIGN.md](DESIGN.md) · [shared](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/DESIGN_PRINCIPLES.md)
 
 ## CausalDynamics.jl (this package)
 

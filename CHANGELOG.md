@@ -11,67 +11,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Orthogonal temporal semantics:** typed `TemporalSupport`
   (`PointwiseSupport`, `PointSupport`, `IntervalSupport`, `FromOnsetSupport`,
-  `GlobalSupport`), `value_representation`, `referent_id` / `ReferentSpec`,
-  `identity_criterion`, `graph_kind` (`TimeUnrolledGraph`, `ProcessGraph`,
-  `SemanticGraph`), optional `ontological_character`, `LaggedEdge.relation_kind`,
-  `causal_projection`, and `semantic_fingerprint`. Node multiplicity follows
-  support and graph kind; referent identity does not collapse nodes.
-  Prefer `identity_criterion` and optional `ontological_character` on
-  `ReferentSpec` (inherited by `TemporalNodeSpec(; referent=…)`).
-- **Policy information set:** optional `ℋ_t` on `Policy` so adaptive rules only
-  see declared available symbols (non-anticipation).
-- **Observation availability:** `ObservationBridge.availability` records when a
-  measured quantity enters the decision information set.
+  `GlobalSupport`), `value_representation`, `ReferentSpec` (carrying
+  `identity_criterion` and optional `ontological_character`), `graph_kind`
+  (`TimeUnrolledGraph`, `ProcessGraph`, `SemanticGraph`),
+  `LaggedEdge.relation_kind`, `causal_projection`, and `semantic_fingerprint`.
+  Node multiplicity follows support and graph kind; referent identity never
+  collapses nodes and ontology is never inferred from construction.
+- **`TemporalNodeSpec` ([#29](https://github.com/SimonAB/CausalDynamics.jl/issues/29)):**
+  `TemporalNodeSpec(name; temporal_support, value_representation, referent,
+  causal_role)` and `TemporalDAGSpec(; entity, nodes, edges, graph_kind)`; the
+  all-pointwise `TemporalDAGSpec(variables, edges)` shorthand is retained.
+  `referent_id = :x` is shorthand for `referent = ReferentSpec(:x)`; identity
+  and ontology are declared on the referent, not the node. Derived read-only
+  properties `onset_time`, `referent_id`, `identity_criterion`,
+  `ontological_character`. Unrolling keeps one node per single-support
+  variable; panel helpers map such symbols to bare columns without
+  `unit_level`. Plotting is `DAGMakie.dagplot_temporal(unrolling)` (extension
+  method; CausalDynamics exports no separate binding).
+- **Temporal edge provenance:** `temporal_edge_role` / `temporal_edge_records`.
+  A declared non-causal `relation_kind` is reported as is; causal-influence
+  edges carry a construction label (`:onset_assignment`,
+  `:recurrent_influence`, `:pointwise_influence`, `:causal_influence`).
+  `causal_projection` keeps every causal edge regardless of support pattern;
+  only declared `:constitutive_*`, `:participation`, `:measurement`, … edges
+  become constraints.
+- **Structural constraint declarations:** `StructuralConstraintSpec` and
+  `constraint_certificate` record auditable invariance, feasibility, viability,
+  and cross-embodiment claims without adding graph nodes or causal parents.
 - **Intervention gates:** `assert_interval_summary_do!`, `assert_feasibility!`,
   and `validate_intervention_semantics` refuse scalar ``do`` on interval
   summaries and wire `:feasibility` constraints into `simulate_panel`.
   Exceptions are licensed only by an `InterventionJustification(kind, targets,
-  note; source)` record naming the target (macro-intervention kinds
+  note; source)` naming the target (macro-intervention kinds
   `:trajectory_generator`, `:admissible_trajectory_distribution`,
-  `:certificate_note`; feasibility kind `:physical_justification`). The Boolean
-  `justified` / `*_justified = true` bypasses are refused with a migration
-  message; `simulate_panel` and `validate_intervention_semantics` take
-  `macro_intervention_justification` / `feasibility_justification`.
-- **Policy ``ℋ_t`` from observation availability:** `Policy(...;
-  information_set = bridge::ObservationBridge)` derives a time-varying
-  information set from the bridge's `mapping` and `availability`
-  (`policy_information_set(policy, t)`); unmapped variables are never visible
-  and rules that read outside ``ℋ_t`` fail loudly.
-- **Identification status:** `IdentificationResult` carries optional
-  `semantic_fingerprint`, `claim_kind`, and `identification_status` while
-  preserving `identifiable::Bool`.
+  `:certificate_note`; feasibility kind `:physical_justification`).
+- **Policy information set ``ℋ_t``:** optional `information_set` on `Policy`,
+  derivable from an `ObservationBridge` whose `availability` records when a
+  measured quantity enters the decision set (`policy_information_set(policy,
+  t)`); rules that read outside ``ℋ_t`` fail loudly.
+- **Identification status:** `IdentificationResult.identification_status`
+  (`IDENTIFICATION_STATUSES`) refines `identifiable::Bool`; optional
+  `semantic_fingerprint`. Temporal `identify` uses the causal projection and
+  returns `:unsupported_model_class` for non-time-unrolled `graph_kind`.
 
 ### Changed
 
 - `GlobalSupport` documents a no-finite-window clock property only; it is not
   unspecified support and not time invariance of a mechanism.
-- DAGMakie extension passes `temporal_supports`, `value_representations`, and `graph_kind` into `dagplot_temporal`.
-- Deprecated `temporal_mode = :occasion | :enduring` as a construction switch;
-  it maps to `PointwiseSupport` / `FromOnsetSupport` and does not set ontology.
-  Where the old flag underdetermines new semantics, require clarification rather
-  than inventing defaults. Legacy `temporal_mode = :enduring` and
-  `parse_temporal_support(:from_onset)` now **require an explicit onset**
-  (`onset_time` / `onset`); there is no default onset.
-- **Relation kind is declared, never inferred from support.**
-  `temporal_edge_role` returns the declared non-causal `relation_kind` when one
-  is set; otherwise it reports a construction label:
-  `:onset_assignment` (into a from-onset node at its onset; formerly
-  `:constitutive`), `:recurrent_influence` (out of a single-support node),
-  `:pointwise_influence` (between pointwise nodes; formerly
-  `:occasion_influence`), or `:causal_influence`. `causal_projection` keeps
-  every edge whose declared kind is causal regardless of support pattern; only
-  declared `:constitutive_*`, `:participation`, `:measurement`, … edges become
-  constraints.
-- `TemporalNodeSpec(; referent = ReferentSpec(…))` inherits `referent_id`,
-  `identity_criterion`, and `ontological_character` from the referent and
-  throws on conflicting node-level values; `identity_criterion` stays
-  `nothing` unless declared (no silent identity claim).
-- Temporal `identify` uses the causal projection and refuses non-time-unrolled
-  `graph_kind` with `:unsupported_model_class`.
+- `parse_temporal_support(:from_onset)` requires an explicit onset; write
+  `FromOnsetSupport(t₀)`. There is no default onset.
+- `check_occasion_resolution` → `check_time_resolution` (deprecated alias
+  kept); `session_slice(...; rename_session)` replaces `rename_occasion`
+  (deprecated). Docstrings no longer use "occasion" for a time index.
+- DAGMakie extension passes `onset_times`, `temporal_supports`,
+  `value_representations`, and `graph_kind` into `dagplot_temporal`.
 - [Terminology](docs/src/terminology.md), [Getting Started](docs/src/getting-started.md),
   [Scope](docs/src/scope.md), and [Time-indexed graphs](docs/src/api/time_graphs.md)
   retargeted to typed `temporal_support` / `value_representation` /
-  `referent_id` / `graph_kind` (including Documenter `@example`s).
+  `ReferentSpec` / `graph_kind`.
 
 ### Fixed
 
@@ -83,28 +80,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   so `checkdocs` and `@ref` succeed.
 - Declare `Statistics = "1"` in `[compat]` so Julia 1.13 loads the stdlib as a
   real dependency.
-
 - BCF `predict` is no longer exported (call `CausalDynamics.predict`); avoids
   StatsAPI / GLM / Associations name clashes in tests and downstream packages.
-
-- **Temporal edge provenance:** `temporal_edge_role` and
-  `temporal_edge_records` distinguish constitution, recurrent influence, and
-  occasion-to-occasion influence in unrolled graphs.
-
-- **Structural constraint declarations:** `StructuralConstraintSpec` records
-  auditable invariance, feasibility, viability, and cross-embodiment claims;
-  `constraint_certificate` provides deterministic metadata without adding graph
-  nodes, causal parents, agents, or empirical validation.
-
-- **Enduring vs occasion nodes ([#29](https://github.com/SimonAB/CausalDynamics.jl/issues/29)):**
-  `TemporalNodeSpec` with `temporal_mode = :enduring | :occasion` (optional
-  `causal_role`, `onset_time`); `TemporalDAGSpec(; entity, nodes, edges)` retains
-  the all-occasion `TemporalDAGSpec(variables, edges)` shorthand. Unrolling keeps
-  one node per enduring attribute; panel-column helpers map enduring symbols to
-  bare columns without requiring `unit_level` (legacy override still accepted).
-  Plotting uses `DAGMakie.dagplot_temporal` (extension method on
-  `TemporalUnrolling`; rounded rectangles vs circles). CausalDynamics no longer
-  exports a separate `dagplot_temporal` binding (avoids a name clash with DAGMakie).
 
 ## [0.4.6] - 2026-08-30
 

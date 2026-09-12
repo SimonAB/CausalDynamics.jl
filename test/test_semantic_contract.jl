@@ -15,11 +15,6 @@ using Random
         ]
         ι = do_sequence(:cum_exp => 1.0)
         @test_throws ArgumentError assert_interval_summary_do!(nodes, ι)
-        # A bare Boolean records nothing and is refused.
-        @test_throws ArgumentError assert_interval_summary_do!(nodes, ι; justified = true)
-        @test_throws ArgumentError validate_intervention_semantics(
-            nodes, ι; macro_intervention_justified = true,
-        )
         # A recorded justification of a macro-intervention kind naming the target passes.
         j = InterventionJustification(
             :trajectory_generator, [:cum_exp],
@@ -48,7 +43,6 @@ using Random
         )
         ι = do_sequence(:a => 99.0)
         @test_throws ArgumentError assert_feasibility!([c], ι)
-        @test_throws ArgumentError assert_feasibility!([c], ι; justified = true)
         physical = InterventionJustification(
             :physical_justification, [:a],
             "99 units is within the pump's rated delivery range (manufacturer sheet).",

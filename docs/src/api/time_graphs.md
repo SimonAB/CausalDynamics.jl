@@ -45,46 +45,38 @@ intervention_targets
 ObservationSemantics
 expands_pointwise
 is_single_node_support
-legacy_temporal_mode
-support_from_temporal_mode
 normalise_value_representation
 normalise_relation_kind
 normalise_ontological_character
 parse_temporal_support
-require_semantics
 VALUE_REPRESENTATIONS
 RELATION_KINDS
-CLAIM_KINDS
 IDENTIFICATION_STATUSES
 ```
 
 ## Single-node attributes from onset
 
-Prefer typed support. A pasture assignment that persists from onset uses
-`FromOnsetSupport` (and usually `value_representation = :attribute`). Optional
-`ontological_character = :enduring` is metadata only.
+Typed support decides node count. A pasture assignment that persists from
+onset uses `FromOnsetSupport` (and usually `value_representation = :attribute`).
+Identity and ontology, when claimed, live on a shared [`ReferentSpec`](@ref)
+and never change node count.
 
 ```@example time-graphs-enduring
 using CausalDynamics, Graphs
 
+sheep = ReferentSpec(:sheep; identity_criterion = :administrative_identifier)
 spec = TemporalDAGSpec(
     entity = :sheep,
     nodes = [
-        TemporalNodeSpec(:diagnosis; value_representation = :state),
+        TemporalNodeSpec(:diagnosis; value_representation = :state, referent = sheep),
         TemporalNodeSpec(
             :pasture;
             temporal_support = FromOnsetSupport(1),
             value_representation = :attribute,
             causal_role = :assigned,
-            referent_id = :sheep,
-            identity_criterion = :administrative_identifier,
+            referent = sheep,
         ),
-        TemporalNodeSpec(
-            :weight;
-            value_representation = :state,
-            referent_id = :sheep,
-            identity_criterion = :organisational_continuity,
-        ),
+        TemporalNodeSpec(:weight; value_representation = :state, referent = sheep),
     ],
     edges = [
         (:diagnosis, :pasture, 1),
@@ -99,9 +91,7 @@ nv(u.graph), temporal_node_label(u, enduring_node(u, :pasture))
 Panel mapping follows support: single-node variables keep their bare column
 symbol; pointwise variables use `panel_column_name`. Prefer declaring
 `temporal_support` on the DAG rather than a downstream `unit_level` override.
-Deprecated `temporal_mode = :enduring` maps to `FromOnsetSupport` only when an
-explicit `onset_time` is given, and does **not** set ontology. The symbol
-shorthand `:from_onset` likewise requires an onset; prefer
+The symbol shorthand `:from_onset` is refused without an onset; write
 `FromOnsetSupport(t₀)`.
 
 The unrolled graph retains edge provenance. Use `temporal_edge_role` for one

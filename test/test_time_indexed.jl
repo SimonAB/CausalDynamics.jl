@@ -70,16 +70,16 @@ using Test
                     temporal_support = FromOnsetSupport(1),
                     value_representation = :attribute,
                     causal_role = :assigned,
-                    referent_id = :sheep,
-                    identity_criterion = :administrative_identifier,
-                    ontological_character = :enduring,
+                    referent = ReferentSpec(
+                        :sheep;
+                        identity_criterion = :administrative_identifier,
+                        ontological_character = :enduring,
+                    ),
                 ),
                 TemporalNodeSpec(
                     :weight;
                     value_representation = :state,
                     referent_id = :sheep,
-                    identity_criterion = :organisational_continuity,
-                    ontological_character = :enduring,
                 ),
             ],
             edges = [
@@ -146,10 +146,17 @@ using Test
             2,
         )
         @test_throws ArgumentError unroll_temporal_dag(TemporalDAGSpec(nodes = [TemporalNodeSpec(:x)], edges = []), -1)
-        @test_throws ArgumentError TemporalNodeSpec(:x; temporal_mode = :unknown)
         @test_throws ArgumentError TemporalNodeSpec(:x; temporal_support = :interval)
+        @test_throws ArgumentError TemporalNodeSpec(:x; temporal_support = :from_onset)
+        @test_throws ArgumentError TemporalNodeSpec(:x; ontological_character = :enduring)
+        @test_throws ArgumentError TemporalNodeSpec(
+            :x; referent = ReferentSpec(:a), referent_id = :b,
+        )
+        @test TemporalNodeSpec(:x; referent_id = :sheep).referent == ReferentSpec(:sheep)
+        @test TemporalNodeSpec(:x).onset_time == 0
+        @test TemporalNodeSpec(:x; temporal_support = FromOnsetSupport(3)).onset_time == 3
         @test_throws ArgumentError unroll_temporal_dag(
-            TemporalDAGSpec(nodes = [TemporalNodeSpec(:x; onset_time = 3)], edges = []),
+            TemporalDAGSpec(nodes = [TemporalNodeSpec(:x; temporal_support = FromOnsetSupport(3))], edges = []),
             2,
         )
         @test_throws ArgumentError unroll_temporal_dag(

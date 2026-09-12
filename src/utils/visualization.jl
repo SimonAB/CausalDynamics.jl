@@ -115,7 +115,7 @@ end
 """
 Plotting a [`TemporalUnrolling`](@ref) uses [`DAGMakie.dagplot_temporal`](@ref)
 after `using DAGMakie` (CausalDynamics extension adds the unrolling method:
-occasion circles; enduring rounded rectangles).
+pointwise nodes drawn by value representation; interval summaries as rounded rectangles).
 """
 
 export has_dagmakie, plot_causal_graph, plot_with_adjustment_set, plot_backdoor_paths

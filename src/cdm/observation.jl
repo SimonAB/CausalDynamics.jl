@@ -14,7 +14,7 @@ Declare how latent (or endogenous) series become estimation columns.
   when `measure` is set, optional rename of measure output keys → panel symbols
   (missing keys keep their measure names)
 - `measure`: optional `(state_nt, t) -> NamedTuple` producing observed values from
-  the full endogenous state at occasion `t`
+  the full endogenous state at time `t`
 - `availability`: optional map from panel (or source) symbol to the earliest
   decision time ``t`` at which the quantity enters ``ℋ_t``. A quantity may
   describe an earlier realisation and become available later.

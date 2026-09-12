@@ -297,7 +297,6 @@ function identify(
         identifiable = false,
         assumptions = [:requires_time_unrolled_graph],
         identification_status = :unsupported_model_class,
-        claim_kind = :declared_assumption,
         semantic_fingerprint = semantic_fingerprint(
             unrolling.spec.graph_kind, query.treatment, query.outcome,
             query.t_treat, query.t_outcome,
@@ -338,7 +337,6 @@ function identify(
         temporal_nodes = temporal_nodes,
         missingness = miss,
         semantic_fingerprint = fingerprint,
-        claim_kind = :identified_under_assumptions,
         identification_status = identifiable ? :identified : :not_identified_by_procedure,
     )
 end

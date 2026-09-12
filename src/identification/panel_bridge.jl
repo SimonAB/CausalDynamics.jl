@@ -102,11 +102,11 @@ end
 """
     temporal_adjustment_columns(result, unrolling; skip, name_fn) -> Vector{Symbol}
 
-Map `result.temporal_nodes` (pairs `(variable, occasion)`) to wide-table column
+Map `result.temporal_nodes` (pairs `(variable, time)`) to wide-table column
 symbols using [`panel_column_name`](@ref) by default.
 
 Single-node supports map to their bare symbols; pointwise variables use
-`name_fn(variable, occasion)`. Symbols in `skip` are omitted.
+`name_fn(variable, time)`. Symbols in `skip` are omitted.
 """
 function temporal_adjustment_columns(
     result::IdentificationResult,
@@ -301,7 +301,7 @@ choice (`:discrete_lmtp`, `:two_part_discrete_lmtp`, `:lmtp_grid`,
 `:sequential_lmtp`), treatment/outcome columns, and adjustment columns present in
 `column_names`.
 
-`discrete_treatment=true` (default) selects `:discrete_lmtp` for same-occasion
+`discrete_treatment=true` (default) selects `:discrete_lmtp` for same-time
 contrasts; set `false` for continuous shift LMTP.
 
 `outcome_specs` maps DAG node symbols to [`NodeOutcomeSpec`](@ref); hurdle nodes
@@ -464,7 +464,7 @@ export identification_support
 
 Like [`plan_targeted_estimation`](@ref) for a **single session slice** from long
 capture data. When `query.t_outcome != session`, runs
-[`check_occasion_resolution`](@ref) and warns if resolution mismatches.
+[`check_time_resolution`](@ref) and warns if resolution mismatches.
 
 Pass `data=` as the **session slice** (see `session_slice`), not the
 full long panel.
@@ -482,9 +482,9 @@ function plan_session_estimation(
         mat = isempty(measured_at) ?
             Dict(query.outcome => session) :
             merge(Dict(query.outcome => session), measured_at)
-        issues = check_occasion_resolution(query, mat; warn = false)
+        issues = check_time_resolution(query, mat; warn = false)
         if !isempty(issues)
-            @warn "plan_session_estimation: query occasion $(query.t_outcome) " *
+            @warn "plan_session_estimation: query time $(query.t_outcome) " *
                   "≠ slice session $session ($(issues[1].message))"
         end
     end

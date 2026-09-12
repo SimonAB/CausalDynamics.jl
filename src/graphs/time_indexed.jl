@@ -3,7 +3,7 @@ Time-indexed causal graphs for discrete-time causal dynamical models.
 
 `unroll_temporal_dag` expands a [`TemporalDAGSpec`](@ref) over ``t = 0:T``.
 Node multiplicity follows [`TemporalSupport`](@ref) and [`GraphKind`](@ref),
-not `ontological_character` or deprecated `temporal_mode`.
+never referent identity or `ontological_character`.
 """
 
 """
@@ -34,137 +34,99 @@ LaggedEdge((parent, child, lag)::Tuple{Symbol, Symbol, Int}) =
     LaggedEdge(parent, child, lag)
 
 """
-    TemporalNodeSpec(name; kwargs...)
+    TemporalNodeSpec(name; temporal_support=PointwiseSupport(),
+        value_representation=:unspecified, referent=nothing, causal_role=nothing)
 
-Describe one variable in a [`TemporalDAGSpec`](@ref).
+Describe one variable in a [`TemporalDAGSpec`](@ref) by three orthogonal
+declarations:
 
-Declare [`temporal_support`](@ref TemporalSupport) and
-`value_representation`. Deprecated `temporal_mode = :occasion | :enduring`
-only selects a support pattern and does **not** set
+- `temporal_support`: a [`TemporalSupport`](@ref) (or the symbol shorthands
+  accepted by [`parse_temporal_support`](@ref)). It alone decides how many nodes
+  the variable contributes when unrolled. A from-onset attribute must name its
+  onset: `FromOnsetSupport(t₀)`.
+- `value_representation`: what a node's value is (`:state`, `:event`,
+  `:attribute`, `:trajectory`, `:interval_summary`, …).
+- `referent`: an optional [`ReferentSpec`](@ref) naming what the variable is
+  about, together with any `identity_criterion` and `ontological_character`.
+  `referent_id = :sheep` is shorthand for `referent = ReferentSpec(:sheep)`.
+  Identity and ontology are declared on the referent, never on the node.
+
+`causal_role` is optional descriptive metadata (`:assigned`, `:mediator`, …)
+read by downstream planners; it does not alter the graph.
+
+Derived read-only properties: `onset_time` (from the support; `0` for
+pointwise and global supports), `referent_id`, `identity_criterion`,
 `ontological_character`.
 """
 struct TemporalNodeSpec
     name::Symbol
-    temporal_mode::Symbol
-    causal_role::Union{Nothing, Symbol}
-    onset_time::Int
     temporal_support::TemporalSupport
     value_representation::Symbol
-    referent_id::Union{Nothing, Symbol}
-    identity_criterion::Union{Nothing, Symbol}
-    ontological_character::Symbol
+    referent::Union{Nothing, ReferentSpec}
+    causal_role::Union{Nothing, Symbol}
 
     function TemporalNodeSpec(
         name::Symbol,
-        temporal_mode::Symbol,
-        causal_role::Union{Nothing, Symbol},
-        onset_time::Int,
         temporal_support::TemporalSupport,
         value_representation::Symbol,
-        referent_id::Union{Nothing, Symbol},
-        identity_criterion::Union{Nothing, Symbol},
-        ontological_character::Symbol,
+        referent::Union{Nothing, ReferentSpec},
+        causal_role::Union{Nothing, Symbol},
     )
-        onset_time ≥ 0 || throw(ArgumentError("onset_time must be ≥ 0, got $onset_time"))
-        if identity_criterion !== nothing && referent_id === nothing
-            throw(ArgumentError("identity_criterion requires referent_id"))
-        end
-        if ontological_character === :enduring && identity_criterion === nothing
-            # metadata only; warn is deferred to require_semantics on gated ops
-        end
         return new(
             name,
-            temporal_mode,
-            causal_role,
-            onset_time,
             temporal_support,
-            value_representation,
-            referent_id,
-            identity_criterion,
-            ontological_character,
+            normalise_value_representation(value_representation),
+            referent,
+            causal_role,
         )
     end
 end
 
 function TemporalNodeSpec(
     name::Symbol;
-    temporal_mode::Union{Nothing, Symbol} = nothing,
-    causal_role::Union{Nothing, Symbol} = nothing,
-    onset_time::Union{Nothing, Integer} = nothing,
-    temporal_support = nothing,
+    temporal_support = PointwiseSupport(),
     value_representation::Symbol = :unspecified,
-    referent_id::Union{Nothing, Symbol} = nothing,
     referent::Union{Nothing, ReferentSpec} = nothing,
-    identity_criterion::Union{Nothing, Symbol} = nothing,
-    ontological_character::Symbol = :unspecified,
+    referent_id::Union{Nothing, Symbol} = nothing,
+    causal_role::Union{Nothing, Symbol} = nothing,
+    identity_criterion = nothing,
+    ontological_character = nothing,
 )
-    # `nothing` means "not declared"; symbol shorthands that need an onset
-    # (`:from_onset`, legacy `:enduring`) must then supply it explicitly.
-    onset = onset_time === nothing ? 0 : Int(onset_time)
-    character = ontological_character
-    if referent !== nothing
-        if referent_id !== nothing && referent_id !== referent.id
-            throw(ArgumentError(
-                "referent_id :$referent_id conflicts with referent.id :$(referent.id)",
-            ))
-        end
-        referent_id = referent.id
-        # Identity criterion is optional: keep `nothing` when neither the node
-        # nor the referent declares one. Conflicting declarations are refused
-        # rather than silently resolved in favour of either side.
-        if identity_criterion === nothing
-            identity_criterion = referent.identity_criterion
-        elseif referent.identity_criterion !== nothing &&
-               identity_criterion !== referent.identity_criterion
-            throw(ArgumentError(
-                "identity_criterion :$identity_criterion conflicts with " *
-                "referent :$(referent.id) declaring :$(referent.identity_criterion)",
-            ))
-        end
-        if character === :unspecified
-            character = referent.ontological_character
-        elseif referent.ontological_character !== :unspecified &&
-               character !== referent.ontological_character
-            throw(ArgumentError(
-                "ontological_character :$character conflicts with " *
-                "referent :$(referent.id) declaring :$(referent.ontological_character)",
-            ))
-        end
+    if identity_criterion !== nothing || ontological_character !== nothing
+        throw(ArgumentError(
+            "identity_criterion and ontological_character are declared on the " *
+            "ReferentSpec, not the node: TemporalNodeSpec(:$name; referent = " *
+            "ReferentSpec(id; identity_criterion, ontological_character))",
+        ))
     end
-    support = if temporal_support !== nothing
-        parse_temporal_support(temporal_support; onset = onset_time)
-    elseif temporal_mode !== nothing
-        temporal_mode === :occasion || temporal_mode === :enduring ||
-            throw(ArgumentError("temporal_mode must be :occasion or :enduring, got :$temporal_mode"))
-        Base.depwarn(
-            "TemporalNodeSpec(...; temporal_mode=:$temporal_mode) is deprecated; " *
-            "declare temporal_support instead. The flag does not set ontological_character.",
-            :TemporalNodeSpec,
-        )
-        if temporal_mode === :enduring && onset_time === nothing
-            throw(ArgumentError(
-                "temporal_mode=:enduring cannot be migrated without an explicit onset_time; " *
-                "declare temporal_support = FromOnsetSupport(t₀) instead",
-            ))
-        end
-        support_from_temporal_mode(temporal_mode, onset)
-    else
-        PointwiseSupport()
+    if referent !== nothing && referent_id !== nothing && referent_id !== referent.id
+        throw(ArgumentError(
+            "referent_id :$referent_id conflicts with referent.id :$(referent.id)",
+        ))
     end
-    if support isa FromOnsetSupport
-        onset = Int(support.onset)
+    if referent === nothing && referent_id !== nothing
+        referent = ReferentSpec(referent_id)
     end
-    mode = legacy_temporal_mode(support)
-    return TemporalNodeSpec(
-        name,
-        mode,
-        causal_role,
-        onset,
-        support,
-        normalise_value_representation(value_representation),
-        referent_id,
-        identity_criterion,
-        normalise_ontological_character(character),
+    support = parse_temporal_support(temporal_support)
+    return TemporalNodeSpec(name, support, value_representation, referent, causal_role)
+end
+
+function Base.getproperty(node::TemporalNodeSpec, property::Symbol)
+    property === :onset_time && return onset_from_support(getfield(node, :temporal_support), 0)
+    if property in (:referent_id, :identity_criterion, :ontological_character)
+        referent = getfield(node, :referent)
+        property === :referent_id && return referent === nothing ? nothing : referent.id
+        property === :identity_criterion &&
+            return referent === nothing ? nothing : referent.identity_criterion
+        return referent === nothing ? :unspecified : referent.ontological_character
+    end
+    return getfield(node, property)
+end
+
+function Base.propertynames(node::TemporalNodeSpec, private::Bool = false)
+    return (
+        fieldnames(TemporalNodeSpec)...,
+        :onset_time, :referent_id, :identity_criterion, :ontological_character,
     )
 end
 
@@ -242,8 +204,7 @@ function Base.getproperty(spec::TemporalDAGSpec, property::Symbol)
 end
 
 function Base.propertynames(spec::TemporalDAGSpec, private::Bool = false)
-    fields = fieldnames(typeof(spec))
-    return private ? (fields..., :variables) : (fields..., :variables)
+    return (fieldnames(TemporalDAGSpec)..., :variables)
 end
 
 """Return the node descriptor named `name`, or throw an informative error."""
@@ -257,10 +218,10 @@ end
 """Return the names declared by a temporal specification."""
 _temporal_node_names(spec::TemporalDAGSpec) = Symbol[node.name for node in spec.nodes]
 
-"""Return whether a descriptor is active at occasion `t`."""
+"""Return whether a descriptor is active at time index `t`."""
 _active_at(node::TemporalNodeSpec, t::Int) = t ≥ node.onset_time
 
-"""Result of unrolling a [`TemporalDAGSpec`](@ref) over occasions `0:T`."""
+"""Result of unrolling a [`TemporalDAGSpec`](@ref) over time indices `0:T`."""
 struct TemporalUnrolling
     T::Int
     spec::TemporalDAGSpec

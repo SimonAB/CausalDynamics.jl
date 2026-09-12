@@ -116,16 +116,13 @@ Wire `:feasibility` [`StructuralConstraintSpec`](@ref)s into intervention
 gates. Mathematical admissibility and practical availability are separate;
 positivity is none of these. An intervention on a constrained target passes
 only when `justification` is an [`InterventionJustification`](@ref) of kind
-`:physical_justification` naming that target. The deprecated `justified::Bool`
-bypass is refused.
+`:physical_justification` naming that target.
 """
 function assert_feasibility!(
     constraints,
     intervention;
     justification::Union{Nothing, InterventionJustification} = nothing,
-    justified::Union{Nothing, Bool} = nothing,
 )
-    justified === true && _refuse_boolean_justification("assert_feasibility!", "justified")
     targets = Set(intervention_targets(intervention))
     isempty(targets) && return nothing
     for spec in constraints
@@ -149,8 +146,7 @@ end
 Combined P0 gate: interval-summary scalar ``do`` refusal and feasibility
 constraints. Call from simulate/identify paths that carry a temporal spec.
 Justifications are [`InterventionJustification`](@ref) records
-(`macro_intervention_justification`, `feasibility_justification`); the
-deprecated Boolean `*_justified` switches are refused.
+(`macro_intervention_justification`, `feasibility_justification`).
 """
 function validate_intervention_semantics(
     nodes,
@@ -158,15 +154,7 @@ function validate_intervention_semantics(
     constraints = StructuralConstraintSpec[],
     macro_intervention_justification::Union{Nothing, InterventionJustification} = nothing,
     feasibility_justification::Union{Nothing, InterventionJustification} = nothing,
-    macro_intervention_justified::Union{Nothing, Bool} = nothing,
-    feasibility_justified::Union{Nothing, Bool} = nothing,
 )
-    macro_intervention_justified === true && _refuse_boolean_justification(
-        "validate_intervention_semantics", "macro_intervention_justified",
-    )
-    feasibility_justified === true && _refuse_boolean_justification(
-        "validate_intervention_semantics", "feasibility_justified",
-    )
     assert_interval_summary_do!(
         nodes, intervention; justification = macro_intervention_justification,
     )

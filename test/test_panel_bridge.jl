@@ -1,5 +1,5 @@
 using CausalDynamics
-using CausalDynamics: hurdle, NodeOutcomeSpec, binary, count_outcome, check_occasion_resolution, MissingnessSpec
+using CausalDynamics: hurdle, NodeOutcomeSpec, binary, count_outcome, check_time_resolution, MissingnessSpec
 using DataFrames
 using Test
 
@@ -218,7 +218,7 @@ end
 
 @testset "occasion resolution (#17)" begin
     query = TemporalEffectQuery(:grid_type, :fec, 3, 3)
-    issues = check_occasion_resolution(
+    issues = check_time_resolution(
         query, Dict(:fec => 1); warn = false,
     )
     @test length(issues) == 1

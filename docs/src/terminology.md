@@ -34,9 +34,3 @@ construction or appearance. Node multiplicity follows `temporal_support` and
 [`causal_projection`](@ref). Scalar ``do`` on `:interval_summary` and
 `:feasibility` constraints are gated by
 [`validate_intervention_semantics`](@ref).
-
-Deprecated: `temporal_mode = :occasion | :enduring` maps to `PointwiseSupport`
-or `FromOnsetSupport` when that mapping is unambiguous, and does **not** set
-`ontological_character`. Where the old flag underdetermines the new semantics,
-require clarification rather than inventing defaults. Prefer `temporal_support`
-as the source of truth for unrolling.

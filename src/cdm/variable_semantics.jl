@@ -1,7 +1,6 @@
 """Orthogonal variable, referent, and graph-kind declarations.
 
 These records do not infer ontology from names, glyphs, or array size.
-`temporal_mode` is a deprecated constructor alias only.
 """
 
 """Abstract temporal extent of the value represented by a node."""
@@ -54,15 +53,6 @@ const RELATION_KINDS = (
     :measurement,
     :temporal_precedence,
     :identity_succession,
-)
-
-"""Claim strength labels for certificates and structural constraints."""
-const CLAIM_KINDS = (
-    :declared_assumption,
-    :structurally_validated,
-    :identified_under_assumptions,
-    :numerically_checked,
-    :empirically_assessed,
 )
 
 """Identification outcome labels on `IdentificationResult`."""
@@ -198,7 +188,7 @@ function parse_temporal_support(support::Symbol; onset = nothing)
     if support === :from_onset
         onset === nothing && throw(ArgumentError(
             ":from_onset requires an explicit onset: use FromOnsetSupport(t₀) " *
-            "or pass onset_time. The onset follows the mechanism, not the indexing convention",
+            "(the onset follows the mechanism, not the indexing convention)",
         ))
         return FromOnsetSupport(Int(onset))
     end
@@ -210,18 +200,6 @@ end
 
 function parse_temporal_support(::Nothing; onset = nothing)
     return PointwiseSupport()
-end
-
-"""Map deprecated `temporal_mode` onto support without setting ontology."""
-function support_from_temporal_mode(mode::Symbol, onset::Integer)
-    mode === :occasion && return PointwiseSupport()
-    mode === :enduring && return FromOnsetSupport(Int(onset))
-    throw(ArgumentError("temporal_mode must be :occasion or :enduring, got :$mode"))
-end
-
-"""Deprecated compatibility flag derived from support (not ontology)."""
-function legacy_temporal_mode(support::TemporalSupport)
-    return expands_pointwise(support) ? :occasion : :enduring
 end
 
 function onset_from_support(support::TemporalSupport, fallback::Integer)
@@ -239,28 +217,6 @@ function semantic_fingerprint(parts...)
     return stable_hash64(string(parts))
 end
 
-"""
-    require_semantics(op, specs; error=false)
-
-Warn (or error) when gated operations lack declared support / representation.
-"""
-function require_semantics(op::Symbol, specs; error::Bool = false)
-    missing = Symbol[]
-    for spec in specs
-        if spec.temporal_support isa PointwiseSupport &&
-           spec.value_representation === :unspecified &&
-           op in (:interval_intervention, :identity, :mixed_relation)
-            push!(missing, spec.name)
-        end
-        if spec.value_representation === :interval_summary && op === :interval_intervention
-            # interval summary is declared; nothing missing
-        end
-    end
-    isempty(missing) && return nothing
-    msg = "operation :$op requires temporal_support / value_representation for $(missing)"
-    error ? throw(ArgumentError(msg)) : @warn msg
-    return missing
-end
 
 """Collect intervention target symbols from common intervention types."""
 function intervention_targets(intervention)
@@ -348,15 +304,6 @@ function justifies(
     return justification.kind in kinds && target in justification.targets
 end
 
-"""Refuse the deprecated Boolean bypass with a migration message."""
-function _refuse_boolean_justification(gate::AbstractString, kw::AbstractString)
-    throw(ArgumentError(
-        "$gate no longer accepts `$kw = true`; a bare Boolean records nothing. Pass " *
-        "an `InterventionJustification(kind, targets, note)` so the justification " *
-        "is stated and travels with the certificate.",
-    ))
-end
-
 """
     assert_interval_summary_do!(nodes, intervention; justification=nothing)
 
@@ -364,17 +311,13 @@ Refuse a scalar ``do(·)`` on an `:interval_summary` target unless
 `justification` is an [`InterventionJustification`](@ref) of a
 macro-intervention kind (`:trajectory_generator`,
 `:admissible_trajectory_distribution`, or `:certificate_note`) that names that
-target. The deprecated `justified::Bool` bypass is refused.
+target. A bare Boolean records nothing and is not accepted.
 """
 function assert_interval_summary_do!(
     nodes,
     intervention;
     justification::Union{Nothing, InterventionJustification} = nothing,
-    justified::Union{Nothing, Bool} = nothing,
 )
-    justified === true && _refuse_boolean_justification(
-        "assert_interval_summary_do!", "justified",
-    )
     by_name = Dict(n.name => n for n in nodes)
     for target in intervention_targets(intervention)
         spec = get(by_name, target, nothing)
@@ -398,9 +341,8 @@ export TemporalSupport, PointwiseSupport, PointSupport, IntervalSupport
 export FromOnsetSupport, GlobalSupport
 export GraphKind, TimeUnrolledGraph, ProcessGraph, SemanticGraph
 export ReferentSpec, ObservationSemantics
-export VALUE_REPRESENTATIONS, RELATION_KINDS, CLAIM_KINDS, IDENTIFICATION_STATUSES
+export VALUE_REPRESENTATIONS, RELATION_KINDS, IDENTIFICATION_STATUSES
 export expands_pointwise, is_single_node_support, parse_temporal_support
-export support_from_temporal_mode, legacy_temporal_mode
 export normalise_value_representation, normalise_relation_kind, normalise_ontological_character
-export semantic_fingerprint, require_semantics
+export semantic_fingerprint
 export intervention_targets, assert_interval_summary_do!

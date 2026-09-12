@@ -176,8 +176,8 @@ The compact `TemporalDAGSpec(variables, edges)` constructor gives every listed
 variable default `PointwiseSupport` (one node per `t ∈ 𝒯`). For a fixed entity
 attribute (genotype, site, baseline arm), declare
 `TemporalNodeSpec(...; temporal_support = FromOnsetSupport(onset))` so unrolling
-keeps one node and panel helpers map to a bare column. Optional
-`ontological_character = :enduring` is metadata only and does not change node
+keeps one node and panel helpers map to a bare column. Ontological character,
+when claimed, is declared on a shared `ReferentSpec` and does not change node
 count ([#29](https://github.com/SimonAB/CausalDynamics.jl/issues/29)).
 
 ```@example gs-temporal

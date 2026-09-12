@@ -13,7 +13,7 @@ Binary response indicators aligned with named columns.
 # Fields
 - `columns`: column symbols (one per mask column)
 - `observed`: `n × length(columns)` bit matrix; `true` means `R = 1` (observed)
-- `time_indexed`: if `true`, columns are occasions of a timed process (e.g. `:y1`, `:y2`)
+- `time_indexed`: if `true`, columns are time steps of a timed process (e.g. `:y1`, `:y2`)
 """
 struct ObservationMask
     columns::Vector{Symbol}

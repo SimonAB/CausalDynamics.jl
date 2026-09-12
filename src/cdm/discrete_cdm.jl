@@ -1,7 +1,7 @@
 """
 Discrete-time Causal Dynamical Models (CDMs).
 
-A `DiscreteTimeCDM` advances named endogenous state over occasions `t = 1:T`,
+A `DiscreteTimeCDM` advances named endogenous state over time steps `t = 1:T`,
 sampling exogenous noise each step and optionally applying a `DoSequence`.
 Shared-`U` counterfactuals reuse realised noise under an alternate intervention.
 """
@@ -26,7 +26,7 @@ abstract type AbstractDoAssignment end
 """
     ConstantAssignment(value)
 
-Hold a constant `do(·)` value for all occasions.
+Hold a constant `do(·)` value for all time steps.
 """
 struct ConstantAssignment{T} <: AbstractDoAssignment
     value::T
@@ -35,7 +35,7 @@ end
 """
     SeriesAssignment(values)
 
-Hold a time-indexed `do(·)` series (`values[t]` at occasion `t`).
+Hold a time-indexed `do(·)` series (`values[t]` at time `t`).
 """
 struct SeriesAssignment{V <: AbstractVector} <: AbstractDoAssignment
     values::V
@@ -367,7 +367,7 @@ Discrete-time Causal Dynamical Model with named endogenous variables.
 # Fields
 - `variables`: endogenous names (documentation / packing order)
 - `initialise`: `(rng) -> NamedTuple` of initial endogenous values at `t = 1`
-- `sample_noise`: `(rng, state, t) -> NamedTuple` of exogenous draws for occasion `t`
+- `sample_noise`: `(rng, state, t) -> NamedTuple` of exogenous draws for time step `t`
 - `step`: `(state, t, noise, intervention) -> NamedTuple` next endogenous state
 
 The `step` function should use [`intervention_value`](@ref) for intervenable
@@ -427,7 +427,7 @@ end
 Result of simulating a [`DiscreteTimeCDM`](@ref).
 
 # Fields
-- `T`: number of occasions
+- `T`: number of time steps
 - `series`: endogenous trajectories (`Symbol => Vector{<:Real}`)
 - `noise`: realised exogenous draws (`Symbol => Vector{<:Real}`)
 """
@@ -451,7 +451,7 @@ end
 """
     simulate(cdm::DiscreteTimeCDM, T; rng=..., intervention=nothing)
 
-Simulate a discrete-time CDM for `T` occasions.
+Simulate a discrete-time CDM for `T` time steps.
 
 Returns a [`CDMTrajectory`](@ref). When `intervention` is a [`DoSequence`](@ref),
 assignments are applied at `t = 1` to the initial state and passed into `step`
@@ -561,12 +561,12 @@ GComputationResult(mean, std, n, samples) =
 Estimate `E[outcome ∣ do(intervention)]` by simulating `n` trajectories of length `T`.
 
 Each replicate is summarised by `reduce` applied to the outcome series (default
-`last`, the terminal occasion). Contrast two calls to obtain an interventional
+`last`, the terminal time step). Contrast two calls to obtain an interventional
 effect, e.g. `do_sequence(:a, 1.0)` versus `do_sequence(:a, 0.0)`.
 
 # Arguments
 - `cdm`: a [`DiscreteTimeCDM`](@ref)
-- `T`: number of occasions per replicate
+- `T`: number of time steps per replicate
 - `outcome`: endogenous variable symbol to summarise
 - `intervention`: [`DoSequence`](@ref) or [`Policy`](@ref)
 - `n`: replicate count

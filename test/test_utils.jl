@@ -66,14 +66,16 @@ using Test
             mixed_spec = TemporalDAGSpec(
                 nodes = [
                     TemporalNodeSpec(:diagnosis),
-                    TemporalNodeSpec(:pasture; temporal_mode = :enduring, onset_time = 1),
+                    TemporalNodeSpec(:pasture; temporal_support = FromOnsetSupport(1)),
                     TemporalNodeSpec(:weight),
                 ],
                 edges = [(:diagnosis, :pasture, 0), (:pasture, :weight, 0)],
             )
             mixed_u = unroll_temporal_dag(mixed_spec, 1)
             _fig_mixed, _ax_mixed, p_mixed = DAGMakie.dagplot_temporal(mixed_u)
-            @test p_mixed[:node_marker][][enduring_node(mixed_u, :pasture)] == DAGMakie.enduring_node_marker()
+            # From-onset support reuses one node; glyph follows value_representation
+            # (default :unspecified → circle), never endurance.
+            @test p_mixed[:node_marker][][enduring_node(mixed_u, :pasture)] == :circle
 
             representation_spec = TemporalDAGSpec(
                 nodes = [
@@ -87,7 +89,8 @@ using Test
             representation_u = unroll_temporal_dag(representation_spec, 0)
             _fig_representation, _ax_representation, p_representation =
                 DAGMakie.dagplot_temporal(representation_u)
-            @test p_representation[:node_marker][][1] == DAGMakie.enduring_node_marker()
+            @test p_representation[:node_marker][][1] ==
+                  DAGMakie.interval_summary_node_marker()
         else
             @test_throws ErrorException plot_causal_graph(g)
             try

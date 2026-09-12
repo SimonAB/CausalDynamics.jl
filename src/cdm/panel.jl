@@ -2,7 +2,7 @@
 
 Column naming (default): baseline symbols kept as-is (value at ``t = 1``);
 timed symbols become ``Symbol(string(var), t)`` (e.g. `:a` → `:a1`, `:a2`);
-terminal symbols use the bare name at occasion ``T`` (e.g. `:y` at last time).
+terminal symbols use the bare name at time index ``T`` (e.g. `:y` at last time).
 
 This layout matches CausalTargeted [`SequentialPolicy`](@ref) wide tables.
 """
@@ -10,7 +10,7 @@ This layout matches CausalTargeted [`SequentialPolicy`](@ref) wide tables.
 """
     panel_column_name(var, t) -> Symbol
 
-Default time-indexed column name: concatenate the variable symbol and occasion
+Default time-indexed column name: concatenate the variable symbol and time
 index with no separator (`:a`, `2` → `:a2`).
 """
 panel_column_name(var::Symbol, t::Integer) = Symbol(string(var), Int(t))
@@ -118,7 +118,7 @@ For observational estimation (CausalTargeted sequential LMTP), leave
 - `baseline`: symbols emitted once (value at ``t = 1``), e.g. `[:w]`
 - `timed`: symbols expanded as `name_fn(v, t)` for ``t = 1:T``; default is all
   endogenous variables not listed in `baseline` or `terminal`
-- `terminal`: symbols emitted once from occasion ``T`` (bare name), e.g. `[:y]`
+- `terminal`: symbols emitted once from time index ``T`` (bare name), e.g. `[:y]`
 - `name_fn`: `(var::Symbol, t::Int) -> Symbol` (default [`panel_column_name`](@ref))
 - `temporal_spec`: optional lag DAG carried for ID hand-off
 """
@@ -136,8 +136,6 @@ function simulate_panel(
     constraints = StructuralConstraintSpec[],
     macro_intervention_justification::Union{Nothing, InterventionJustification} = nothing,
     feasibility_justification::Union{Nothing, InterventionJustification} = nothing,
-    macro_intervention_justified::Union{Nothing, Bool} = nothing,
-    feasibility_justified::Union{Nothing, Bool} = nothing,
 )
     n = Int(n)
     T = Int(T)
@@ -151,14 +149,11 @@ function simulate_panel(
             constraints = constraints,
             macro_intervention_justification = macro_intervention_justification,
             feasibility_justification = feasibility_justification,
-            macro_intervention_justified = macro_intervention_justified,
-            feasibility_justified = feasibility_justified,
         )
     elseif !isempty(constraints) && intervention !== nothing
         assert_feasibility!(
             constraints, intervention;
             justification = feasibility_justification,
-            justified = feasibility_justified,
         )
     end
 
@@ -198,18 +193,18 @@ function Base.NamedTuple(panel::CDMPanel)
 end
 
 """
-    check_occasion_resolution(query, measured_at; warn=true) -> Vector{NamedTuple}
+    check_time_resolution(query, measured_at; warn=true) -> Vector{NamedTuple}
 
-Check whether a [`TemporalEffectQuery`](@ref) references variables at occasions
-that differ from where they were actually measured in the wide panel.
+Check whether a [`TemporalEffectQuery`](@ref) references variables at time
+indices that differ from where they were actually measured in the wide panel.
 
-`measured_at` maps DAG node symbols to the occasion index of the wide column
-that holds the value (e.g. period-constant contact scores measured once at
-occasion 1 but referenced at `t_outcome = 4`).
+`measured_at` maps DAG node symbols to the time index of the wide column that
+holds the value (e.g. period-constant contact scores measured once at ``t = 1``
+but referenced at `t_outcome = 4`).
 
 Returns a vector of issue records; emits `@warn` when `warn=true`.
 """
-function check_occasion_resolution(
+function check_time_resolution(
     query::TemporalEffectQuery,
     measured_at::AbstractDict{Symbol, Int};
     warn::Bool = true,
@@ -226,16 +221,18 @@ function check_occasion_resolution(
         src_t == ref_t && continue
         rec = (
             variable = var,
-            query_occasion = ref_t,
-            source_occasion = src_t,
-            message = ":$(var) at query occasion $ref_t uses measurement from occasion $src_t",
+            query_time = ref_t,
+            source_time = src_t,
+            message = ":$(var) at query time $ref_t uses measurement from time $src_t",
         )
         push!(issues, rec)
         if warn
-            @warn rec.message variable = var query_occasion = ref_t source_occasion = src_t
+            @warn rec.message variable = var query_time = ref_t source_time = src_t
         end
     end
     return issues
 end
 
-export panel_column_name, CDMPanel, trajectory_wide_row, simulate_panel, check_occasion_resolution
+Base.@deprecate check_occasion_resolution(query, measured_at; kwargs...) check_time_resolution(query, measured_at; kwargs...)
+
+export panel_column_name, CDMPanel, trajectory_wide_row, simulate_panel, check_time_resolution

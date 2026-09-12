@@ -191,8 +191,9 @@ end
 
 Plot a [`TemporalUnrolling`](@ref) with time left→right and variables as rows.
 
-Labels use [`temporal_node_label`](@ref). Occasion nodes are circles and
-enduring nodes are rounded rectangles, positioned at their onset time.
+Labels use [`temporal_node_label`](@ref). Pointwise nodes sit at their time
+index and single-node keys at their onset; markers follow each node's
+`value_representation` (rounded rectangle only for `:interval_summary`).
 This method extends [`DAGMakie.dagplot_temporal`](@ref).
 """
 function DAGMakie.dagplot_temporal(
@@ -202,7 +203,6 @@ function DAGMakie.dagplot_temporal(
     kwargs...,
 )
     labels = [temporal_node_label(unrolling, i) for i in 1:nv(unrolling.graph)]
-    modes = [time === nothing ? :enduring : :occasion for (_variable, time) in unrolling.index_node]
     supports = [
         begin
             descriptor = first(
@@ -237,7 +237,6 @@ function DAGMakie.dagplot_temporal(
         unrolling.graph,
         unrolling.index_node;
         nlabels = labels,
-        temporal_modes = modes,
         onset_times = onsets,
         temporal_supports = supports,
         value_representations = representations,

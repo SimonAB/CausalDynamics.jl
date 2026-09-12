@@ -52,7 +52,7 @@ end
 """
     TemporalEffectQuery(treatment, outcome, t_treat, t_outcome)
 
-Total effect of `treatment` at occasion `t_treat` on `outcome` at `t_outcome`
+Total effect of `treatment` at time `t_treat` on `outcome` at `t_outcome`
 after unrolling a [`TemporalDAGSpec`](@ref).
 """
 struct TemporalEffectQuery{T} <: CausalQuery
