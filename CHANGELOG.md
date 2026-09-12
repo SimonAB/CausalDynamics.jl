@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Unit tests for the clarity surface (`test_clarity_surface.jl`):
+  `single_node` export diet, refusal of `unit_level=`, and FromOnset vs
+  pointwise panel columns.
 - Getting-started walk-through for from-onset attributes vs
   `:interval_summary` glyphs (`ReferentSpec` + `dagplot_temporal`).
 - Index links to [BOUNDARIES.md](BOUNDARIES.md) and shared design principles.
