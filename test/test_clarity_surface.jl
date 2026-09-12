@@ -1,7 +1,7 @@
 using CausalDynamics
 using Test
 
-@testset "clarity surface (exports and panel mapping)" begin
+@testset "clarity surface (exports and removed APIs)" begin
     public = names(CausalDynamics)
 
     @testset "single_node is public; enduring_node is not" begin
@@ -18,7 +18,7 @@ using Test
         @test isdefined(CausalDynamics, :normalise_value_representation)
     end
 
-    @testset "panel bridge refuses unit_level override" begin
+    @testset "unit_level override and unrolling-free panel API are gone" begin
         spec = TemporalDAGSpec(
             nodes = [
                 TemporalNodeSpec(:grid_type; temporal_support = FromOnsetSupport(0)),
@@ -36,17 +36,33 @@ using Test
             identify(u, query), u;
             unit_level = [:grid_type],
         )
-        qcols = query_panel_columns(u, query)
-        @test qcols.treatment === :grid_type
-        @test qcols.outcome === :fec1
+        # Unrolling-free query_panel_columns(query; …) was removed
+        @test length(methods(query_panel_columns)) == 1
+        @test_throws MethodError query_panel_columns(query)
     end
 
-    @testset "pointwise treatment needs timed column without FromOnsetSupport" begin
-        spec = TemporalDAGSpec([:a, :y], [(:a, :y, 0)])
+    @testset "GlobalSupport is single-node, not unspecified time-invariance" begin
+        @test parse_temporal_support(:global) isa GlobalSupport
+        @test parse_temporal_support(:from_onset; onset = 2) == FromOnsetSupport(2)
+        @test_throws ArgumentError parse_temporal_support(:from_onset)
+        @test_throws ArgumentError parse_temporal_support(:interval)
+
+        spec = TemporalDAGSpec(
+            nodes = [
+                TemporalNodeSpec(:site; temporal_support = GlobalSupport()),
+                TemporalNodeSpec(:y),
+            ],
+            edges = [(:site, :y, 0)],
+        )
+        @test is_single_node(spec.nodes[1])
         u = unroll_temporal_dag(spec, 2)
-        query = TemporalEffectQuery(:a, :y, 1, 1)
-        qcols = query_panel_columns(u, query)
-        @test qcols.treatment === :a1
+        site_idx = single_node(u, :site)
+        @test site_idx isa Integer
+        # Only one node exists; timed lookup resolves to that same index
+        @test temporal_node(u, :site, 0) == site_idx
+        @test temporal_node(u, :site, 1) == site_idx
+        qcols = query_panel_columns(u, TemporalEffectQuery(:site, :y, 1, 1))
+        @test qcols.treatment === :site
         @test qcols.outcome === :y1
     end
 end

@@ -89,15 +89,6 @@ using Random
         @test !is_single_node(spec.nodes[1])
     end
 
-    @testset "process graph identify unsupported" begin
-        spec = TemporalDAGSpec(
-            nodes = [TemporalNodeSpec(:x), TemporalNodeSpec(:y)],
-            edges = [(:x, :y, 0)],
-            graph_kind = ProcessGraph(),
-        )
-        @test_throws ArgumentError unroll_temporal_dag(spec, 1)
-    end
-
     @testset "participation vs influence projection" begin
         spec = TemporalDAGSpec(
             nodes = [

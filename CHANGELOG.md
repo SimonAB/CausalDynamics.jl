@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Unit tests: drop duplicate FromOnset planner clones; expand clarity surface
+  for `GlobalSupport`, removed unrolling-free `query_panel_columns`, and
+  `unit_level` refusal; assert `(var, nothing)` on single-node ID certificates.
+
 ### Breaking
 
 - Renamed `enduring_node` → `single_node` (reused temporal node index).

@@ -76,25 +76,13 @@ end
     @test :site in temporal_adjustment_columns(result, u)
     @test result.semantic_fingerprint isa UInt64
     @test result.identification_status === :identified
-end
-
-@testset "Apodemus-style discrete LMTP planner" begin
-    spec = TemporalDAGSpec(
-        nodes = [
-            TemporalNodeSpec(:grid_type; temporal_support = FromOnsetSupport(0)),
-            TemporalNodeSpec(:fec),
-        ],
-        edges = [(:grid_type, :fec, 0)],
+    # FromOnset / Global confounders carry time === nothing on the certificate
+    site_entries = filter(p -> first(p) === :site, result.temporal_nodes)
+    @test !isempty(site_entries)
+    @test all(p -> last(p) === nothing, site_entries)
+    @test_throws ArgumentError CausalDynamics._panel_column(
+        u, :weight, nothing, panel_column_name,
     )
-    u = unroll_temporal_dag(spec, 4)
-    query = TemporalEffectQuery(:grid_type, :fec, 2, 2)
-    wide_cols = [:mouse_id, :grid_type, :fec1, :fec2, :fec3, :fec4]
-    plan = plan_targeted_estimation(u, query, wide_cols)
-    @test plan.engine === :discrete_lmtp
-    @test plan.treatment === :grid_type
-    @test plan.outcome === :fec2
-    @test isempty(plan.baseline)
-    @test isempty(plan.missing_columns)
 end
 
 @testset "hurdle outcome planner (#22)" begin
@@ -290,39 +278,4 @@ end
     )
     @test plan_ok.estimability !== :structural_skip
     @test plan_ok.outcome === :fec2
-end
-
-@testset "single-node TemporalNodeSpec panel path (#29)" begin
-    spec = TemporalDAGSpec(
-        nodes = [
-            TemporalNodeSpec(
-                :grid_type;
-                temporal_support = FromOnsetSupport(0),
-                value_representation = :attribute,
-                causal_role = :assigned
-            ),
-            TemporalNodeSpec(:fec; temporal_support = PointwiseSupport()),
-            TemporalNodeSpec(:weight; temporal_support = PointwiseSupport()),
-        ],
-        edges = [
-            LaggedEdge(:grid_type, :fec, 0),
-            LaggedEdge(:weight, :fec, 0),
-            LaggedEdge(:fec, :fec, 1),
-        ]
-    )
-    u = unroll_temporal_dag(spec, 4)
-    query = TemporalEffectQuery(:grid_type, :fec, 2, 2)
-    qcols = query_panel_columns(u, query)
-    @test qcols.treatment === :grid_type
-    @test qcols.outcome === :fec2
-
-    wide_cols = [
-        :mouse_id, :grid_type,
-        :fec1, :fec2, :fec3, :fec4,
-        :weight1, :weight2, :weight3, :weight4,
-    ]
-    plan = plan_targeted_estimation(u, query, wide_cols)
-    @test plan.engine === :discrete_lmtp
-    @test plan.treatment === :grid_type
-    @test plan.outcome === :fec2
 end
