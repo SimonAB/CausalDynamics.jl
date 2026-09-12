@@ -133,11 +133,28 @@ function simulate_panel(
     terminal::AbstractVector{Symbol} = Symbol[],
     name_fn = panel_column_name,
     temporal_spec::Union{Nothing, TemporalDAGSpec} = nothing,
+    constraints = StructuralConstraintSpec[],
+    macro_intervention_justified::Bool = false,
+    feasibility_justified::Bool = false,
 )
     n = Int(n)
     T = Int(T)
     n < 1 && throw(ArgumentError("n must be ≥ 1, got $n"))
     T < 1 && throw(ArgumentError("T must be ≥ 1, got $T"))
+
+    if temporal_spec !== nothing && intervention !== nothing
+        validate_intervention_semantics(
+            temporal_spec.nodes,
+            intervention;
+            constraints = constraints,
+            macro_intervention_justified = macro_intervention_justified,
+            feasibility_justified = feasibility_justified,
+        )
+    elseif !isempty(constraints) && intervention !== nothing
+        assert_feasibility!(
+            constraints, intervention; justified = feasibility_justified,
+        )
+    end
 
     base, timed_vars, term = _default_roles(cdm, baseline, timed, terminal)
     order = _column_order(T, base, timed_vars, term, name_fn)

@@ -58,7 +58,7 @@ Keep simulation and identification **orthogonal**: the same `IdentificationResul
 
 ### Temporal identity lexicon
 
-Pearl/SciML names stay on identification and surgery (`identify`, `do_surgery`, `DoIntervention`, `DoSequence`). Where static causal vocabulary is overloaded, this package may export or document the closed lexicon from [DESIGN_PRINCIPLES.md](DESIGN_PRINCIPLES.md): **occasion**, **enduring**, **constitution**, **constitutive**, **influence**, **onset**, **replacement**, **deployment**. Prefer attaching those words to existing objects (`TemporalNodeSpec`, `temporal_edge_role` / `LaggedEdge`, `Policy`, `onset_time`) rather than a second graph or event-store API. Targeted and Mediation consume the roles; they do not re-derive them. Whitehead glossary terms stay out of exports and Documenter.
+Pearl/SciML names stay on identification and surgery (`identify`, `do_surgery`, `DoIntervention`, `DoSequence`). Temporal identity uses orthogonal declarations on existing types: `temporal_support`, `value_representation`, `referent_id` / `ReferentSpec`, `identity_criterion`, `graph_kind`, optional `ontological_character`, edge `relation_kind`, and policy `information_set` (`ℋ_t`). Deprecated `temporal_mode = :occasion | :enduring` maps only onto support and must not set ontology. Prefer attaching those words to `TemporalNodeSpec`, `LaggedEdge`, `Policy`, and `ObservationBridge.availability` rather than a second graph or event-store API. Targeted and Mediation consume the roles; they do not re-derive them. Whitehead glossary terms stay out of exports and Documenter.
 
 ### Julia native types
 

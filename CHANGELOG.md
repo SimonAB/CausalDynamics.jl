@@ -9,13 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Temporal identity lexicon (docs):** [Terminology](docs/src/terminology.md)
-  records occasion, enduring, constitution, constitutive, influence, onset,
-  replacement, and deployment on existing types. Pearl identification names are
-  unchanged; Whitehead glossary stays in the CDCS book.
+- **Orthogonal temporal semantics:** typed `TemporalSupport`
+  (`PointwiseSupport`, `PointSupport`, `IntervalSupport`, `FromOnsetSupport`,
+  `GlobalSupport`), `value_representation`, `referent_id` / `ReferentSpec`,
+  `identity_criterion`, `graph_kind` (`TimeUnrolledGraph`, `ProcessGraph`,
+  `SemanticGraph`), optional `ontological_character`, `LaggedEdge.relation_kind`,
+  `causal_projection`, and `semantic_fingerprint`. Node multiplicity follows
+  support and graph kind; referent identity does not collapse nodes.
+- **Policy information set:** optional `ℋ_t` on `Policy` so adaptive rules only
+  see declared available symbols (non-anticipation).
+- **Observation availability:** `ObservationBridge.availability` records when a
+  measured quantity enters the decision information set.
+- **Intervention gates:** `assert_interval_summary_do!`, `assert_feasibility!`,
+  and `validate_intervention_semantics` refuse scalar ``do`` on interval
+  summaries and wire `:feasibility` constraints into `simulate_panel`.
+- **Identification status:** `IdentificationResult` carries optional
+  `semantic_fingerprint`, `claim_kind`, and `identification_status` while
+  preserving `identifiable::Bool`.
 
-- BCF `predict` is no longer exported (call `CausalDynamics.predict`); avoids
-  StatsAPI / GLM / Associations name clashes in tests and downstream packages.
+### Changed
+
+- Deprecated `temporal_mode = :occasion | :enduring` as a construction switch;
+  it maps to `PointwiseSupport` / `FromOnsetSupport` and does not set ontology.
+- Temporal `identify` uses the causal projection and refuses non-time-unrolled
+  `graph_kind` with `:unsupported_model_class`.
+- [Terminology](docs/src/terminology.md) rewritten to the glossary split.
 
 ### Fixed
 
@@ -27,6 +45,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   so `checkdocs` and `@ref` succeed.
 - Declare `Statistics = "1"` in `[compat]` so Julia 1.13 loads the stdlib as a
   real dependency.
+
+- BCF `predict` is no longer exported (call `CausalDynamics.predict`); avoids
+  StatsAPI / GLM / Associations name clashes in tests and downstream packages.
 
 - **Temporal edge provenance:** `temporal_edge_role` and
   `temporal_edge_records` distinguish constitution, recurrent influence, and

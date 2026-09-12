@@ -5,7 +5,7 @@ observed columns for [`simulate_panel`](@ref) / [`CDMPanel`](@ref) hand-off.
 """
 
 """
-    ObservationBridge(mapping; measure=nothing)
+    ObservationBridge(mapping; measure=nothing, availability=nothing)
 
 Declare how latent (or endogenous) series become estimation columns.
 
@@ -15,20 +15,55 @@ Declare how latent (or endogenous) series become estimation columns.
   (missing keys keep their measure names)
 - `measure`: optional `(state_nt, t) -> NamedTuple` producing observed values from
   the full endogenous state at occasion `t`
+- `availability`: optional map from panel (or source) symbol to the earliest
+  decision time ``t`` at which the quantity enters ``ℋ_t``. A quantity may
+  describe an earlier realisation and become available later.
 """
 struct ObservationBridge
     mapping::Dict{Symbol, Symbol}
     measure::Any
+    availability::Union{Nothing, Dict{Symbol, Int}}
 end
 
 function ObservationBridge(
     mapping::AbstractDict;
     measure = nothing,
+    availability = nothing,
 )
+    avail = if availability === nothing
+        nothing
+    else
+        Dict{Symbol, Int}(Symbol(k) => Int(v) for (k, v) in availability)
+    end
     return ObservationBridge(
         Dict{Symbol, Symbol}(Symbol(k) => Symbol(v) for (k, v) in mapping),
         measure,
+        avail,
     )
+end
+
+"""
+    available_at(bridge, variable, decision_t) -> Bool
+
+Return whether `variable` is in the decision information set at `decision_t`.
+When `availability` is unset, every mapped variable is treated as available.
+"""
+function available_at(bridge::ObservationBridge, variable::Symbol, decision_t::Integer)
+    bridge.availability === nothing && return true
+    t0 = get(bridge.availability, variable, nothing)
+    t0 === nothing && return true
+    return Int(decision_t) >= t0
+end
+
+"""
+    information_set_at(bridge, decision_t) -> Set{Symbol}
+
+Symbols available to a decision-maker at `decision_t` under this bridge.
+"""
+function information_set_at(bridge::ObservationBridge, decision_t::Integer)
+    vars = Set{Symbol}(values(bridge.mapping))
+    bridge.availability === nothing && return vars
+    return Set{Symbol}(v for v in vars if available_at(bridge, v, decision_t))
 end
 
 """
@@ -229,6 +264,6 @@ function simulate_observed_panel(
     )
 end
 
-export ObservationBridge, identity_observation
+export ObservationBridge, identity_observation, available_at, information_set_at
 export observe_series, observe_trajectory
 export panel_from_trajectories, panel_from_latent_series, simulate_observed_panel

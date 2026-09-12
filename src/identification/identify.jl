@@ -289,31 +289,57 @@ function identify(
     query::TemporalEffectQuery;
     missingness = nothing,
 )
+    unrolling.spec.graph_kind isa TimeUnrolledGraph || return IdentificationResult(
+        query = query,
+        graph_hash = graph_fingerprint(unrolling.graph),
+        adjustment = Symbol[],
+        strategy = :unsupported_model_class,
+        identifiable = false,
+        assumptions = [:requires_time_unrolled_graph],
+        identification_status = :unsupported_model_class,
+        claim_kind = :declared_assumption,
+        semantic_fingerprint = semantic_fingerprint(
+            unrolling.spec.graph_kind, query.treatment, query.outcome,
+            query.t_treat, query.t_outcome,
+        ),
+    )
     X = temporal_node(unrolling, query.treatment, query.t_treat)
     Y = temporal_node(unrolling, query.outcome, query.t_outcome)
-    g = unrolling.graph
+    proj = causal_projection(unrolling)
+    g = proj.graph
     adj_set = backdoor_adjustment_set(g, X, Y)
     identifiable = adj_set !== nothing
-    temporal_nodes = temporal_backdoor_adjustment_nodes(
-        unrolling, query.treatment, query.t_treat, query.outcome, query.t_outcome,
-    )
+    temporal_nodes = if identifiable
+        Set(unrolling.index_node[index] for index in adj_set)
+    else
+        nothing
+    end
     # Expose baseline symbols (variable component of temporal nodes).
     temporal_nodes = temporal_nodes === nothing ?
         Tuple{Symbol, Union{Nothing, Int}}[] :
         Tuple{Symbol, Union{Nothing, Int}}[node for node in temporal_nodes]
     adj_syms = sort!(unique([var for (var, _) in temporal_nodes]))
     miss = _missingness_cert(missingness; graph = g, node_names = nothing)
-    return IdentificationResult{Symbol}(
-        query,
-        graph_fingerprint(g),
-        adj_syms,
-        Symbol[],
-        Symbol[],
-        :temporal_backdoor,
-        identifiable,
-        [:no_unmeasured_confounding, :correct_lag_structure],
-        temporal_nodes,
-        miss,
+    fingerprint = semantic_fingerprint(
+        [(n.name, n.temporal_support, n.value_representation, n.referent_id) for n in unrolling.spec.nodes],
+        [(e.parent, e.child, e.lag, e.relation_kind) for e in unrolling.spec.edges],
+        query.treatment, query.outcome, query.t_treat, query.t_outcome,
+        proj.constraints,
+    )
+    return IdentificationResult(
+        query = query,
+        graph_hash = graph_fingerprint(g),
+        adjustment = adj_syms,
+        mediators = Symbol[],
+        moc = Symbol[],
+        strategy = :temporal_backdoor,
+        identifiable = identifiable,
+        assumptions = [:no_unmeasured_confounding, :correct_lag_structure],
+        temporal_nodes = temporal_nodes,
+        missingness = miss,
+        semantic_fingerprint = fingerprint,
+        claim_kind = :identified_under_assumptions,
+        identification_status = identifiable ? :identified : :not_identified_by_procedure,
     )
 end
 

@@ -105,7 +105,60 @@ function constraint_certificate(spec::StructuralConstraintSpec)
         test_ids = copy(spec.test_ids),
         embodiments = copy(spec.embodiments),
         fingerprint = stable_hash64(canonical),
+        claim_kind = :declared_assumption,
     )
 end
 
+"""
+    assert_feasibility!(constraints, intervention; justified=false)
+
+Wire `:feasibility` [`StructuralConstraintSpec`](@ref)s into intervention
+gates. Mathematical admissibility and practical availability are separate;
+positivity is none of these. Pass `justified=true` only when a certificate
+records the physical justification.
+"""
+function assert_feasibility!(
+    constraints,
+    intervention;
+    justified::Bool = false,
+)
+    justified && return nothing
+    targets = Set(intervention_targets(intervention))
+    isempty(targets) && return nothing
+    for spec in constraints
+        spec.kind === :feasibility || continue
+        hit = [t for t in spec.targets if t in targets]
+        isempty(hit) && continue
+        throw(ArgumentError(
+            "feasibility constraint :$(spec.id) blocks intervention on $hit " *
+            "without physical justification; set feasibility_justified=true only " *
+            "when the certificate records that justification. Claim: $(spec.claim)",
+        ))
+    end
+    return nothing
+end
+
+"""
+    validate_intervention_semantics(nodes, intervention; constraints, kwargs...)
+
+Combined P0 gate: interval-summary scalar ``do`` refusal and feasibility
+constraints. Call from simulate/identify paths that carry a temporal spec.
+"""
+function validate_intervention_semantics(
+    nodes,
+    intervention;
+    constraints = StructuralConstraintSpec[],
+    macro_intervention_justified::Bool = false,
+    feasibility_justified::Bool = false,
+)
+    assert_interval_summary_do!(
+        nodes, intervention; justified = macro_intervention_justified,
+    )
+    assert_feasibility!(
+        constraints, intervention; justified = feasibility_justified,
+    )
+    return nothing
+end
+
 export StructuralConstraintSpec, constraint_certificate
+export assert_feasibility!, validate_intervention_semantics

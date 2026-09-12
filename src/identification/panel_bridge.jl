@@ -87,15 +87,15 @@ function _panel_column(
     unit_level::Set{Symbol} = Set{Symbol}(),
 )
     descriptor = _temporal_node_spec(unrolling.spec, variable)
-    if descriptor.temporal_mode == :enduring
+    if is_single_node(descriptor)
         enduring_node(unrolling, variable)
     else
         time === nothing && throw(ArgumentError(
-            "occasion node :$variable requires an occasion for panel mapping",
+            "pointwise node :$variable requires a time for panel mapping",
         ))
         temporal_node(unrolling, variable, time)
     end
-    return variable in unit_level || descriptor.temporal_mode == :enduring ?
+    return variable in unit_level || is_single_node(descriptor) ?
         variable : name_fn(variable, time::Int)
 end
 
@@ -105,7 +105,7 @@ end
 Map `result.temporal_nodes` (pairs `(variable, occasion)`) to wide-table column
 symbols using [`panel_column_name`](@ref) by default.
 
-Enduring variables map to their bare symbols; occasion variables use
+Single-node supports map to their bare symbols; pointwise variables use
 `name_fn(variable, occasion)`. Symbols in `skip` are omitted.
 """
 function temporal_adjustment_columns(

@@ -64,9 +64,23 @@ using Test
         spec = TemporalDAGSpec(
             entity = :sheep,
             nodes = [
-                TemporalNodeSpec(:diagnosis),
-                TemporalNodeSpec(:pasture; temporal_mode = :enduring, onset_time = 1, causal_role = :assigned),
-                TemporalNodeSpec(:weight),
+                TemporalNodeSpec(:diagnosis; value_representation = :state),
+                TemporalNodeSpec(
+                    :pasture;
+                    temporal_support = FromOnsetSupport(1),
+                    value_representation = :attribute,
+                    causal_role = :assigned,
+                    referent_id = :sheep,
+                    identity_criterion = :administrative_identifier,
+                    ontological_character = :enduring,
+                ),
+                TemporalNodeSpec(
+                    :weight;
+                    value_representation = :state,
+                    referent_id = :sheep,
+                    identity_criterion = :organisational_continuity,
+                    ontological_character = :enduring,
+                ),
             ],
             edges = [
                 (:diagnosis, :pasture, 1),
@@ -77,6 +91,8 @@ using Test
         u = unroll_temporal_dag(spec, 2)
         @test u.T == 2
         @test nv(u.graph) == 1 + 3 + 3
+        @test is_single_node(spec.nodes[2])
+        @test !is_single_node(spec.nodes[3])
         @test temporal_node(u, :pasture, 1) == enduring_node(u, :pasture)
         @test temporal_node_label(u, enduring_node(u, :pasture)) == "pasture"
         @test temporal_node_label(u, temporal_node(u, :diagnosis, 0)) == "diagnosis[0]"
@@ -93,6 +109,10 @@ using Test
         @test length(recurrent) == 2
         @test all(record.parent == (:pasture, nothing) for record in recurrent)
         @test Set(record.child for record in recurrent) == Set([(:weight, 1), (:weight, 2)])
+
+        proj = causal_projection(u)
+        @test ne(proj.graph) == ne(u.graph) - 1  # constitutive edge excluded
+        @test only(proj.constraints).relation_kind === :constitutive_persistence
     end
 
     @testset "validation errors" begin
@@ -106,16 +126,28 @@ using Test
         )
         @test_throws ArgumentError unroll_temporal_dag(TemporalDAGSpec(nodes = [TemporalNodeSpec(:x)], edges = []), -1)
         @test_throws ArgumentError TemporalNodeSpec(:x; temporal_mode = :unknown)
+        @test_throws ArgumentError TemporalNodeSpec(:x; temporal_support = :interval)
         @test_throws ArgumentError unroll_temporal_dag(
             TemporalDAGSpec(nodes = [TemporalNodeSpec(:x; onset_time = 3)], edges = []),
             2,
         )
         @test_throws ArgumentError unroll_temporal_dag(
             TemporalDAGSpec(
-                nodes = [TemporalNodeSpec(:x), TemporalNodeSpec(:a; temporal_mode = :enduring, onset_time = 1)],
+                nodes = [
+                    TemporalNodeSpec(:x),
+                    TemporalNodeSpec(:a; temporal_support = FromOnsetSupport(1)),
+                ],
                 edges = [(:x, :a, 2)],
             ),
             2,
+        )
+        @test_throws ArgumentError unroll_temporal_dag(
+            TemporalDAGSpec(
+                nodes = [TemporalNodeSpec(:x)],
+                edges = [],
+                graph_kind = ProcessGraph(),
+            ),
+            1,
         )
     end
 

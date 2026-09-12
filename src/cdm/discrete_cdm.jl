@@ -120,11 +120,19 @@ State-dependent (soft) intervention. Each key is an endogenous variable symbol;
 each value is a `Function` rule `(state, t) -> value` evaluated against the
 *current* state before the update. Use for treatment strategies that react to
 the system, where [`DoSequence`](@ref) fixes a value independently of state.
+
+Optional `information_set` declares which symbols are available at decision
+time ``ℋ_t`` (non-anticipation). When set, rules may only read those symbols
+from `state`.
 """
 struct Policy <: AbstractIntervention
     rules::Dict{Symbol, Function}
+    information_set::Union{Nothing, Set{Symbol}}
 
-    function Policy(rules::AbstractDict{<:Symbol})
+    function Policy(
+        rules::AbstractDict{<:Symbol};
+        information_set = nothing,
+    )
         normalised = Dict{Symbol, Function}()
         for (k, r) in rules
             r isa Function || throw(ArgumentError(
@@ -132,26 +140,31 @@ struct Policy <: AbstractIntervention
             ))
             normalised[Symbol(k)] = r
         end
-        return new(normalised)
+        info = if information_set === nothing
+            nothing
+        else
+            Set{Symbol}(Symbol(s) for s in information_set)
+        end
+        return new(normalised, info)
     end
 end
 
 """
-    policy(variable::Symbol, rule)
+    policy(variable::Symbol, rule; information_set=nothing)
 
 Build a [`Policy`](@ref) assigning `variable` via `rule(state, t)`.
 """
-function policy(variable::Symbol, rule)
-    return Policy(Dict{Symbol, Function}(variable => rule))
+function policy(variable::Symbol, rule; information_set = nothing)
+    return Policy(Dict{Symbol, Function}(variable => rule); information_set = information_set)
 end
 
 """
-    policy(pairs::Pair{Symbol, <:Any}...)
+    policy(pairs::Pair{Symbol, <:Any}...; information_set=nothing)
 
 Build a [`Policy`](@ref) from `variable => rule` pairs, each `rule(state, t)`.
 """
-function policy(pairs::Pair{Symbol, <:Any}...)
-    return Policy(Dict{Symbol, Any}(pairs...))
+function policy(pairs::Pair{Symbol, <:Any}...; information_set = nothing)
+    return Policy(Dict{Symbol, Any}(pairs...); information_set = information_set)
 end
 
 """
@@ -187,6 +200,14 @@ end
 
 function intervention_value(intervention::Policy, variable::Symbol, t::Int, observational_value, state)
     haskey(intervention.rules, variable) || return observational_value
+    if intervention.information_set !== nothing
+        allowed = intervention.information_set
+        keys_allowed = Tuple(s for s in keys(state) if s in allowed)
+        restricted = NamedTuple{keys_allowed}(
+            Tuple(getproperty(state, s) for s in keys_allowed)
+        )
+        return intervention.rules[variable](restricted, t)
+    end
     return intervention.rules[variable](state, t)
 end
 

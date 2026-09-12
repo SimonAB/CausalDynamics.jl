@@ -4,22 +4,24 @@ Identification and estimation keep Pearl and SciML names (`DoIntervention`,
 `backdoor_adjustment_set`, `d_separated`, `Policy`, …). Those exports are not
 renamed.
 
-**Temporal identity** may use a closed lexicon when the words name distinct
-objects on existing types (`TemporalNodeSpec`, `LaggedEdge` roles, `Policy`,
-`onset_time`). Whitehead glossary terms (prehension, creative advance,
-concrescence, superject) belong in the
+**Temporal declarations** attach to existing types (`TemporalNodeSpec`,
+`LaggedEdge`, `TemporalDAGSpec`, `Policy`). Whitehead glossary terms
+(prehension, creative advance, concrescence, superject) belong in the
 [CDCS book Concept Reference](https://simonab.github.io/causal-dynamics-book/concept-reference-tables.html),
 not in this manual.
 
 | Term | Meaning in this package |
 |------|-------------------------|
-| **Occasion** | One node per observation step (`temporal_mode = :occasion`) |
-| **Enduring** | One node per entity across the horizon (`temporal_mode = :enduring`) |
-| **Onset** | Time at which an enduring node is constituted (`onset_time`) |
-| **Constitution / constitutive** | Assignment into persistence; `temporal_edge_role` `:constitutive` |
-| **Influence** | Later use of an enduring node, or occasion-to-occasion dependence |
-| **Replacement** | Successor enduring instance after a realised prefix (not in-place overwrite) |
-| **Deployment** | Where, when, and to whom a constituted policy applies; not the rule \(d(\cdot)\) itself |
+| **`temporal_support`** | Temporal extent of the value a node represents (`PointwiseSupport`, `PointSupport`, `IntervalSupport`, `FromOnsetSupport`, `GlobalSupport`) |
+| **`value_representation`** | How the value represents its referent (`:state`, `:event`, `:trajectory`, `:interval_summary`, `:attribute`) |
+| **`referent_id` / `ReferentSpec`** | What entity or organisation the variable concerns |
+| **`identity_criterion`** | Why manifestations count as the same referent (required only when endurance is claimed) |
+| **`graph_kind`** | `TimeUnrolledGraph`, `ProcessGraph`, or `SemanticGraph` |
+| **`ontological_character`** | Optional metadata (`:occasion`, `:enduring`); never selects how many nodes are created |
+| **`relation_kind`** | Declared edge semantics (`:causal_influence`, `:constitutive_persistence`, …) |
+| **Onset** | Constitution time for `FromOnsetSupport` (`onset_time`) |
+| **Replacement / deployment** | Successor instance / policy applicability; not a second intervention algebra |
 
-Replacement and deployment are lexicon for identity and applicability. They are
-not a second intervention algebra beside `DoSequence` and `Policy`.
+Deprecated: `temporal_mode = :occasion | :enduring` maps to `PointwiseSupport` or
+`FromOnsetSupport` and does **not** set `ontological_character`. Prefer
+`temporal_support` and `graph_kind` as the source of truth for unrolling.

@@ -57,8 +57,8 @@ end
     spec = TemporalDAGSpec(
         nodes = [
             TemporalNodeSpec(:diagnosis),
-            TemporalNodeSpec(:site; temporal_mode = :enduring),
-            TemporalNodeSpec(:pasture; temporal_mode = :enduring, onset_time = 1),
+            TemporalNodeSpec(:site; temporal_support = FromOnsetSupport(0)),
+            TemporalNodeSpec(:pasture; temporal_support = FromOnsetSupport(1)),
             TemporalNodeSpec(:weight),
         ],
         edges = [
@@ -74,6 +74,8 @@ end
     @test columns == (treatment = :pasture, outcome = :weight2)
     result = identify(u, query)
     @test :site in temporal_adjustment_columns(result, u)
+    @test result.semantic_fingerprint isa UInt64
+    @test result.identification_status === :identified
 end
 
 @testset "Apodemus-style discrete LMTP planner" begin

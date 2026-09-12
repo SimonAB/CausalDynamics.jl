@@ -1,88 +1,168 @@
 """
 Time-indexed causal graphs for discrete-time causal dynamical models.
 
-`TemporalDAGSpec` separates occasion-indexed variables from enduring entity
-attributes. `unroll_temporal_dag` expands the specification over occasions
-`t = 0:T`, while retaining each enduring variable as one graph node.
+`unroll_temporal_dag` expands a [`TemporalDAGSpec`](@ref) over ``t = 0:T``.
+Node multiplicity follows [`TemporalSupport`](@ref) and [`GraphKind`](@ref),
+not `ontological_character` or deprecated `temporal_mode`.
 """
 
 """
-    LaggedEdge(parent, child, lag)
+    LaggedEdge(parent, child, lag; relation_kind=:causal_influence)
 
-Directed edge from `parent` at the occasion `child_time - lag` to `child`.
+Directed edge from `parent` at `child_time - lag` to `child`.
 
-For an enduring child, `child_time` is its `onset_time`; for an enduring
-parent, the edge is emitted to every active occasion of the child.
+For a single-node child, `child_time` is its onset; for a single-node parent,
+the edge is emitted to every active time of the child.
 """
 struct LaggedEdge
     parent::Symbol
     child::Symbol
     lag::Int
+    relation_kind::Symbol
 end
 
-LaggedEdge((parent, child, lag)::Tuple{Symbol, Symbol, Int}) = LaggedEdge(parent, child, lag)
+function LaggedEdge(
+    parent::Symbol,
+    child::Symbol,
+    lag::Integer;
+    relation_kind::Symbol = :causal_influence,
+)
+    return LaggedEdge(parent, child, Int(lag), normalise_relation_kind(relation_kind))
+end
+
+LaggedEdge((parent, child, lag)::Tuple{Symbol, Symbol, Int}) =
+    LaggedEdge(parent, child, lag)
 
 """
-    TemporalNodeSpec(name; temporal_mode=:occasion, causal_role=nothing, onset_time=0)
+    TemporalNodeSpec(name; kwargs...)
 
 Describe one variable in a [`TemporalDAGSpec`](@ref).
 
-`temporal_mode` is either `:occasion` or `:enduring`. Occasion variables have
-one node at every active time; enduring variables have one node whose value is
-available from `onset_time` onwards. `causal_role` is descriptive metadata and
-does not affect identification.
+Declare [`temporal_support`](@ref TemporalSupport) and
+`value_representation`. Deprecated `temporal_mode = :occasion | :enduring`
+only selects a support pattern and does **not** set
+`ontological_character`.
 """
 struct TemporalNodeSpec
     name::Symbol
     temporal_mode::Symbol
     causal_role::Union{Nothing, Symbol}
     onset_time::Int
+    temporal_support::TemporalSupport
+    value_representation::Symbol
+    referent_id::Union{Nothing, Symbol}
+    identity_criterion::Union{Nothing, Symbol}
+    ontological_character::Symbol
 
     function TemporalNodeSpec(
         name::Symbol,
         temporal_mode::Symbol,
         causal_role::Union{Nothing, Symbol},
         onset_time::Int,
+        temporal_support::TemporalSupport,
+        value_representation::Symbol,
+        referent_id::Union{Nothing, Symbol},
+        identity_criterion::Union{Nothing, Symbol},
+        ontological_character::Symbol,
     )
-        temporal_mode in (:occasion, :enduring) || throw(ArgumentError(
-            "temporal_mode must be :occasion or :enduring, got :$temporal_mode",
-        ))
         onset_time ≥ 0 || throw(ArgumentError("onset_time must be ≥ 0, got $onset_time"))
-        return new(name, temporal_mode, causal_role, onset_time)
+        if identity_criterion !== nothing && referent_id === nothing
+            throw(ArgumentError("identity_criterion requires referent_id"))
+        end
+        if ontological_character === :enduring && identity_criterion === nothing
+            # metadata only; warn is deferred to require_semantics on gated ops
+        end
+        return new(
+            name,
+            temporal_mode,
+            causal_role,
+            onset_time,
+            temporal_support,
+            value_representation,
+            referent_id,
+            identity_criterion,
+            ontological_character,
+        )
     end
 end
 
 function TemporalNodeSpec(
     name::Symbol;
-    temporal_mode::Symbol = :occasion,
+    temporal_mode::Union{Nothing, Symbol} = nothing,
     causal_role::Union{Nothing, Symbol} = nothing,
     onset_time::Integer = 0,
+    temporal_support = nothing,
+    value_representation::Symbol = :unspecified,
+    referent_id::Union{Nothing, Symbol} = nothing,
+    referent::Union{Nothing, ReferentSpec} = nothing,
+    identity_criterion::Union{Nothing, Symbol} = nothing,
+    ontological_character::Symbol = :unspecified,
 )
-    return TemporalNodeSpec(name, temporal_mode, causal_role, Int(onset_time))
+    onset = Int(onset_time)
+    if referent !== nothing
+        referent_id = referent.id
+        identity_criterion = something(identity_criterion, referent.identity_criterion)
+    end
+    support = if temporal_support !== nothing
+        parse_temporal_support(temporal_support; onset = onset)
+    elseif temporal_mode !== nothing
+        temporal_mode === :occasion || temporal_mode === :enduring ||
+            throw(ArgumentError("temporal_mode must be :occasion or :enduring, got :$temporal_mode"))
+        Base.depwarn(
+            "TemporalNodeSpec(...; temporal_mode=:$temporal_mode) is deprecated; " *
+            "declare temporal_support instead. The flag does not set ontological_character.",
+            :TemporalNodeSpec,
+        )
+        support_from_temporal_mode(temporal_mode, onset)
+    else
+        PointwiseSupport()
+    end
+    if support isa FromOnsetSupport
+        onset = Int(support.onset)
+    end
+    mode = legacy_temporal_mode(support)
+    return TemporalNodeSpec(
+        name,
+        mode,
+        causal_role,
+        onset,
+        support,
+        normalise_value_representation(value_representation),
+        referent_id,
+        identity_criterion,
+        normalise_ontological_character(ontological_character),
+    )
 end
 
+"""Return whether this descriptor unrolls to one reused node."""
+is_single_node(node::TemporalNodeSpec) = is_single_node_support(node.temporal_support)
+
 """
-    TemporalDAGSpec(; entity, nodes, edges)
+    TemporalDAGSpec(; entity, nodes, edges, graph_kind=TimeUnrolledGraph())
 
 Time-invariant temporal graph specification over [`TemporalNodeSpec`](@ref)s.
 
 `entity` is an optional display label. Every node must have a unique name.
+`graph_kind` defaults to [`TimeUnrolledGraph`](@ref); process and semantic
+graphs are not automatically valid for d-separation or adjustment.
 """
 struct TemporalDAGSpec
     entity::Union{Nothing, Symbol}
     nodes::Vector{TemporalNodeSpec}
     edges::Vector{LaggedEdge}
+    graph_kind::GraphKind
 
     function TemporalDAGSpec(
         entity::Union{Nothing, Symbol},
         nodes::Vector{TemporalNodeSpec},
         edges::Vector{LaggedEdge},
+        graph_kind::GraphKind = TimeUnrolledGraph(),
     )
         names = getfield.(nodes, :name)
         length(unique(names)) == length(names) || throw(ArgumentError(
             "TemporalDAGSpec node names must be unique",
         ))
-        return new(entity, nodes, edges)
+        return new(entity, nodes, edges, graph_kind)
     end
 end
 
@@ -104,15 +184,17 @@ function TemporalDAGSpec(
     ; entity::Union{Nothing, Symbol} = nothing,
     nodes::AbstractVector{<:TemporalNodeSpec},
     edges::AbstractVector = Any[],
+    graph_kind::GraphKind = TimeUnrolledGraph(),
 )
     return TemporalDAGSpec(
         entity,
         collect(TemporalNodeSpec, nodes),
         LaggedEdge[_as_lagged_edge(edge) for edge in edges],
+        graph_kind,
     )
 end
 
-"""Construct an all-occasion specification from the pre-descriptor form."""
+"""Construct a pointwise-unrolled specification from the pre-descriptor form."""
 function TemporalDAGSpec(variables::AbstractVector{Symbol}, edges::AbstractVector)
     return TemporalDAGSpec(
         nodes = [TemporalNodeSpec(variable) for variable in variables],
@@ -153,11 +235,11 @@ struct TemporalUnrolling
     index_node::Vector{Tuple{Symbol, Union{Nothing, Int}}}
 end
 
-"""Return the node index for an enduring variable."""
+"""Return the node index for a single-node (non-pointwise) variable."""
 function enduring_node(unrolling::TemporalUnrolling, variable::Symbol)
     descriptor = _temporal_node_spec(unrolling.spec, variable)
-    descriptor.temporal_mode == :enduring || throw(ArgumentError(
-        ":$variable is an occasion node, not an enduring node",
+    is_single_node(descriptor) || throw(ArgumentError(
+        ":$variable expands pointwise; it has no single reused node",
     ))
     return unrolling.node_index[(variable, nothing)]
 end
@@ -165,18 +247,18 @@ end
 """
     temporal_node(unrolling, variable, t)
 
-Return the node for `variable` at occasion `t`. Enduring variables resolve to
-their single node once active at `t`.
+Return the node for `variable` at time `t`. Single-node supports resolve to
+their reused node once active at `t`.
 """
 function temporal_node(unrolling::TemporalUnrolling, variable::Symbol, t::Int)
     0 ≤ t ≤ unrolling.T || throw(ArgumentError(
-        "occasion t=$t is outside unrolling range 0:$(unrolling.T)",
+        "time t=$t is outside unrolling range 0:$(unrolling.T)",
     ))
     descriptor = _temporal_node_spec(unrolling.spec, variable)
     _active_at(descriptor, t) || throw(ArgumentError(
         ":$variable is not active at t=$t; onset_time=$(descriptor.onset_time)",
     ))
-    key = descriptor.temporal_mode == :enduring ? (variable, nothing) : (variable, t)
+    key = is_single_node(descriptor) ? (variable, nothing) : (variable, t)
     haskey(unrolling.node_index, key) || throw(ArgumentError(
         "no node for :$variable at t=$t in unrolling with T=$(unrolling.T)",
     ))
@@ -195,10 +277,10 @@ function _validate_lagged_edge(edge::LaggedEdge, spec::TemporalDAGSpec)
     ))
     parent = _temporal_node_spec(spec, edge.parent)
     child = _temporal_node_spec(spec, edge.child)
-    if child.temporal_mode == :enduring && parent.temporal_mode == :enduring &&
+    if is_single_node(child) && is_single_node(parent) &&
        parent.onset_time > child.onset_time
         throw(ArgumentError(
-            "enduring parent :$(edge.parent) is not active when enduring child :$(edge.child) starts",
+            "single-node parent :$(edge.parent) is not active when child :$(edge.child) starts",
         ))
     end
     return parent, child
@@ -211,15 +293,18 @@ end
 """
     unroll_temporal_dag(spec, T)
 
-Unroll `spec` over occasions `t = 0:T`.
+Unroll `spec` over times `t = 0:T` under [`TimeUnrolledGraph`](@ref).
 
-Enduring variables contribute one node. An occasion-to-enduring edge is an
-assignment into persistence: with enduring child onset `a`, lag `ℓ` connects
-`parent[a - ℓ]` to the enduring node.
+Single-node supports (`FromOnsetSupport`, `GlobalSupport`, …) contribute one
+node. A pointwise-to-single-node edge is an assignment into persistence: with
+child onset `a`, lag `ℓ` connects `parent[a - ℓ]` to the reused child node.
 """
 function unroll_temporal_dag(spec::TemporalDAGSpec, T::Integer)
     T = Int(T)
     T ≥ 0 || throw(ArgumentError("T must be ≥ 0, got $T"))
+    spec.graph_kind isa TimeUnrolledGraph || throw(ArgumentError(
+        "unroll_temporal_dag requires TimeUnrolledGraph; got $(typeof(spec.graph_kind))",
+    ))
     for node in spec.nodes
         node.onset_time ≤ T || throw(ArgumentError(
             "onset_time $(node.onset_time) for :$(node.name) exceeds unrolling horizon T=$T",
@@ -230,7 +315,7 @@ function unroll_temporal_dag(spec::TemporalDAGSpec, T::Integer)
     node_index = Dict{Tuple{Symbol, Union{Nothing, Int}}, Int}()
     index_node = Tuple{Symbol, Union{Nothing, Int}}[]
     for descriptor in spec.nodes
-        if descriptor.temporal_mode == :enduring
+        if is_single_node(descriptor)
             key = (descriptor.name, nothing)
             push!(index_node, key)
             node_index[key] = length(index_node)
@@ -245,8 +330,8 @@ function unroll_temporal_dag(spec::TemporalDAGSpec, T::Integer)
 
     graph = Graphs.DiGraph(length(index_node))
     for ((parent, child), edge) in validated_edges
-        if child.temporal_mode == :enduring
-            if parent.temporal_mode == :enduring
+        if is_single_node(child)
+            if is_single_node(parent)
                 _add_temporal_edge!(
                     graph, node_index,
                     (parent.name, nothing), (child.name, nothing),
@@ -254,7 +339,7 @@ function unroll_temporal_dag(spec::TemporalDAGSpec, T::Integer)
             else
                 source_time = child.onset_time - edge.lag
                 source_time ≥ parent.onset_time || throw(ArgumentError(
-                    "edge :$(edge.parent) → :$(edge.child) requires unavailable parent occasion t=$source_time",
+                    "edge :$(edge.parent) → :$(edge.child) requires unavailable parent time t=$source_time",
                 ))
                 _add_temporal_edge!(
                     graph, node_index,
@@ -264,7 +349,7 @@ function unroll_temporal_dag(spec::TemporalDAGSpec, T::Integer)
         else
             for target_time in child.onset_time:T
                 target_key = (child.name, target_time)
-                parent_key = if parent.temporal_mode == :enduring
+                parent_key = if is_single_node(parent)
                     parent.onset_time ≤ target_time || continue
                     (parent.name, nothing)
                 else
@@ -327,18 +412,28 @@ end
 """
     temporal_edge_role(unrolling, parent, child) -> Symbol
 
-Classify an edge in a temporal unrolling as `:constitutive` when its child is
-an enduring node, `:recurrent_influence` when an enduring node points to an
-occasion, or `:occasion_influence` otherwise. The classification is derived
-from temporal identity and does not alter the graph used for identification.
+Classify an edge in a temporal unrolling:
+
+- `:constitutive` — pointwise parent assigns into a single-node child
+  (compatibility alias for `:constitutive_persistence`)
+- `:recurrent_influence` — single-node parent influences a pointwise child
+- `:occasion_influence` — pointwise to pointwise
+- `:causal_influence` — single-node to single-node (or other non-constitutive cases)
+
+Derived roles do not alter the unrolled topology used for display.
 """
 function temporal_edge_role(unrolling::TemporalUnrolling, parent::Integer, child::Integer)
     1 ≤ parent ≤ length(unrolling.index_node) || throw(BoundsError(unrolling.index_node, parent))
     1 ≤ child ≤ length(unrolling.index_node) || throw(BoundsError(unrolling.index_node, child))
     parent_time = unrolling.index_node[parent][2]
     child_time = unrolling.index_node[child][2]
-    child_time === nothing && return :constitutive
-    parent_time === nothing && return :recurrent_influence
+    if child_time === nothing && parent_time !== nothing
+        return :constitutive
+    elseif parent_time === nothing && child_time !== nothing
+        return :recurrent_influence
+    elseif parent_time === nothing && child_time === nothing
+        return :causal_influence
+    end
     return :occasion_influence
 end
 
@@ -359,7 +454,56 @@ function temporal_edge_records(unrolling::TemporalUnrolling)
     ]
 end
 
+"""Look up the declared `relation_kind` for an unrolled edge's variable pair."""
+function _declared_relation_kind(unrolling::TemporalUnrolling, parent::Integer, child::Integer)
+    parent_var = unrolling.index_node[parent][1]
+    child_var = unrolling.index_node[child][1]
+    for edge in unrolling.spec.edges
+        if edge.parent === parent_var && edge.child === child_var
+            return edge.relation_kind
+        end
+    end
+    return :causal_influence
+end
+
+"""
+    causal_projection(unrolling) -> NamedTuple
+
+Return the subgraph of causal-influence edges together with binding
+non-causal constraints (constitution, participation, …) that remain relevant
+for intervention admissibility. Non-`:causal_influence` declarations and
+structurally constitutive pointwise→single-node edges are excluded from the
+identification graph.
+"""
+function causal_projection(unrolling::TemporalUnrolling)
+    g = unrolling.graph
+    causal = Graphs.DiGraph(Graphs.nv(g))
+    constraints = NamedTuple[]
+    for edge in Graphs.edges(g)
+        src = Graphs.src(edge)
+        dst = Graphs.dst(edge)
+        declared = _declared_relation_kind(unrolling, src, dst)
+        role = temporal_edge_role(unrolling, src, dst)
+        non_causal = declared !== :causal_influence || role === :constitutive
+        if non_causal
+            kind = if declared !== :causal_influence
+                declared
+            else
+                :constitutive_persistence
+            end
+            push!(constraints, (
+                parent = unrolling.index_node[src],
+                child = unrolling.index_node[dst],
+                relation_kind = kind,
+            ))
+        else
+            Graphs.add_edge!(causal, src, dst)
+        end
+    end
+    return (graph = causal, constraints = constraints)
+end
+
 export LaggedEdge, TemporalNodeSpec, TemporalDAGSpec, TemporalUnrolling
-export unroll_temporal_dag, temporal_node, enduring_node, temporal_node_label
+export unroll_temporal_dag, temporal_node, enduring_node, temporal_node_label, is_single_node
 export d_separated_temporal, temporal_backdoor_adjustment_set, temporal_backdoor_adjustment_nodes
-export temporal_edge_role, temporal_edge_records
+export temporal_edge_role, temporal_edge_records, causal_projection
