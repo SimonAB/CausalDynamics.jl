@@ -8,7 +8,7 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 |---------|--------|
 | **0.3.16** | On General ([#163619](https://github.com/JuliaRegistries/General/pull/163619)) |
 | **0.4.0** | On General ([#163649](https://github.com/JuliaRegistries/General/pull/163649), merged 2026-08-05) |
-| **0.4.6** | Tip of `main` — `family_outcome`, session slice, missingness `:structural_skip` |
+| **0.4.6** | On General ([#166644](https://github.com/JuliaRegistries/General/pull/166644), merged 2026-08-31) — `family_outcome`, session slice, missingness `:structural_skip` |
 | **0.4.5** | Shipped in 0.4.6 tip (session-slice planner) |
 | **0.4.4** | Shipped in 0.4.6 tip (`EstimationPlan.family_outcome`) |
 | **0.4.3** | On General — panel bridge, OutcomeKind, empirical EstimationPlan, occasion resolution |
@@ -21,7 +21,7 @@ Local `main` targets **0.4.6**. Register **incrementally** (no version skips).
 
 1. Push `main` with `version = "0.4.6"`
 2. Comment `@JuliaRegistrator register` on [issue #7](https://github.com/SimonAB/CausalDynamics.jl/issues/7)
-3. General AutoMerge — pending ([#166644](https://github.com/JuliaRegistries/General/pull/166644))
+3. General AutoMerge — done ([#166644](https://github.com/JuliaRegistries/General/pull/166644)); TagBot tagged `v0.4.6`
 
 ## 0.4.3 register steps
 
