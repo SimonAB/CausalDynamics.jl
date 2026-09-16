@@ -47,8 +47,8 @@ using DAGMakie, CairoMakie
 
 Registry CausalDynamics + DAGMakie resolve together with GraphMakie **≥0.6.6**
 (CausalInference **≥0.19.4** widened the GraphMakie weakdep to `"0.5, 0.6"`).
-Book authoring may still path-develop the CDCS GraphMakie fork for extra
-features (e.g. auto-label alignment).
+Book authoring uses registry GraphMakie 0.6.6; DAGMakie owns causal-specific
+label alignment and related figure behaviour.
 
 ## Quick start
 
