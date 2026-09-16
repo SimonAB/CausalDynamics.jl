@@ -11,7 +11,7 @@ and CausalMediation.
 
 | Object | Role |
 |--------|------|
-| [`ObservationMask`](@ref) | Binary $R=1$ (observed) / $R=0$ (missing) aligned to named columns |
+| [`ObservationMask`](@ref) | Binary \(R=1\) (observed) / \(R=0\) (missing) aligned to named columns |
 | [`MissingnessSpec`](@ref) | Claimed regime (`:mcar`, `:mar`, `:mnar`) and optional conditioning set |
 | [`MissingnessCertificate`](@ref) | Result of [`certify_missingness`](@ref): identifiable status, `mar_set`, notes |
 | `identify(...; missingness=)` | Attaches a certificate on [`IdentificationResult`](@ref).missingness |
@@ -26,7 +26,7 @@ complete observation.
 
 ## Assignment form
 
-For each substantive column $V$ (e.g. $Y$),
+For each substantive column \(V\) (e.g. \(Y\)),
 
 $$
 \begin{aligned}
@@ -41,9 +41,9 @@ V & R_V = 1, \\
 $$
 
 Latent complete values stay in the model; Julia `missing` is only the recorded
-token when $R_V=0$. Figure labels may write $V^*$ for $V^{\mathrm{rec}}$;
-counterfactuals remain $V^{do(\cdot)}(\mathbf{u})$, not $V^*$. Imputed fills
-$\tilde{V}$ are Observable policies and are not new nodes on $G$. Dynamics never
+token when \(R_V=0\). Figure labels may write \(V^*\) for \(V^{\mathrm{rec}}\);
+counterfactuals remain \(V^{do(\cdot)}(\mathbf{u})\), not \(V^*\). Imputed fills
+\(\tilde{V}\) are Observable policies and are not new nodes on \(G\). Dynamics never
 invents a float fill inside CDM solvers or [`encode_to_panel`](@ref).
 
 ## Regimes
