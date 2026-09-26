@@ -8,6 +8,7 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 |---------|--------|
 | **0.3.16** | On General ([#163619](https://github.com/JuliaRegistries/General/pull/163619)) |
 | **0.4.0** | On General ([#163649](https://github.com/JuliaRegistries/General/pull/163649), merged 2026-08-05) |
+| **0.4.7** | Local release candidate; not yet registered |
 | **0.4.6** | On General ([#166644](https://github.com/JuliaRegistries/General/pull/166644), merged 2026-08-31) — `family_outcome`, session slice, missingness `:structural_skip` |
 | **0.4.5** | Shipped in 0.4.6 tip (session-slice planner) |
 | **0.4.4** | Shipped in 0.4.6 tip (`EstimationPlan.family_outcome`) |
@@ -15,7 +16,13 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 | **0.4.2** | Skipped on General |
 | **0.4.1** | On General ([#163720](https://github.com/JuliaRegistries/General/pull/163720), merged 2026-08-06) |
 
-Local `main` targets **0.4.6**. Register **incrementally** (no version skips).
+Local `main` targets **0.4.7**. Register **incrementally** (no version skips).
+
+## 0.4.7 register steps
+
+1. Push `main` with `version = "0.4.7"`
+2. Comment `@JuliaRegistrator register` on [issue #7](https://github.com/SimonAB/CausalDynamics.jl/issues/7)
+3. Wait for General AutoMerge and TagBot
 
 ## 0.4.6 register steps
 
@@ -50,5 +57,5 @@ Local `main` targets **0.4.6**. Register **incrementally** (no version skips).
 
 ## Downstream
 
-- **CausalMediation.jl** **0.1.0** is on General ([#163653](https://github.com/JuliaRegistries/General/pull/163653)); requires `CausalDynamics = "0.4"` (uses `moc` / mediation strategies).
-- **CausalTargeted.jl** **0.3.4** is on General ([#163904](https://github.com/JuliaRegistries/General/pull/163904)); sequential panel bridge needs CausalDynamics **0.4.1+** for `simulate_panel` / `panel_column_name` (compat already `"0.4"`).
+- **CausalMediation.jl** **0.1.2** is on General; requires `CausalDynamics = "0.4"` (uses `moc` / mediation strategies).
+- **CausalTargeted.jl** **0.3.28** is on General; sequential panel bridge needs CausalDynamics **0.4.1+** for `simulate_panel` / `panel_column_name` (compat already `"0.4"`).

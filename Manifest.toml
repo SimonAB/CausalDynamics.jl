@@ -2,7 +2,7 @@
 
 julia_version = "1.13.0"
 manifest_format = "2.1"
-project_hash = "d1479bec745989262209416c9132ecab61b8523e"
+project_hash = "0ee23f912fec4a640221ab9fb70e9ceafe5afffe"
 
 [[deps.AbstractTrees]]
 git-tree-sha1 = "2d9c9a55f9c93e8887ad391fbae72f8ef55e1177"
@@ -112,7 +112,7 @@ version = "0.1.1"
 deps = ["CausalInference", "Graphs", "LinearAlgebra", "Random", "SHA", "Statistics"]
 path = "."
 uuid = "823b1367-efac-4af0-bbfc-73ee462bce07"
-version = "0.4.6"
+version = "0.4.7"
 
     [deps.CausalDynamics.extensions]
     CausalDynamicsAssociationsExt = ["Associations", "DataFrames"]

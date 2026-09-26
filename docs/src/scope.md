@@ -22,6 +22,7 @@ Whitehead glossary terms live in the book
 | Discrete-time CDM | Trajectories over occasions | `DiscreteTimeCDM`, `DoSequence`, `simulate`, `counterfactual` |
 | Observational panels | Wide tables for sequential estimation | `CDMPanel`, `simulate_panel`, `panel_column_name` |
 | Hierarchical nesting | Cluster→unit exogenous draws; plate unroll for ID | `RandomEffectSpec`, `simulate_hierarchical_panel`, `unroll_hierarchical_dag`, `attach_hierarchy_assumptions` |
+| Relational grounding | Entity/relation schemas grounded to ordinary causal graphs | `RelationalSchema`, `RelationalSkeleton`, `RelationalParent`, `ground_relational_graph` |
 | Latent → observed bridge | Filter/smoother outputs → panel columns | `ObservationBridge`, `panel_from_latent_series`, `simulate_observed_panel` |
 | Representation bridge | High-dim tensor → low-dim codes for ID/estimation | `RepresentationSpec`, `encode_to_panel`, `representation_certificate` |
 | Structural constraints | Auditable declared invariance, feasibility, viability, or cross-embodiment claim | `StructuralConstraintSpec`, `constraint_certificate` |
@@ -55,6 +56,7 @@ Whitehead glossary terms live in the book
 | Flux-in-core | Deferred; Flux via MLJFlux / application encoders; Lux for mechanisms |
 | Full MIRS / Twins cohort fixtures | Deferred; synthetic spectra in `docs/stress/` |
 | Full symbolic do-calculus / ModelingToolkit ID | Stubs only (`is_identifiable`, `SymbolicSCM`); unexported until implemented |
+| Relational identification across unseen skeletons | Grounding prototype only; mechanism invariance and transport assumptions remain caller-specified |
 | Process metaphysics vocabulary | CDCS book prose, not package exports |
 
 ## Experimental (exported, quarantined)
@@ -62,6 +64,7 @@ Whitehead glossary terms live in the book
 | API | Status |
 |-----|--------|
 | `Hypergraph` | Higher-order edges; **not** used by `identify` or CDM simulation |
+| Relational grounding | Schema/skeleton expansion only; **not** relational identification or estimation |
 | `SymbolicSCM` | ModelingToolkit placeholder (`system::Any`); use `GraphSCM` for executable SCMs |
 
 ## Façade vs own code

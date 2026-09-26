@@ -64,6 +64,7 @@ include("graphs/paths.jl")  # paths needs d_separation
 include("graphs/hypergraph.jl")  # hypergraph for higher-order interactions
 include("graphs/causal_graph.jl")  # CausalGraph with properties
 include("cdm/variable_semantics.jl")
+include("cdm/relational.jl")
 include("graphs/time_indexed.jl")  # unrolled lag DAGs for discrete-time ID
 
 # Identification algorithms

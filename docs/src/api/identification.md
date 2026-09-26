@@ -39,7 +39,7 @@ OutcomeKind
 NodeOutcomeSpec
 EstimationPlan
 plan_targeted_estimation
-plan_session_estimation
+plan_session_estimation(::TemporalUnrolling, ::TemporalEffectQuery, ::Integer, ::Any)
 identification_support
 ```
 

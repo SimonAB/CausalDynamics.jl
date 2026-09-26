@@ -48,6 +48,7 @@ New integrations follow the same pattern: narrow API in `src/integration/`, impl
 - **Representation bridge:** `RepresentationSpec` / `encode_to_panel` compress high-dim tensors (spectra, images) to low-dim code columns via a user-supplied encoder (no Flux/Lux hard dep). Codes are the DAG/estimation nodes; CNN layers are not. Roles `:measurement` vs `:definitional` are recorded in `representation_certificate`.
 - **Deep mechanisms (Phase 2a):** `MechanismSpec` / `MechanismLibrary` declare parent-constrained ``f_i``; Lux extension attaches MLPs, `build_ode_rhs` / `graphscm_with_mechanisms`, and thin `train_mechanisms!`.
 - **Generative L3 (Phase 2b):** `:generative` mechanisms ``X = f(\\mathrm{pa}) + U`` with `abduce_noise` / `mechanism_counterfactual` (codes or low-dim vectors; raw images still go through Phase 1 first).
+- **Relational grounding (experimental):** `RelationalSchema` / `RelationalSkeleton` / `RelationalParent` ground changing entity compositions to ordinary `Graphs.jl` graphs; identification and transport assumptions remain downstream and explicit.
 - **Stress:** `docs/stress/deep_scm_stress.qmd` (Dynamics) and CausalTargeted `deep_scm_estimation_stress.qmd` (mediation/LMTP on codes). Unit tests remain the merge gate.
 - **Not in core:** UniversalDiffEq hard wiring, Flux-in-core, non-additive image DeepSCM, full MIRS cohort fixtures (see BOUNDARIES.md).
 - **Continuous functionals:** `ContinuousEffectFunctional` + SciML `g_computation` (weakdep).

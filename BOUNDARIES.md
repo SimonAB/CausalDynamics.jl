@@ -13,6 +13,10 @@
 - **Hierarchical DAG unroll** (`HierarchicalNestingSpec`,
   `unroll_hierarchical_dag`, `attach_hierarchy_assumptions`): expand unit
   templates + cluster nodes to a flat DAG for `identify`
+- **Relational grounding** (`RelationalSchema`, `RelationalSkeleton`,
+  `RelationalParent`, `ground_relational_graph`): expand a declared
+  schema/skeleton to an ordinary graph; no unseen-skeleton identification or
+  relational estimator
 - Latent→observed bridges (`ObservationBridge`); high-dim → code
   representation (`RepresentationSpec`, `encode_to_panel`); graph-constrained
   deep mechanisms (`MechanismSpec` / `MechanismLibrary`; Lux weakdep);
@@ -28,6 +32,8 @@
 ### Experimental (exported; outside the main pipeline)
 
 - **`Hypergraph`** — higher-order edges; not used by `identify` / CDM simulation
+- **Relational grounding** — experimental; invariance and transport across
+  skeletons are not inferred
 - **`SymbolicSCM`** — ModelingToolkit placeholder (`system::Any`); use `GraphSCM`
 - Stub do-calculus (`is_identifiable`, `identify_formula`) — unexported; throw until implemented
 

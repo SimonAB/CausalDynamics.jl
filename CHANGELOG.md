@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Experimental relational grounding from declared schemas and skeletons to
+  ordinary directed graphs, with entity-instance-attribute node labels.
 - Unit tests for the clarity surface (`test_clarity_surface.jl`):
   `single_node` export diet, refusal of `unit_level=`, and FromOnset vs
   pointwise panel columns.

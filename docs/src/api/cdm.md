@@ -27,6 +27,12 @@ unroll_hierarchical_dag
 hierarchical_node
 hierarchical_node_names
 attach_hierarchy_assumptions
+RelationalSchema
+RelationalSkeleton
+RelationalParent
+relational_entities
+relational_attributes
+ground_relational_graph
 ObservationBridge
 available_at
 information_set_at
@@ -78,6 +84,34 @@ simulate
 counterfactual
 GComputationResult
 g_computation
+```
+
+## Relational grounding
+
+`RelationalSchema` describes entity types, attributes, and binary relation
+types. `RelationalSkeleton` supplies the entities and relation instances present
+in one situation. A `RelationalParent` declares an attribute-level parent rule;
+`ground_relational_graph` expands those rules into an ordinary `Graphs.jl`
+directed graph with tuple labels. Identification and temporal unrolling remain
+downstream operations on that grounded graph. The prototype does not claim
+transportability to unseen skeletons without additional mechanism-invariance and
+confounding assumptions.
+
+```julia
+schema = RelationalSchema(
+    [:signal, :car],
+    Dict(:controls => (:signal, :car)),
+    Dict(:signal => [:walk], :car => [:brake]),
+)
+skeleton = RelationalSkeleton(
+    schema,
+    Dict(:signal => [:s1], :car => [:c1]),
+    Dict(:controls => [(:s1, :c1)]),
+)
+ground_relational_graph(
+    skeleton,
+    [RelationalParent(:signal, :walk, :car, :brake, :controls)],
+)
 ```
 
 ## Minimal example
