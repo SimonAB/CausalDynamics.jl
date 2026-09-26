@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Require DAGMakie 0.1.11 or later for the temporal plotting extension API.
 - Unit tests: drop duplicate FromOnset planner clones; expand clarity surface
   for `GlobalSupport`, removed unrolling-free `query_panel_columns`, and
   `unit_level` refusal; assert `(var, nothing)` on single-node ID certificates.

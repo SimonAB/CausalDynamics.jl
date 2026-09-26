@@ -48,9 +48,10 @@ Local `main` targets **0.4.7**. Register **incrementally** (no version skips).
 2. Comment `@JuliaRegistrator register` — done ([issue #7](https://github.com/SimonAB/CausalDynamics.jl/issues/7))
 3. General AutoMerge — **merged** ([#163720](https://github.com/JuliaRegistries/General/pull/163720)); TagBot tagged `v0.4.1`
 
-## Prerequisites (met)
+## Prerequisites
 
-1. **DAGMakie on General** — done (`0.1.6`).
+1. **DAGMakie on General** — `0.1.11` registration pending; required by the
+   temporal plotting extension (`dagplot_temporal`).
 2. **CausalInference on General** — hard dep; local CDCS fork is optional for development.
 3. **Core tests pass without DAGMakie** in default `[targets] test`.
 4. **No `[sources]`** in `Project.toml` (path deps are CDCS-only).
