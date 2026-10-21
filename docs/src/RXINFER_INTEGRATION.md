@@ -10,9 +10,13 @@ as a GraphPPL Delta factor:
 
 ```julia
 μ[t] ~ bistable_transition(x[t], a[t], c[t], r[t], Δt) where {
-    meta = DeltaMeta(method = Linearization())
+    algorithm = Linearization()
 }
 ```
+
+This is the RxInfer 6 notation. The extension selects the same linearisation
+through `meta` on RxInfer 4 and 5, so callers use the same package API across
+these versions. See the [RxInfer migration guide](https://github.com/ReactiveBayes/RxInfer.jl/blob/main/docs/src/manuals/migration/v5-to-v6.md).
 
 RxInfer therefore performs Gaussian variational message passing with local
 linearisation of the cubic drift; this is a nonlinear factor rather than a

@@ -16,7 +16,7 @@ using CausalDynamics: CausalDynamics,
 using DataFrames: DataFrames
 using GraphPPL: GraphPPL
 using LinearAlgebra: rank
-using RxInfer: RxInfer, @model, infer, Normal, KeepLast, DeltaMeta, Linearization
+using RxInfer: RxInfer, @model, infer, Normal, KeepLast, Linearization
 
 export BackdoorInferenceResult,
     NonlinearStateSpaceResult,
@@ -126,14 +126,23 @@ end
 @model function bistable_state_space_model(y, a, c, r, Δt, process_variance, observation_variance)
     x[1] ~ Normal(mean = 0.65, var = 1.0)
     for t in 1:(length(y) - 1)
-        μ[t] ~ bistable_transition(x[t], a[t], c[t], r[t], Δt) where {
-            meta = DeltaMeta(method = Linearization())
-        }
+        μ[t] ~ bistable_transition(x[t], a[t], c[t], r[t], Δt)
         x[t + 1] ~ Normal(mean = μ[t], var = process_variance * Δt)
     end
     for t in eachindex(y)
         y[t] ~ Normal(mean = x[t], var = observation_variance)
     end
+end
+
+"""Select the transition approximation using the installed RxInfer interface."""
+function transition_inference_options()
+    # GraphPPL constructs the same specification for RxInfer's old `meta`
+    # and new `algorithm` keyword. The method alone avoids removed DeltaMeta.
+    specification = GraphPPL.@meta begin
+        bistable_transition() -> Linearization()
+    end
+    return isdefined(RxInfer, :DeltaApproximation) ?
+        (; algorithm = specification) : (; meta = specification)
 end
 
 """Return the mean and variance encoded by a Gaussian RxInfer marginal."""
@@ -197,6 +206,7 @@ function infer_bistable_state_space(
     observation_variance > 0 || throw(ArgumentError("observation_variance must be positive"))
     iterations ≥ 1 || throw(ArgumentError("iterations must be at least one"))
     raw = infer(
+        ; transition_inference_options()...,
         model = bistable_state_space_model(
             Δt = Float64(Δt),
             process_variance = Float64(process_variance),

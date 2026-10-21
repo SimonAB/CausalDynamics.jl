@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Support RxInfer 6 alongside 4 and 5. Select the nonlinear transition's
+  linearisation through `algorithm` on RxInfer 6 and `meta` on earlier versions,
+  without using the removed `DeltaMeta` constructor.
 - Require DAGMakie 0.1.11 or later for the temporal plotting extension API.
 - Unit tests: drop duplicate FromOnset planner clones; expand clarity surface
   for `GlobalSupport`, removed unrolling-free `query_panel_columns`, and
