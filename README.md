@@ -130,7 +130,7 @@ If you have a scenario that should be harder to pass (tighter oracle bounds, mes
 ## Integrations
 
 - **[TMLE.jl](https://github.com/TARGENE/TMLE.jl)** — identify adjustment sets, then estimate CM / ATE / AIE (`prepare_for_tmle`)
-- **[RxInfer](https://github.com/ReactiveBayes/RxInfer.jl) / [GraphPPL](https://github.com/ReactiveBayes/GraphPPL.jl)** — optional extension for variational backdoor heads
+- **[RxInfer](https://github.com/ReactiveBayes/RxInfer.jl) / [GraphPPL](https://github.com/ReactiveBayes/GraphPPL.jl)** — optional extension for variational backdoor heads (RxInfer 4–6; RxInfer 6 is tested in the CDCS book environment)
 - **[DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl)** — optional extension for DAG figures (`plot_causal_graph`, `plot_backdoor_paths`, …)
 - **[Associations.jl](https://github.com/JuliaDynamics/Associations.jl)** — optional PC / OCE discovery bridge
 - **Representation bridge** — `RepresentationSpec` / `encode_to_panel` compress high-dim tensors (spectra, images) to low-dim **code** columns for identification and estimation (no Flux/Lux hard dependency; user-supplied encoder). Example: `examples/representation_bridge.jl`.

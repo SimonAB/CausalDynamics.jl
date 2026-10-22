@@ -102,7 +102,7 @@ this page.
 
 Optional weak dependencies: `GraphPPL`, `RxInfer`. They are **not** required for core CausalDynamics.
 
-On Julia 1.13, `CausalTargeted` + `CausalDynamics` + `RxInfer` 4+ resolve together from General; Julia 1.12 remains supported by the package compat bounds. **PrettyTables** enters only transitively (via `DataFrames` / MLJ) at **2.x**, matching RxInfer’s weak `PrettyTablesExt`. Neither owned package pins PrettyTables.
+On Julia 1.13, `CausalTargeted` + `CausalDynamics` resolve with RxInfer 4, 5, and 6 under the package compat bounds; the CDCS book environment has resolved and tested RxInfer 6. Julia 1.12 remains supported by the package compat bounds. **PrettyTables** enters only transitively (via `DataFrames` / MLJ) at **2.x**, matching RxInfer’s weak `PrettyTablesExt`. Neither owned package pins PrettyTables.
 
 The CDCS book environment lists `RxInfer` explicitly and is the reference unified stack for stress notebooks ([CausalTargeted stress validation](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/stress_validation.md)).
 
