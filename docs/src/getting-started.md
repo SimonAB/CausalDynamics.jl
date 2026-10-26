@@ -42,9 +42,13 @@ add_edge!(g, 1, 3)  # Z → Y
 add_edge!(g, 2, 3)  # X → Y
 names = Dict(1 => :Z, 2 => :X, 3 => :Y)
 
-d_separated(g, 2, 3, [1])  # true once Z is conditioned
-backdoor_adjustment_set(g, 2, 3)
+d_separated(g, 2, 3, [1])  # false: direct X → Y path remains open
+backdoor_adjustment_set(g, 2, 3)  # Set([1])
 ```
+
+Conditioning on `Z` blocks the backdoor path `X ← Z → Y`, but not the
+direct causal path `X → Y`. Thus, `Z` satisfies the backdoor criterion while
+`X` and `Y` remain d-connected given `Z`.
 
 **Graph (identification).** Good-control triangle: adjust `Z` (Cinelli et al. 2022).
 
