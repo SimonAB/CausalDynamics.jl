@@ -64,9 +64,13 @@ add_edge!(g, 1, 2)  # Z → X
 add_edge!(g, 1, 3)  # Z → Y
 add_edge!(g, 2, 3)  # X → Y
 
-d_separated(g, 2, 3, [1])                  # true
+d_separated(g, 2, 3, [1])                  # false: X → Y remains open
 adj_set = backdoor_adjustment_set(g, 2, 3)   # Set([1]) = {Z}
 ```
+
+Conditioning on `Z` blocks the backdoor path `X ← Z → Y`, but not the direct
+causal path `X → Y`. Therefore, `Z` is a valid backdoor adjustment set even
+though `X` and `Y` are not d-separated given `Z`.
 
 Plot with DAGMakie (after `using DAGMakie`):
 

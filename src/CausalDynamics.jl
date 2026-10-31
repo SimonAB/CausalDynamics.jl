@@ -27,8 +27,8 @@ add_edge!(g, 1, 2)  # X → Y
 add_edge!(g, 3, 1)  # Z → X
 add_edge!(g, 3, 2)  # Z → Y
 
-d_separated(g, 1, 2, [3])  # true (Z blocks the path)
-backdoor_adjustment_set(g, 1, 2)  # [3]
+d_separated(g, 1, 2, [3])  # false: direct X → Y path remains open
+backdoor_adjustment_set(g, 1, 2)  # Set([3])
 ```
 
 # References

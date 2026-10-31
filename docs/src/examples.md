@@ -13,9 +13,13 @@ add_edge!(g, 1, 2)  # Z → X
 add_edge!(g, 1, 3)  # Z → Y
 add_edge!(g, 2, 3)  # X → Y
 
-# X and Y are d-separated by Z
-d_separated(g, 2, 3, [1])  # true
+# X and Y are not d-separated by Z: the direct X → Y path remains open.
+d_separated(g, 2, 3, [1])  # false
 ```
+
+Conditioning on `Z` blocks the backdoor path `X ← Z → Y` but does not block
+the causal path `X → Y`. The backdoor criterion below requires blocking the
+former, not d-separating `X` and `Y` in the original DAG.
 
 ### Ancestors and Descendants
 

@@ -46,13 +46,17 @@ add_edge!(g, 1, 2)  # Z → X
 add_edge!(g, 1, 3)  # Z → Y
 add_edge!(g, 2, 3)  # X → Y
 
-d_separated(g, 2, 3, [1])                 # true
+d_separated(g, 2, 3, [1])                 # false: X → Y remains open
 backdoor_adjustment_set(g, 2, 3)            # Set([1])
 
 # Optional DAGMakie highlighting of backdoor paths and the adjustment set
 fig = plot_backdoor_paths(g, 2, 3; node_labels = ["Z", "X", "Y"])
 fig
 ```
+
+Adjusting for `Z` blocks the backdoor path `X ← Z → Y`, while leaving the
+direct causal path `X → Y` open. A valid backdoor adjustment set does not
+imply d-separation of `X` and `Y` in the original DAG.
 
 DAG figures use [DAGMakie.jl](https://simonab.github.io/DAGMakie.jl/dev/);
 CausalDynamics supplies the identification sets that the plot helpers consume.
