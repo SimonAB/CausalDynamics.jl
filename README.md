@@ -28,16 +28,20 @@ Pkg.add("CausalDynamics")
 using CausalDynamics
 ```
 
-Development tip of `main` (before a new version hits General):
+Development version **0.5.0** is not yet registered or tagged. Its API changes
+are listed in [CHANGELOG.md](CHANGELOG.md). Install compatible development
+versions of the CDCS packages together when following the current examples.
+
+Development tip of `main`:
 
 ```julia
 Pkg.add(url="https://github.com/SimonAB/CausalDynamics.jl.git")
 ```
 
-From the CDCS monorepo:
+From a local clone:
 
 ```julia
-Pkg.develop(path="packages/CausalDynamics.jl")
+Pkg.develop(path="path/to/CausalDynamics.jl")
 ```
 
 Optional DAG plots ([DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl) on General):

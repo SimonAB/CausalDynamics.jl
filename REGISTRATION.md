@@ -1,5 +1,9 @@
 ## Registration status
 
+Development version **0.5.0** is prepared in `Project.toml` and
+[CHANGELOG.md](CHANGELOG.md). It is not yet registered or tagged;
+`Pkg.add("CausalDynamics")` continues to select a registered version.
+
 CausalDynamics.jl is on the Julia **General** registry.
 
 Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
@@ -16,9 +20,10 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 | **0.4.2** | Skipped on General |
 | **0.4.1** | On General ([#163720](https://github.com/JuliaRegistries/General/pull/163720), merged 2026-08-06) |
 
-Version **0.4.7** is registered and tagged. The development tip includes
-subsequent RxInfer 6 compatibility work; that change is not part of the
-registered release.
+Version **0.4.7** is registered and tagged. The development version 0.5.0
+includes the orthogonal temporal semantics and
+API changes listed in the changelog, alongside RxInfer 6 compatibility; these
+are not part of the registered 0.4.7 release.
 
 ## 0.4.7 register steps
 

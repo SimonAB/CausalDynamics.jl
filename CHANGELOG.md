@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-08
+
 ### Changed
+
+- Preserve semantic fingerprints and identification status when resolving
+  graph nodes to data columns.
+- Share graph traversal helpers and delegate reachability and cycle detection
+  to Graphs.jl. Remove the unused symbolic-utilities placeholder.
 
 - Support RxInfer 6 alongside 4 and 5. Select the nonlinear transition's
   linearisation through `algorithm` on RxInfer 6 and `meta` on earlier versions,
