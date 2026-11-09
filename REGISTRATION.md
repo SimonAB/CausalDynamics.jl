@@ -1,7 +1,7 @@
 ## Registration status
 
-Development version **0.5.0** is prepared in `Project.toml` and
-[CHANGELOG.md](CHANGELOG.md). It is not yet registered or tagged;
+Source release **0.5.0** is documented in [CHANGELOG.md](CHANGELOG.md)
+and identified by tag `v0.5.0`. General registration remains pending;
 `Pkg.add("CausalDynamics")` continues to select a registered version.
 
 CausalDynamics.jl is on the Julia **General** registry.

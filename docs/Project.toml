@@ -5,6 +5,8 @@ CausalInference = "8e462317-f959-576b-b3c1-403f26cec956"
 DAGMakie = "4e3bd891-6b6d-4d36-a31e-f0404dd10c7d"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+GraphMakie = "1ecd5474-83a3-4783-bb4f-06765db800d2"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 
 [sources]
 CausalDynamics = {path = ".."}
@@ -14,3 +16,5 @@ DAGMakie = {rev = "main", url = "https://github.com/SimonAB/DAGMakie.jl.git"}
 CairoMakie = "0.13, 0.14, 0.15"
 Documenter = "1"
 Graphs = "1"
+GraphMakie = "=0.6.6"
+Makie = "=0.24.8"
