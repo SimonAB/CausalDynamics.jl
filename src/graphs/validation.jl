@@ -31,22 +31,13 @@ is_dag(g2)  # false
 ```
 
 # Notes
-- Uses topological sort to detect cycles
-- Returns `false` if topological sort fails (indicates cycle)
+- Delegates cycle detection to `Graphs.is_cyclic`
 - Causal graphs must be DAGs (no causal loops)
 
 # See Also
 - `validate_causal_graph`: Validate and throw error if not DAG
 """
-function is_dag(g::AbstractGraph)
-    # Use topological sort - if it succeeds, graph is acyclic
-    try
-        Graphs.topological_sort_by_dfs(g)
-        return true
-    catch
-        return false
-    end
-end
+is_dag(g::AbstractGraph) = Graphs.is_directed(g) && !Graphs.is_cyclic(g)
 
 """
     validate_causal_graph(g)

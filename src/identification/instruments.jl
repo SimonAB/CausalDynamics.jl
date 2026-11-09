@@ -166,7 +166,7 @@ has_path(g, 3, 1)  # false (no reverse path)
 ```
 
 # Notes
-- Returns `false` if source == target (no self-loops)
+- Returns `true` if source == target
 - Uses BFS reachability (not path enumeration)
 """
 function has_path(g::AbstractGraph, source::Int, target::Int)

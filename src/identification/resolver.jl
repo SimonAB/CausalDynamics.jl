@@ -27,6 +27,9 @@ end
     resolve_columns(resolver, nodes, available) -> Vector
 
 Return columns present in `available` that correspond to `nodes`.
+
+- [`IdentityColumnResolver`](@ref): keep `n` when `n in available`.
+- [`DictColumnResolver`](@ref): resolve `col = get(r.mapping, n, n)` and keep when `col in available`.
 """
 function resolve_columns(::IdentityColumnResolver, nodes::Vector{T}, available::AbstractSet) where {T}
     out = T[]
@@ -47,6 +50,10 @@ end
 
 """
     resolve_identification_columns(result, resolver, column_names) -> IdentificationResult
+
+Filter `result.adjustment`, `result.mediators`, and `result.moc` to columns present in `column_names` (as a `Set`), using
+[`resolve_columns`](@ref). Query, graph hash, strategy, assumptions, temporal nodes, and missingness metadata are
+unchanged. Semantic fingerprint and identification status are preserved as well.
 """
 function resolve_identification_columns(
     result::IdentificationResult{T},
@@ -57,17 +64,19 @@ function resolve_identification_columns(
     adj = resolve_columns(resolver, result.adjustment, avail)
     meds = resolve_columns(resolver, result.mediators, avail)
     moc = resolve_columns(resolver, result.moc, avail)
-    return IdentificationResult{eltype(result.adjustment)}(
-        result.query,
-        result.graph_hash,
-        adj,
-        meds,
-        moc,
-        result.strategy,
-        result.identifiable,
-        result.assumptions,
-        result.temporal_nodes,
-        result.missingness,
+    return IdentificationResult(
+        query = result.query,
+        graph_hash = result.graph_hash,
+        adjustment = adj,
+        mediators = meds,
+        moc = moc,
+        strategy = result.strategy,
+        identifiable = result.identifiable,
+        assumptions = result.assumptions,
+        temporal_nodes = result.temporal_nodes,
+        missingness = result.missingness,
+        semantic_fingerprint = result.semantic_fingerprint,
+        identification_status = result.identification_status,
     )
 end
 

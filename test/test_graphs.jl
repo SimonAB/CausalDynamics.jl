@@ -97,6 +97,13 @@ using Test
         # Test with multiple nodes
         ancestors_multi = get_ancestors(g, [2, 3])
         @test ancestors_multi == Set([1, 2])
+
+        # Node collections may be any iterable, and overlapping seeds remain
+        # reachable from the other seed.
+        @test get_ancestors(g, (2, 3)) == Set([1, 2])
+        @test get_descendants(g, 1:2) == Set([2, 3])
+        @test get_parents(g, (3,)) == Set([1, 2])
+        @test get_children(g, (1, 2)) == Set([2, 3])
         
         # Test isolated node
         g_isolated = DiGraph(3)
@@ -177,11 +184,28 @@ using Test
         # Test single node
         g_single = DiGraph(1)
         @test is_dag(g_single) == true
+
+        # A DAG is directed; an undirected graph is not a DAG even when it is
+        # acyclic as an undirected graph.
+        @test is_dag(SimpleGraph(3)) == false
         
         # Test validate_causal_graph
         @test validate_causal_graph(g) == true
         # validate_causal_graph may throw error for invalid graphs
         @test_throws Exception validate_causal_graph(g_cycle)
+    end
+
+    @testset "Directed reachability exclusions" begin
+        g_path = DiGraph(3)
+        add_edge!(g_path, 1, 2)
+        add_edge!(g_path, 2, 3)
+
+        @test CausalDynamics._has_directed_path(g_path, 1, 3)
+        @test CausalDynamics._has_directed_path(g_path, 1, 1)
+        @test !CausalDynamics._has_directed_path(g_path, 1, 1; forbidden = Set([1]))
+        @test !CausalDynamics._has_directed_path(g_path, 1, 3; forbidden = Set([1]))
+        @test !CausalDynamics._has_directed_path(g_path, 1, 3; forbidden = Set([3]))
+        @test !CausalDynamics._has_directed_path(g_path, 1, 3; forbidden = Set([2]))
     end
     
     @testset "Edge Cases" begin

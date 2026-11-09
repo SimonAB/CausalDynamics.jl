@@ -50,4 +50,26 @@ using Test
         res, IdentityColumnResolver(), [:Z, :X, :Y, :W],
     )
     @test :Z in resolved.adjustment
+
+    # Filtering columns must not discard the semantic certificate or narrow
+    # a more specific identification status to the legacy Boolean-derived one.
+    certified = IdentificationResult(
+        query = res.query,
+        graph_hash = res.graph_hash,
+        adjustment = res.adjustment,
+        mediators = res.mediators,
+        moc = res.moc,
+        strategy = res.strategy,
+        identifiable = false,
+        assumptions = res.assumptions,
+        temporal_nodes = res.temporal_nodes,
+        missingness = res.missingness,
+        semantic_fingerprint = UInt64(123),
+        identification_status = :unsupported_model_class,
+    )
+    resolved_certified = resolve_identification_columns(
+        certified, IdentityColumnResolver(), [:Z, :X, :Y, :W],
+    )
+    @test resolved_certified.semantic_fingerprint == UInt64(123)
+    @test resolved_certified.identification_status == :unsupported_model_class
 end

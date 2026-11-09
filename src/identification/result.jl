@@ -29,6 +29,13 @@ struct IdentificationResult{T}
     identification_status::Symbol
 end
 
+"""
+    IdentificationResult(; query, graph_hash, adjustment, mediators, moc, strategy, identifiable, assumptions, temporal_nodes, missingness, semantic_fingerprint, identification_status) -> IdentificationResult
+
+Keyword constructor: normalises `temporal_nodes` pairs to `(variable, Union{Nothing,Int})`, validates `identification_status`
+against [`IDENTIFICATION_STATUSES`](@ref) when provided, else sets `:identified` or `:not_identified_by_procedure` from
+`identifiable`. Prefer this constructor for new code so `semantic_fingerprint` and `identification_status` are explicit.
+"""
 function IdentificationResult(;
     query::CausalQuery,
     graph_hash::UInt64,
@@ -61,7 +68,13 @@ function IdentificationResult(;
     )
 end
 
-"""Positional constructor used by historical call sites."""
+"""
+    IdentificationResult{T}(query, graph_hash, adjustment, mediators, moc, strategy, identifiable, assumptions, temporal_nodes, missingness) -> IdentificationResult{T}
+
+Positional constructor retained for historical call sites: sets `semantic_fingerprint` to `nothing` and derives
+`identification_status` from `identifiable` only (`:identified` or `:not_identified_by_procedure`). Normalises
+`temporal_nodes` like the keyword constructor.
+"""
 function IdentificationResult{T}(
     query::CausalQuery,
     graph_hash::UInt64,
@@ -97,7 +110,11 @@ function graph_fingerprint(g::AbstractGraph)
 end
 
 """
-    certificate_dict(result) -> Dict{Symbol, Any}
+    certificate_dict(result::IdentificationResult) -> Dict{Symbol, Any}
+
+Serialise an [`IdentificationResult`](@ref) to a `Symbol`-keyed dict (query, graph hash, adjustment sets, strategy,
+assumptions, temporal nodes, optional missingness certificate, semantic fingerprint, identification status). Suitable
+for structured logging or merging into downstream metadata.
 """
 function certificate_dict(result::IdentificationResult)
     return Dict{Symbol, Any}(

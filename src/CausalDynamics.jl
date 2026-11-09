@@ -100,7 +100,6 @@ include("cdm/representation.jl")
 
 # Utilities
 include("utils/graph_utils.jl")
-include("utils/symbolic_utils.jl")
 include("utils/visualization.jl")
 
 # Integration with other packages

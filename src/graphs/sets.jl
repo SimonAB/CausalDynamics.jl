@@ -2,6 +2,44 @@
 using Graphs: inneighbors, outneighbors
 
 """
+    _node_set(nodes) -> Set{Int}
+
+Normalise a single node or a collection of nodes to a `Set{Int}`.
+"""
+_node_set(nodes::Integer) = Set{Int}([nodes])
+_node_set(nodes) = Set{Int}(nodes)
+
+"""
+    _reachable_set(g, nodes, step) -> Set{Int}
+
+Collect every node reached from any of `nodes` by repeatedly following `step`
+(`inneighbors` for ancestors, `outneighbors` for descendants).
+
+Each seed is traversed independently, so a seed that is reachable from another
+seed is itself included in the result.
+"""
+function _reachable_set(g::AbstractGraph, nodes, step::F) where {F}
+    reached = Set{Int}()
+    queue = Int[]
+    for seed in _node_set(nodes)
+        empty!(queue)
+        push!(queue, seed)
+        visited = Set{Int}([seed])
+        while !isempty(queue)
+            current = popfirst!(queue)
+            for next in step(g, current)
+                if next ∉ visited
+                    push!(visited, next)
+                    push!(reached, next)
+                    push!(queue, next)
+                end
+            end
+        end
+    end
+    return reached
+end
+
+"""
     get_ancestors(g, nodes)
 
 Get the set of all ancestors of the given nodes.
@@ -28,30 +66,7 @@ add_edge!(g, 3, 4)  # Z → W
 ancestors = get_ancestors(g, 4)  # {1, 2, 3}
 ```
 """
-function get_ancestors(g::AbstractGraph, nodes)
-    node_set = nodes isa AbstractVector ? Set(nodes) : Set([nodes])
-    ancestors = Set{Int}()
-    
-    for node in node_set
-        # Use BFS to find all ancestors
-        queue = [node]
-        visited = Set{Int}([node])
-        
-        while !isempty(queue)
-            current = popfirst!(queue)
-            
-            for parent in inneighbors(g, current)
-                if parent ∉ visited
-                    push!(visited, parent)
-                    push!(ancestors, parent)
-                    push!(queue, parent)
-                end
-            end
-        end
-    end
-    
-    return ancestors
-end
+get_ancestors(g::AbstractGraph, nodes) = _reachable_set(g, nodes, inneighbors)
 
 """
     get_descendants(g, nodes)
@@ -80,30 +95,7 @@ add_edge!(g, 2, 4)  # Y → W
 descendants = get_descendants(g, 1)  # {2, 3, 4}
 ```
 """
-function get_descendants(g::AbstractGraph, nodes)
-    node_set = nodes isa AbstractVector ? Set(nodes) : Set([nodes])
-    descendants = Set{Int}()
-    
-    for node in node_set
-        # Use BFS to find all descendants
-        queue = [node]
-        visited = Set{Int}([node])
-        
-        while !isempty(queue)
-            current = popfirst!(queue)
-            
-            for child in outneighbors(g, current)
-                if child ∉ visited
-                    push!(visited, child)
-                    push!(descendants, child)
-                    push!(queue, child)
-                end
-            end
-        end
-    end
-    
-    return descendants
-end
+get_descendants(g::AbstractGraph, nodes) = _reachable_set(g, nodes, outneighbors)
 
 """
     get_parents(g, nodes)
@@ -133,15 +125,10 @@ parents = get_parents(g, 3)  # {1, 2}
 ```
 """
 function get_parents(g::AbstractGraph, nodes)
-    node_set = nodes isa AbstractVector ? Set(nodes) : Set([nodes])
     parents = Set{Int}()
-    
-    for node in node_set
-        for parent in inneighbors(g, node)
-            push!(parents, parent)
-        end
+    for node in _node_set(nodes)
+        union!(parents, inneighbors(g, node))
     end
-    
     return parents
 end
 
@@ -173,15 +160,10 @@ children = get_children(g, 1)  # {2, 3}
 ```
 """
 function get_children(g::AbstractGraph, nodes)
-    node_set = nodes isa AbstractVector ? Set(nodes) : Set([nodes])
     children = Set{Int}()
-    
-    for node in node_set
-        for child in outneighbors(g, node)
-            push!(children, child)
-        end
+    for node in _node_set(nodes)
+        union!(children, outneighbors(g, node))
     end
-    
     return children
 end
 

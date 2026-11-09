@@ -13,7 +13,12 @@ function stable_hash64(value)
     return parse(UInt64, bytes2hex(digest[1:8]); base = 16)
 end
 
-"""Return a type-tagged, length-stable encoding of a literal intervention value."""
+"""
+    _canonical_literal(value)
+
+Type-tagged string for hashing and seed derivation: `Symbol`, `String`, `Integer`, `AbstractFloat`, `UnitRange`, or
+a fallback `string(value)` with type name and character count.
+"""
 function _canonical_literal(value::Symbol)
     return "Symbol=$(value)"
 end
@@ -39,12 +44,21 @@ function _canonical_literal(value)
     return "$(nameof(typeof(value)))=$(ncodeunits(text)):$(text)"
 end
 
-"""Join canonical field strings with length prefixes."""
+"""
+    _canonical_fields(xs)
+
+Concatenate strings `x` as length-prefixed segments `len:x` joined by `|`, so concatenation cannot be parsed
+ambiguously without delimiters.
+"""
 function _canonical_fields(xs)
     return join(["$(ncodeunits(string(x))):$(x)" for x in xs], "|")
 end
 
-"""Encode the shared intervention-descriptor field tuple."""
+"""
+    _canonical_descriptor_fields(target, replacement, replacement_id, interval, scope, stochasticity, cointerventions)
+
+Length-prefixed encoding of intervention descriptor components (including sorted `cointerventions`) for stable hashing.
+"""
 function _canonical_descriptor_fields(target, replacement, replacement_id, interval, scope,
     stochasticity, cointerventions)
     cointervention_text = join(
@@ -59,7 +73,11 @@ function _canonical_descriptor_fields(target, replacement, replacement_id, inter
     return _canonical_fields(fields)
 end
 
-"""Return a length-prefixed representation of one seed component."""
+"""
+    _canonical_seed_component(part)
+
+One argument to `stable_seed`: concatenates `typeof(part)` and `_canonical_literal(part)` with length prefixes.
+"""
 function _canonical_seed_component(part)
     type_text = string(typeof(part))
     value_text = _canonical_literal(part)

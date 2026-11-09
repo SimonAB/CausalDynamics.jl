@@ -65,6 +65,12 @@ function _node_index(g::AbstractGraph, x::Symbol, node_names::Dict{Int, Symbol})
     throw(ArgumentError("symbol :$x not found in node_names"))
 end
 
+"""
+    _labels_from_indices(indices, node_names)
+
+Map integer node ids in `indices` to labels: if `node_names === nothing`, return sorted `Vector{Int}`;
+otherwise return `Symbol` names in sorted index order (skipping ids missing from `node_names`).
+"""
 function _labels_from_indices(indices::Set{Int}, node_names::Union{Nothing, Dict{Int, Symbol}})
     sorted = sort(collect(indices))
     if node_names === nothing
@@ -73,16 +79,14 @@ function _labels_from_indices(indices::Set{Int}, node_names::Union{Nothing, Dict
     return [node_names[i] for i in sorted if haskey(node_names, i)]
 end
 
+"""
+    _empty_like(adjustment)
+
+Zero-length collection of the same type as `adjustment` (e.g. empty `Vector{Symbol}` when adjustment is symbolic),
+used for unused result slots in [`IdentificationResult`](@ref).
+"""
 function _empty_like(adjustment)
     return similar(adjustment, 0)
-end
-
-"""
-    _has_directed_path_simple(g, src, dst) -> Bool
-"""
-function _has_directed_path_simple(g::AbstractGraph, src::Int, dst::Int)
-    src == dst && return true
-    return dst in get_descendants(g, src)
 end
 
 """
@@ -90,23 +94,32 @@ end
 
 Nodes Z on a recanting structure: descendants of A, ancestors of Y, and
 ancestors of at least one mediator (intermediate confounding / recanting twin).
+
+Reachability sets are precomputed from `A`, `Y`, and the mediators rather than
+re-running reachability for every candidate node.
 """
 function _recanting_witness_nodes(g::AbstractGraph, A::Int, Y::Int, mediator_idx::Vector{Int})
     forbidden = Set{Int}(vcat(A, Y, mediator_idx))
+    from_A = get_descendants(g, A)
+    to_Y = get_ancestors(g, Y)
+    to_mediator = isempty(mediator_idx) ? Set{Int}() : get_ancestors(g, mediator_idx)
     witnesses = Int[]
     for z in 1:nv(g)
         z in forbidden && continue
-        _has_directed_path_simple(g, A, z) || continue
-        _has_directed_path_simple(g, z, Y) || continue
-        if any(_has_directed_path_simple(g, z, m) for m in mediator_idx)
-            push!(witnesses, z)
-        end
+        z in from_A || continue
+        z in to_Y || continue
+        z in to_mediator || continue
+        push!(witnesses, z)
     end
     return witnesses
 end
 
 """
-    _missingness_cert(missingness) -> Union{Nothing, MissingnessCertificate}
+    _missingness_cert(missingness; kwargs...) -> Union{Nothing, MissingnessCertificate}
+
+- `nothing` → `nothing`
+- `MissingnessSpec` → `certify_missingness(...; kwargs...)`
+- any other type → `ArgumentError`
 """
 function _missingness_cert(missingness::Nothing; kwargs...)
     return nothing

@@ -81,22 +81,7 @@ function _has_directed_path(
     target::Int;
     forbidden::Set{Int} = Set{Int}(),
 )
-    source == target && return source ∉ forbidden
-    source in forbidden && return false
-    queue = Int[source]
-    visited = Set{Int}([source])
-    while !isempty(queue)
-        u = popfirst!(queue)
-        for v in outneighbors(g, u)
-            v in forbidden && continue
-            v == target && return true
-            if v ∉ visited
-                push!(visited, v)
-                push!(queue, v)
-            end
-        end
-    end
-    return false
+    return Graphs.has_path(g, source, target; exclude_vertices = collect(forbidden))
 end
 
 """
