@@ -1,8 +1,6 @@
 ## Registration status
 
-Source release **0.5.0** is documented in [CHANGELOG.md](CHANGELOG.md)
-and identified by tag `v0.5.0`. General registration remains pending;
-`Pkg.add("CausalDynamics")` continues to select a registered version.
+Source release **0.5.0** is on General ([#175631](https://github.com/JuliaRegistries/General/pull/175631), merged 2026-11-10; tree `a8ec7e36ff0846661452fe340a2ee98d4ce62a2c`) and identified by tag `v0.5.0`.
 
 CausalDynamics.jl is on the Julia **General** registry.
 
@@ -10,6 +8,7 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 
 | Version | Status |
 |---------|--------|
+| **0.5.0** | On General ([#175631](https://github.com/JuliaRegistries/General/pull/175631), merged 2026-11-10); TagBot tagged `v0.5.0` |
 | **0.3.16** | On General ([#163619](https://github.com/JuliaRegistries/General/pull/163619)) |
 | **0.4.0** | On General ([#163649](https://github.com/JuliaRegistries/General/pull/163649), merged 2026-08-05) |
 | **0.4.7** | On General (tree `501f55ee96f4098690befdca0d6240999df6ee90`); TagBot tagged `v0.4.7` |
@@ -20,10 +19,8 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 | **0.4.2** | Skipped on General |
 | **0.4.1** | On General ([#163720](https://github.com/JuliaRegistries/General/pull/163720), merged 2026-08-06) |
 
-Version **0.4.7** is registered and tagged. The development version 0.5.0
-includes the orthogonal temporal semantics and
-API changes listed in the changelog, alongside RxInfer 6 compatibility; these
-are not part of the registered 0.4.7 release.
+Version **0.5.0** is registered and tagged. It includes the orthogonal temporal
+semantics, API changes listed in the changelog, and RxInfer 6 compatibility.
 
 ## 0.4.7 register steps
 

@@ -28,9 +28,9 @@ Pkg.add("CausalDynamics")
 using CausalDynamics
 ```
 
-Source release **0.5.0** is not yet registered in General. Its API changes
-are listed in [CHANGELOG.md](CHANGELOG.md). Install compatible source
-versions of the CDCS packages together when following the current examples.
+Source release **0.5.0** is registered in General. Its API changes are listed
+in [CHANGELOG.md](CHANGELOG.md); install compatible CDCS package versions when
+following the current examples.
 
 Development tip of `main`:
 
