@@ -31,6 +31,7 @@ makedocs(
             "Overview" => "integration.md",
             "SciML recipes" => "SCIML_INTEGRATION.md",
             "RxInfer / GraphPPL" => "RXINFER_INTEGRATION.md",
+            "Exact linear Gaussian states" => "linear_bayesian_states.md",
             "Associations.jl" => "ASSOCIATIONS_INTEGRATION.md",
             "Methods adoption" => "METHODS_ADOPTION.md",
             "API" => "api/integration.md",

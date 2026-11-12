@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Add exact known-parameter linear Gaussian state inference, incremental updates
+  and joint trajectory covariance. Complete full-rank observations use RxInfer;
+  missing or partially observed states use an explicit analytic Kalman/RTS path.
+
 ## [0.5.0] - 2026-11-08
 
 ### Changed

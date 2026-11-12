@@ -28,6 +28,10 @@
   (`:drop`, `:ipcw`, imputation) belong in CausalTargeted / CausalMediation
 - Transport identification (`TransportQuery`); not domain-cohort registries
 - Integration **façades** (TMLE.jl, RxInfer, DAGMakie) via package extensions
+- Exact known-parameter linear Gaussian state filtering/smoothing in the RxInfer
+  integration, including cross-time covariance and updates from new observations.
+  Regression priors, nuisance candidates and policy-effect fitting belong to
+  CausalTargeted. Unknown state-model parameters require separate validation.
 
 ### Experimental (exported; outside the main pipeline)
 

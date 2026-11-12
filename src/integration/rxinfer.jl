@@ -84,6 +84,32 @@ function infer_bistable_state_space(args...; kwargs...)
     return ext.infer_bistable_state_space(args...; kwargs...)
 end
 
+"""Infer filtering and smoothing moments for a known linear Gaussian state model. Requires RxInfer."""
+function infer_linear_state_space(args...; kwargs...)
+    ext = _require_rxinfer!(:infer_linear_state_space)
+    return ext.infer_linear_state_space(args...; kwargs...)
+end
+
+"""Update a linear Gaussian filtered posterior using only new observations."""
+function update_state_posterior(args...; kwargs...)
+    ext = _require_rxinfer!(:update_state_posterior)
+    return ext.update_state_posterior(args...; kwargs...)
+end
+
+"""Return the smoothing cross-covariance of states at two occasions."""
+function state_crosscovariance(args...; kwargs...)
+    ext = _require_rxinfer!(:state_crosscovariance)
+    return ext.state_crosscovariance(args...; kwargs...)
+end
+
+"""Construct the joint smoothing covariance in time-major state order on request."""
+function trajectory_covariance(args...; kwargs...)
+    ext = _require_rxinfer!(:trajectory_covariance)
+    return ext.trajectory_covariance(args...; kwargs...)
+end
+
+export infer_linear_state_space, update_state_posterior, state_crosscovariance, trajectory_covariance
+
 export has_rxinfer,
     infer_backdoor_effect,
     backdoor_graphppl_model,

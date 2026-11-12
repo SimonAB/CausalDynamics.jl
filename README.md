@@ -139,6 +139,12 @@ If you have a scenario that should be harder to pass (tighter oracle bounds, mes
 
 ## Integrations
 
+The development RxInfer integration includes exact known-parameter linear
+Gaussian filtering, smoothing, sequential updates and cross-time covariance.
+It records whether Gaussian messages or analytic Kalman/RTS calculations were
+used. See [linear state inference](docs/src/linear_bayesian_states.md) and the
+[validation report](docs/LINEAR_STATE_VALIDATION.md).
+
 - **[TMLE.jl](https://github.com/TARGENE/TMLE.jl)** — identify adjustment sets, then estimate CM / ATE / AIE (`prepare_for_tmle`)
 - **[RxInfer](https://github.com/ReactiveBayes/RxInfer.jl) / [GraphPPL](https://github.com/ReactiveBayes/GraphPPL.jl)** — optional extension for variational backdoor heads (RxInfer 4–6; RxInfer 6 is tested in the CDCS book environment)
 - **[DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl)** — optional extension for DAG figures (`plot_causal_graph`, `plot_backdoor_paths`, …)

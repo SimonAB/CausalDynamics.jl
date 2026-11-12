@@ -18,6 +18,8 @@ using GraphPPL: GraphPPL
 using LinearAlgebra: rank
 using RxInfer: RxInfer, @model, infer, Normal, KeepLast, Linearization
 
+include("linear_state_space.jl")
+
 export BackdoorInferenceResult,
     NonlinearStateSpaceResult,
     backdoor_graphppl_model,
