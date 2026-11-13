@@ -12,6 +12,40 @@ concurrency:
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 
 jobs:
+  linear-state-compatibility:
+    name: Linear states - Julia ${{ matrix.version }} - RxInfer ${{ matrix.rxinfer }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['1.12', '1.13']
+        rxinfer: ['4', '5', '6']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: ${{ matrix.version }}
+      - uses: julia-actions/cache@v3
+      - name: Test exact linear Gaussian states with registered dependencies
+        env:
+          RXINFER_VERSION: ${{ matrix.rxinfer }}
+          JULIA_PKG_PRECOMPILE_AUTO: '0'
+        run: |
+          julia --startup-file=no --project=. --threads=auto -e '
+            using Pkg
+            package_path = pwd()
+            Pkg.activate(temp=true)
+            Pkg.develop(PackageSpec(path=package_path))
+            Pkg.add([
+              PackageSpec(name="RxInfer", version=ENV["RXINFER_VERSION"]),
+              PackageSpec(name="GraphPPL"),
+              PackageSpec(name="DataFrames"),
+            ])
+            Pkg.status()
+            include(joinpath(package_path, "test", "test_rxinfer_activation.jl"))
+            include(joinpath(package_path, "test", "test_linear_state_space.jl"))
+          '
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}

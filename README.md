@@ -28,7 +28,9 @@ Pkg.add("CausalDynamics")
 using CausalDynamics
 ```
 
-Source release **0.5.0** is registered in General. Its API changes are listed
+Version **0.5.1** adds exact known-parameter linear Gaussian filtering,
+smoothing and joint trajectory covariance. Registration is being prepared;
+**0.5.0** remains the registered release. API changes are listed
 in [CHANGELOG.md](CHANGELOG.md); install compatible CDCS package versions when
 following the current examples.
 

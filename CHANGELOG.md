@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-13
+
 - Add exact known-parameter linear Gaussian state inference, incremental updates
   and joint trajectory covariance. Complete full-rank observations use RxInfer;
   missing or partially observed states use an explicit analytic Kalman/RTS path.
+- Correct extension activation guidance to include GraphPPL and DataFrames.
+- Reject initial-prior overrides in continuation calls instead of silently
+  discarding them; continuation uses the previous filtering posterior.
 
 ## [0.5.0] - 2026-11-08
 

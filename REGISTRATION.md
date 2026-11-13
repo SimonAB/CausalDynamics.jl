@@ -1,5 +1,9 @@
 ## Registration status
 
+Version **0.5.1** is being prepared for registration after release checks.
+It adds exact known-parameter linear Gaussian state inference and joint
+trajectory covariance.
+
 Source release **0.5.0** is on General ([#175631](https://github.com/JuliaRegistries/General/pull/175631), merged 2026-11-10; tree `a8ec7e36ff0846661452fe340a2ee98d4ce62a2c`) and identified by tag `v0.5.0`.
 
 CausalDynamics.jl is on the Julia **General** registry.
@@ -8,6 +12,7 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 
 | Version | Status |
 |---------|--------|
+| **0.5.1** | Release checks pending; not yet registered |
 | **0.5.0** | On General ([#175631](https://github.com/JuliaRegistries/General/pull/175631), merged 2026-11-10); TagBot tagged `v0.5.0` |
 | **0.3.16** | On General ([#163619](https://github.com/JuliaRegistries/General/pull/163619)) |
 | **0.4.0** | On General ([#163649](https://github.com/JuliaRegistries/General/pull/163649), merged 2026-08-05) |
