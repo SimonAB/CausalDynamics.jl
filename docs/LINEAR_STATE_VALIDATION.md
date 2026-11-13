@@ -1,8 +1,8 @@
 ## Linear Gaussian state validation
 
 Local development run: Julia 1.13.3, 20 threads, RxInfer 6.1.3. Reproduce with
-`julia --project=. --threads=auto test/stress/linear_bayesian_calibration.jl`
-from an environment containing the package and its RxInfer test extras.
+`julia --project=test/stress --threads=auto test/stress/linear_bayesian_calibration.jl`
+after `Pkg.instantiate()` in that stress environment (package plus RxInfer extras).
 
 Seed 20261112 generated 500 independent trajectories, each with 20 states.
 All transition, observation and noise parameters were known. The missing-data

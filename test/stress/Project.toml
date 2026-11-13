@@ -1,0 +1,14 @@
+[deps]
+CausalDynamics = "823b1367-efac-4af0-bbfc-73ee462bce07"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+GraphPPL = "b3f8163a-e979-4e85-b43e-1f63d8c8b42c"
+RxInfer = "86711068-29c9-4ff7-b620-ae75d7495b3d"
+
+[sources]
+CausalDynamics = {path = "../.."}
+
+[compat]
+DataFrames = "1"
+GraphPPL = "4.6"
+RxInfer = "4, 5, 6"
+julia = "1.12, 1.13"

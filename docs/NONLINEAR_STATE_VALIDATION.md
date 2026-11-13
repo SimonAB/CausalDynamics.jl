@@ -5,11 +5,12 @@ state API registered in CausalDynamics 0.5.1. Parameters and Gaussian noise
 variances are known. The approximation describes one local Gaussian surrogate;
 it does not estimate parameter uncertainty.
 
-Reproduce from an environment containing CausalDynamics and its RxInfer,
-GraphPPL and DataFrames extras:
+Reproduce from the package's isolated stress environment (CausalDynamics plus
+RxInfer, GraphPPL and DataFrames):
 
 ```sh
-julia --project=. --threads=auto test/stress/nonlinear_state_validation.jl report.txt
+julia --project=test/stress --threads=auto -e 'using Pkg; Pkg.instantiate()'
+julia --project=test/stress --threads=auto test/stress/nonlinear_state_validation.jl report.txt
 ```
 
 The reference uses the original nonlinear transition density on a trapezoidal
