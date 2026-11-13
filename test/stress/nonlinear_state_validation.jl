@@ -110,6 +110,40 @@ function report_approximation(io, name, observations, model, reference)
     return result, error
 end
 
+"""Sweep sine amplitude under a shared design; report when the Gaussian surrogate drifts."""
+function report_nonlinearity_sweep(io, observations; amplitudes = (0.0, 0.05, 0.2, 0.5, 1.0),
+    process_variance = 0.15, observation_variance = 0.25,
+    initial_mean = 0.0, initial_variance = 0.8,
+    observation = 1.0, observation_offset = 0.0, initial_time = 0,
+    bounds = (-6.0, 6.0), coarse_points = 201, fine_points = 401,
+    wide_bounds = (-9.0, 9.0), wide_points = 601)
+    println(io, "Increasing-nonlinearity sweep: transition 0.8x + α sin(x); same observations and noise.")
+    println(io, "Amplitude α is diagnostic only; the prespecified gate remains α = 0.05.")
+    rows = NamedTuple[]
+    for α in amplitudes
+        model = (transition = (x, t) -> 0.8x + α * sin(x),
+            transition_derivative = (x, t) -> 0.8 + α * cos(x),
+            process_variance, observation_variance, initial_mean, initial_variance,
+            observation, observation_offset, initial_time)
+        name = @sprintf("sine_α=%.2f", α)
+        refined = reference_refinement(io, name, observations, model;
+            bounds, coarse_points, fine_points, wide_bounds, wide_points)
+        result, error = report_approximation(io, name, observations, model, refined.reference)
+        modes = [mode_locations(refined.reference, t) for t in eachindex(observations)]
+        push!(rows, (; α, standardised_mean = error.standardised_mean,
+            relative_covariance = error.relative_covariance,
+            max_modes = maximum(length, modes), backend = string(result.backend),
+            spacing_mean = refined.spacing_error.standardised_mean,
+            domain_mean = refined.domain_error.standardised_mean))
+    end
+    @printf(io, "Nonlinearity sweep summary (α, mean_error/SD, relative_cov, max_modes):\n")
+    for row in rows
+        @printf(io, "  α=%g: mean=%.6g; cov=%.6g; max_modes=%d; backend=%s\n",
+            row.α, row.standardised_mean, row.relative_covariance, row.max_modes, row.backend)
+    end
+    return rows
+end
+
 """Benchmark warm API calls separately from independent reference computation."""
 function report_warm_benchmark(io, observations, model; samples = 20)
     infer_once() = CausalDynamics.infer_nonlinear_state_space(observations; model...)
@@ -172,6 +206,7 @@ function run_nonlinear_validation(report_path; reference_only = false)
                 @test weak_error.relative_covariance <= 0.25
             end
             report_approximation(io, "weak_missing", missing_observations, weak_model, absent.reference)
+            report_nonlinearity_sweep(io, weak_observations)
             try
                 report_approximation(io, "two_well", bimodal_observations, bimodal_model, bimodal.reference)
             catch error

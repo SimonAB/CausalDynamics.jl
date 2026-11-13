@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   joint covariance for one local Gaussian surrogate, and timed continuation.
   The affine limit has an independent Gaussian oracle; nonlinear approximation
   errors use a separately refined grid reference.
+- Stress validation sweeps sine amplitude against the independent grid
+  reference, alongside missing observations and the retained two-well failure
+  case, and records where the local Gaussian surrogate stays reliable.
 
 ## [0.5.1] - 2026-11-13
 

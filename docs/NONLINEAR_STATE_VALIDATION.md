@@ -41,8 +41,30 @@ For the prespecified transition `0.8x + 0.05sin(x)`, six supplied observations,
 prior N(0,0.8), Q=0.15 and R=0.25, the maximum mean error was 0.001735
 reference posterior SD and joint covariance relative Frobenius error was
 0.002914. These pass the unchanged bounds of 0.2 SD and 0.25. With two missing
-observations, the diagnostic errors were 0.002775 SD and 0.004858 respectively.
+observations, the diagnostic errors were 0.002775 SD and 0.004858 respectively;
+Gaussian 95% interval content stayed near 0.949 under the grid reference.
 Spacing and domain changes were below 4e-16 for these smooth fixtures.
+
+### Increasing nonlinearity
+
+The same observation path and noise were reused with transition
+`0.8x + α sin(x)` for α ∈ {0, 0.05, 0.2, 0.5, 1}. The α = 0 case recovers the
+affine limit to machine precision. Errors rise smoothly with α, but remain
+inside the 0.2 SD / 0.25 relative-covariance gate through α = 1 on this
+unimodal design (one reference mode at every occasion; interval content about
+0.94–0.95):
+
+| α | Mean error / SD | Relative joint covariance |
+| --- | --- | --- |
+| 0 | 1.8e-16 | 2.4e-16 |
+| 0.05 | 0.001735 | 0.002914 |
+| 0.2 | 0.007947 | 0.01344 |
+| 0.5 | 0.02420 | 0.03488 |
+| 1 | 0.03569 | 0.03892 |
+
+This sweep shows graceful degradation under smooth, unimodal nonlinearity. It
+does not certify accuracy for larger α, different observation schedules, or
+unknown parameters. The prespecified acceptance gate remains α = 0.05.
 
 ### Bimodality remains a failure case
 
