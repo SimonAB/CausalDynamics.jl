@@ -1,8 +1,11 @@
 ## Registration status
 
-Version **0.5.1** is being prepared for registration after release checks.
-It adds exact known-parameter linear Gaussian state inference and joint
-trajectory covariance.
+Version **0.5.1** is on General ([#176025](https://github.com/JuliaRegistries/General/pull/176025),
+merged 2026-11-13; tree `af8a72ab0fff4c35748b1e4f0fbd5047f1a93744`)
+and identified by tag [`v0.5.1`](https://github.com/SimonAB/CausalDynamics.jl/releases/tag/v0.5.1)
+at commit `6bc8058`. It adds exact known-parameter linear Gaussian state
+inference and joint trajectory covariance. Experimental nonlinear inference
+on the development tip is not part of this registered release.
 
 Source release **0.5.0** is on General ([#175631](https://github.com/JuliaRegistries/General/pull/175631), merged 2026-11-10; tree `a8ec7e36ff0846661452fe340a2ee98d4ce62a2c`) and identified by tag `v0.5.0`.
 
@@ -12,7 +15,7 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 
 | Version | Status |
 |---------|--------|
-| **0.5.1** | Release checks pending; not yet registered |
+| **0.5.1** | On General ([#176025](https://github.com/JuliaRegistries/General/pull/176025), merged 2026-11-13); tagged `v0.5.1` |
 | **0.5.0** | On General ([#175631](https://github.com/JuliaRegistries/General/pull/175631), merged 2026-11-10); TagBot tagged `v0.5.0` |
 | **0.3.16** | On General ([#163619](https://github.com/JuliaRegistries/General/pull/163619)) |
 | **0.4.0** | On General ([#163649](https://github.com/JuliaRegistries/General/pull/163649), merged 2026-08-05) |
@@ -26,6 +29,12 @@ Install: `Pkg.add("CausalDynamics")`. Requires Julia **1.12+**.
 
 Version **0.5.0** is registered and tagged. It includes the orthogonal temporal
 semantics, API changes listed in the changelog, and RxInfer 6 compatibility.
+
+TagBot uses the repository-scoped `DOCUMENTER_KEY` deploy key to push tags.
+GitHub rejected automatic 0.5.1 release publication because its default Actions
+token lacked workflow permission; the release was published with the
+authenticated maintainer account. Releases containing workflow changes may
+require a suitably scoped release credential or maintainer publication.
 
 ## 0.4.7 register steps
 
