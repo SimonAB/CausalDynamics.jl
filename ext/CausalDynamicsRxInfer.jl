@@ -19,6 +19,7 @@ using LinearAlgebra: rank
 using RxInfer: RxInfer, @model, infer, Normal, KeepLast, Linearization
 
 include("linear_state_space.jl")
+include("nonlinear_state_space.jl")
 
 export BackdoorInferenceResult,
     NonlinearStateSpaceResult,

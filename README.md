@@ -124,7 +124,12 @@ Full matrices: [ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/causal-dynam
 
 ## Testing and validation
 
-CI runs `Pkg.test()` on Julia **1.13** (macOS and Ubuntu). Package `test/` is the merge gate; Quarto stress notebooks are pre-ship / methods probes (see [STRESS.md](STRESS.md)). Julia **1.12** remains within the declared compatibility range. Default `Pkg.test` is contract-focused; set `UNIT_STRESS=1` to also run large-panel / Monte Carlo representation recovery in `test/test_representation.jl`.
+CI runs `Pkg.test()` on Julia **1.13** (macOS and Ubuntu), with focused state
+inference checks on Julia **1.12/1.13** and RxInfer **4/5/6**. Package `test/`
+is the merge gate; Quarto stress notebooks are pre-ship / methods probes (see
+[STRESS.md](STRESS.md)). Default `Pkg.test` is contract-focused; set
+`UNIT_STRESS=1` to also run large-panel / Monte Carlo representation recovery
+in `test/test_representation.jl`.
 
 | Guardrail | What we exercise | Where |
 |-----------|------------------|-------|
@@ -146,6 +151,13 @@ Gaussian filtering, smoothing, sequential updates and cross-time covariance.
 It records whether Gaussian messages or analytic Kalman/RTS calculations were
 used. See [linear state inference](docs/src/linear_bayesian_states.md) and the
 [validation report](docs/LINEAR_STATE_VALIDATION.md).
+
+The development API also provides experimental scalar nonlinear filtering and
+smoothing with known noise and one joint local Gaussian approximation. It
+supports missing observations and timed continuation; it is not part of the
+registered 0.5.1 release. See [the nonlinear guide](docs/src/nonlinear_states.md)
+and [validation](docs/NONLINEAR_STATE_VALIDATION.md), including a two-well case
+where the Gaussian covariance is substantially inaccurate.
 
 - **[TMLE.jl](https://github.com/TARGENE/TMLE.jl)** — identify adjustment sets, then estimate CM / ATE / AIE (`prepare_for_tmle`)
 - **[RxInfer](https://github.com/ReactiveBayes/RxInfer.jl) / [GraphPPL](https://github.com/ReactiveBayes/GraphPPL.jl)** — optional extension for variational backdoor heads (RxInfer 4–6; RxInfer 6 is tested in the CDCS book environment)

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Add experimental scalar known-noise nonlinear state filtering/smoothing,
+  joint covariance for one local Gaussian surrogate, and timed continuation.
+  The affine limit has an independent Gaussian oracle; nonlinear approximation
+  errors use a separately refined grid reference.
+
 ## [0.5.1] - 2026-11-13
 
 - Add exact known-parameter linear Gaussian state inference, incremental updates

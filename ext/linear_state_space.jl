@@ -2,6 +2,8 @@ using LinearAlgebra: I, Symmetric, cholesky, issymmetric, PosDefException, rank
 using Statistics: mean, cov
 using RxInfer: MvNormal
 
+abstract type AbstractGaussianStateResult end
+
 """
     LinearStateSpaceResult
 
@@ -14,7 +16,7 @@ trajectory covariance. `backend` identifies `:rxinfer` or `:analytic_rts`.
 Rank-deficient or incomplete measurements use an exact analytic smoother because
 RxInfer's covariance-form backward messages require nonsingular information.
 """
-struct LinearStateSpaceResult{M,R}
+struct LinearStateSpaceResult{M,R} <: AbstractGaussianStateResult
     filtering_means::Matrix{Float64}
     filtering_covariances::Vector{Matrix{Float64}}
     smoothing_means::Matrix{Float64}
@@ -248,7 +250,7 @@ Return `Cov(x[t], x[s] | all observations)` as a state × state matrix. State
 indices are one-based, matching result rows. Covariance orientation follows the
 argument order; reversing the indices transposes the returned block.
 """
-function state_crosscovariance(result::LinearStateSpaceResult, t::Integer, s::Integer)
+function state_crosscovariance(result::AbstractGaussianStateResult, t::Integer, s::Integer)
     1 <= t <= result.n || throw(BoundsError(result.smoothing_covariances, t))
     1 <= s <= result.n || throw(BoundsError(result.smoothing_covariances, s))
     t > s && return Matrix(state_crosscovariance(result, s, t)')
@@ -266,7 +268,7 @@ Materialise the full smoothed trajectory covariance in time-major order
 `[x[1]; x[2]; …]`. Storage is quadratic in the number of states and times;
 use `state_crosscovariance` when only selected blocks are needed.
 """
-function trajectory_covariance(result::LinearStateSpaceResult)
+function trajectory_covariance(result::AbstractGaussianStateResult)
     d = size(result.smoothing_means, 2)
     covariance = zeros(result.n * d, result.n * d)
     for s in 1:result.n

@@ -91,7 +91,29 @@ function infer_linear_state_space(args...; kwargs...)
     return ext.infer_linear_state_space(args...; kwargs...)
 end
 
-"""Update a linear Gaussian filtered posterior using only new observations."""
+"""
+    infer_nonlinear_state_space(observations; transition, transition_derivative,
+        process_variance, observation_variance, initial_mean, initial_variance,
+        observation=1.0, observation_offset=0.0, initial_time=0)
+
+Approximate scalar nonlinear state inference with known Gaussian noise and
+linear observations. Both deterministic callbacks take `(x,t)`, where the first
+represented time is `initial_time`. The derivative is with respect to `x`.
+Missing observations omit their likelihood. Requires
+`using RxInfer, GraphPPL, DataFrames`.
+
+An extended Kalman filter determines a time-varying linear Gaussian surrogate;
+RxInfer sum-product or analytic RTS smoothing supplies its joint moments.
+These are approximate nonlinear posterior moments, including cross-time
+covariance. A numerically successful fit does not establish approximation
+accuracy, identification, or uncertainty about the supplied model parameters.
+"""
+function infer_nonlinear_state_space(args...; kwargs...)
+    ext = _require_rxinfer!(:infer_nonlinear_state_space)
+    return ext.infer_nonlinear_state_space(args...; kwargs...)
+end
+
+"""Update a filtered state posterior using only new observations."""
 function update_state_posterior(args...; kwargs...)
     ext = _require_rxinfer!(:update_state_posterior)
     return ext.update_state_posterior(args...; kwargs...)
@@ -110,6 +132,7 @@ function trajectory_covariance(args...; kwargs...)
 end
 
 export infer_linear_state_space, update_state_posterior, state_crosscovariance, trajectory_covariance
+export infer_nonlinear_state_space
 
 export has_rxinfer,
     infer_backdoor_effect,

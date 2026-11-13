@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   linear-state-compatibility:
-    name: Linear states - Julia ${{ matrix.version }} - RxInfer ${{ matrix.rxinfer }}
+    name: State inference - Julia ${{ matrix.version }} - RxInfer ${{ matrix.rxinfer }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -45,6 +45,8 @@ jobs:
             Pkg.status()
             include(joinpath(package_path, "test", "test_rxinfer_activation.jl"))
             include(joinpath(package_path, "test", "test_linear_state_space.jl"))
+            include(joinpath(package_path, "test", "test_nonlinear_state_space.jl"))
+            include(joinpath(package_path, "test", "test_nonlinear_reference.jl"))
           '
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }}

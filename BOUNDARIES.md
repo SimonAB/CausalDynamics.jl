@@ -35,6 +35,10 @@
 
 ### Experimental (exported; outside the main pipeline)
 
+- `infer_nonlinear_state_space`: scalar known-noise extended Kalman/RTS
+  inference with joint covariance for its local Gaussian surrogate. It does
+  not identify interventions, infer unknown parameters, or certify nonlinear
+  posterior accuracy. The bistable batch fit remains a separate approximation.
 - **`Hypergraph`** — higher-order edges; not used by `identify` / CDM simulation
 - **Relational grounding** — experimental; invariance and transport across
   skeletons are not inferred
