@@ -228,9 +228,12 @@ end
 Infer states for new observations only, starting one transition after the final
 filtering posterior in `previous`. Reuse the stored model unless model keywords
 are supplied. Returned smoothing covers the new segment; past states are not
-recomputed or assimilated twice.
+recomputed or assimilated twice. Initial-prior keywords are rejected because
+continuation must start from the previous filtering posterior.
 """
 function update_state_posterior(previous::LinearStateSpaceResult, new_observations; kwargs...)
+    any(key -> haskey(kwargs, key), (:initial_mean, :initial_covariance)) &&
+        throw(ArgumentError("continuation derives its initial prior from the previous filtering posterior; initial_mean and initial_covariance cannot be overridden"))
     model = _linear_model(; merge(previous.model, (; kwargs...))...)
     F, Q, b = model.transition, model.process_covariance, model.transition_offset
     prior = (initial_mean = F * previous.posterior.mean + b,

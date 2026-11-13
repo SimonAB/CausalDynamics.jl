@@ -1,14 +1,15 @@
 """
     RxInfer / GraphPPL integration (optional)
 
-Load `RxInfer` (and `GraphPPL`) to activate the `CausalDynamicsRxInfer` package extension.
+Load `RxInfer`, `GraphPPL` and `DataFrames` to activate the `CausalDynamicsRxInfer` package extension.
 Core identification remains in `prepare_for_rxinfer`; inference runs in the extension.
 """
 
 """
     has_rxinfer() -> Bool
 
-Return `true` when the `CausalDynamicsRxInfer` extension is loaded (`using RxInfer`).
+Return `true` when the `CausalDynamicsRxInfer` extension is loaded
+(`using RxInfer, GraphPPL, DataFrames`).
 """
 function has_rxinfer()
     return !isnothing(Base.get_extension(@__MODULE__, :CausalDynamicsRxInfer))
@@ -17,8 +18,8 @@ end
 function _require_rxinfer!(f::Symbol)
     ext = Base.get_extension(@__MODULE__, :CausalDynamicsRxInfer)
     ext === nothing && error(
-        "RxInfer.jl extension is not loaded. Run: using RxInfer\n" *
-        "Then call CausalDynamics.$f(...). See docs/RXINFER_INTEGRATION.md.",
+        "RxInfer.jl extension is not loaded. Run: using RxInfer, GraphPPL, DataFrames\n" *
+        "Then call CausalDynamics.$f(...). See docs/src/RXINFER_INTEGRATION.md.",
     )
     return ext
 end

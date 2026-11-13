@@ -20,7 +20,7 @@ precision. The analytic path returns `raw = nothing`; it does not approximate
 missing observations by adding very large measurement noise.
 
 ```julia
-using CausalDynamics, RxInfer
+using CausalDynamics, RxInfer, GraphPPL, DataFrames
 states = infer_linear_state_space([0.1, missing, 0.4];
     transition = 0.9, observation = 1.0,
     process_covariance = 0.1, observation_covariance = 0.2,
@@ -33,6 +33,9 @@ Missing measurement components use the corresponding rows of the observation
 model and noise covariance. Updating begins from the final filtered state and
 consumes only the newly supplied observations. Smoothing additionally uses later
 observations; it is not the online filtering posterior.
+Continuation rejects `initial_mean` and `initial_covariance` overrides, since
+the initial prior is determined by the previous filtered posterior and one
+transition under the supplied model.
 
 Smoothing gains recover adjacent-time and longer-lag cross-covariances.
 `trajectory_covariance` constructs the joint covariance in time-major order on

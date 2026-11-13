@@ -125,6 +125,8 @@ end
         @test one.backend == :rxinfer
         @test one.smoothing_means ≈ one.filtering_means
         @test CausalDynamics.trajectory_covariance(one) ≈ one.filtering_covariances[1]
+        @test_throws ArgumentError CausalDynamics.update_state_posterior(one, [0.3]; initial_mean = 100.0)
+        @test_throws ArgumentError CausalDynamics.update_state_posterior(one, [0.3]; initial_covariance = 100.0)
         for bad in (NaN, Inf)
             @test_throws ArgumentError CausalDynamics.infer_linear_state_space([bad]; scalar_model...)
         end

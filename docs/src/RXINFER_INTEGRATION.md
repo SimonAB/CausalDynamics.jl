@@ -50,7 +50,7 @@ Load the extension:
 
 ```julia
 using CausalDynamics
-using RxInfer   # activates CausalDynamicsRxInfer
+using RxInfer, GraphPPL, DataFrames   # activates CausalDynamicsRxInfer
 ```
 
 ## Workflow

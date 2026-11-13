@@ -26,3 +26,10 @@ Missing or partially observed states deliberately use the analytic path because
 the native covariance message attempts to invert singular likelihood precision.
 Both paths remain exact for the declared known-parameter Gaussian model. This
 validation does not cover unknown parameters or nonlinear approximations.
+
+Release compatibility checks passed on Julia 1.12.7 and 1.13.3 with registered
+RxInfer 4.7.3, 5.5.3 and 6.1.3 (GraphPPL 4.6.6 with RxInfer 4; 4.9.0 with
+RxInfer 5/6). Each combination passed 71 exact-state assertions and a
+fresh-process extension-activation test. The full Julia 1.13.3 package suite
+passed 1,639 assertions. Continuation rejects initial-prior overrides rather
+than discarding them silently.
