@@ -191,13 +191,43 @@ packages.
 - [Stack stress (Targeted)](https://github.com/SimonAB/CausalTargeted.jl/blob/main/STRESS.md) — estimation path ([qmd](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/stress/stress_validation.qmd)); [Documenter](https://simonab.github.io/CausalTargeted.jl/dev/stress_validation/)
 - [CDCS book](https://simonab.github.io/causal-dynamics-book/) — narrative companion
 
+Full bibliography: [docs/src/references.md](docs/src/references.md).
 Estimation-layer citations live in
 [CausalTargeted.jl](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/references.md).
 
 ## Acknowledgements
 
-Part of the Causal Dynamics for Complex Systems (CDCS) project.
+Developed in the [CDCS Julia package set](https://github.com/SimonAB/causal-dynamics-book/tree/main/packages).
 Maintainer: [Simon A. Babayan](https://orcid.org/0000-0002-4949-1117).
+
+Graphical identification builds on Pearl’s structural framework and on the
+adjustment algorithms exposed by
+[CausalInference.jl](https://github.com/mschauer/CausalInference.jl)
+(`gensearch`; van der Zander, Liśkiewicz & Textor, 2019; Wienöbst, van der
+Zander & Liśkiewicz, 2024). Optional discovery and estimation bridges reuse
+[Associations.jl](https://github.com/JuliaDynamics/Associations.jl) and
+[TMLE.jl](https://github.com/TARGENE/TMLE.jl). Closest R companions for
+graphical modelling are [dagitty](https://cran.r-project.org/package=dagitty)
+and [ggdag](https://cran.r-project.org/package=ggdag).
+
+## Related literature and software
+
+Highlights (see [references](docs/src/references.md) for DOIs and BibTeX keys):
+
+- Pearl (2009). *Causality* (2nd ed.). Cambridge University Press
+- Shpitser & Pearl (2006). Identification of joint interventional distributions. *AAAI*
+- Robins (1986); Hernán & Robins (2020). g-methods / *What If*
+- van der Zander, Liśkiewicz & Textor (2019). Separators and adjustment sets. *Artificial Intelligence*. [arXiv:1803.00116](https://arxiv.org/abs/1803.00116)
+- Wienöbst, van der Zander & Liśkiewicz (2024). Linear-time front-door adjustment. *AAAI*. [arXiv:2211.16468](https://arxiv.org/abs/2211.16468)
+- Pearl (2001); Robins & Greenland (1992); VanderWeele (2015). Mediation identification (structural)
+
+Related software: [CausalInference.jl](https://github.com/mschauer/CausalInference.jl),
+[Graphs.jl](https://github.com/JuliaGraphs/Graphs.jl),
+[DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl),
+[CausalTargeted.jl](https://github.com/SimonAB/CausalTargeted.jl),
+[CausalMediation.jl](https://github.com/SimonAB/CausalMediation.jl),
+R [dagitty](https://cran.r-project.org/package=dagitty) /
+[ggdag](https://cran.r-project.org/package=ggdag).
 
 ## License
 

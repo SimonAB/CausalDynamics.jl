@@ -22,14 +22,21 @@ plotting extension):
 using CausalDynamics, Graphs, DAGMakie, CairoMakie
 ```
 
-DAG figures follow Cinelli, Forney & Pearl (2022,
+DAG figures follow Cinelli, Forney & Pearl (2024,
 [SMR](https://doi.org/10.1177/00491241221099552)): a **good-control triangle**
 for adjustment, then the **estimand path** with effects on edges where helpful.
 Plotting uses DAGMakie directly (`dagplot_confounding`, `dagplot_backdoor`,
 `dagplot_chain`, `dagplot_mediation`, `dagplot_temporal`, [`edge_routing`](https://simonab.github.io/DAGMakie.jl/dev/),
 [`CurvedEdge`](https://simonab.github.io/DAGMakie.jl/dev/)).
 
+Papers implemented in each section are named at the section opening; DOIs are
+collected in [References](references.md).
+
 ## 1. Backdoor adjustment (good control)
+
+Implements Pearl’s backdoor criterion (Pearl, 2009) via CausalInference
+`gensearch` adjustment algorithms (van der Zander, Liśkiewicz & Textor, 2019,
+[arXiv:1803.00116](https://arxiv.org/abs/1803.00116)).
 
 **Graph.** Classic confounding: `Z → X → Y` and `Z → Y`.
 
@@ -50,7 +57,7 @@ Conditioning on `Z` blocks the backdoor path `X ← Z → Y`, but not the
 direct causal path `X → Y`. Thus, `Z` satisfies the backdoor criterion while
 `X` and `Y` remain d-connected given `Z`.
 
-**Graph (identification).** Good-control triangle: adjust `Z` (Cinelli et al. 2022).
+**Graph (identification).** Good-control triangle: adjust `Z` (Cinelli et al. 2024).
 
 ```@example gs-backdoor
 using DAGMakie, CairoMakie
@@ -97,6 +104,10 @@ fig
 Further reading: [Identification API](api/identification.md) · [Graph operations](api/graphs.md).
 
 ## 2. Mediation (triangle)
+
+Implements structural mediation identification (Pearl, 2001; Robins & Greenland,
+1992; VanderWeele, 2015) with interventional effect kinds for estimation
+hand-off. Estimation of TE / NDE / NIE under MTP shifts lives in CausalMediation.
 
 **Graph.** Baseline confounding plus mediator `M` on `A → Y`.
 
