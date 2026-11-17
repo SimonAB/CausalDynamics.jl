@@ -6,7 +6,7 @@
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This package is part of the [CDCS Julia package set](https://github.com/SimonAB/causal-dynamics-book/tree/main/packages), which supports the [Causal Dynamics of Complex Systems book](https://simonab.github.io/causal-dynamics-book/).
+This package is part of the [CDCS Julia package set](https://github.com/SimonAB/causal-dynamics-book/tree/main/packages). The packages are the primary software; an early draft of [*Causal Dynamics of Complex Systems*](https://simonab.github.io/causal-dynamics-book/) uses them as a pedagogical implementation.
 
 CausalDynamics provides causal graph operations and identification for structural
 and discrete-time dynamical models (CDMs): d-separation, backdoor / frontdoor /
