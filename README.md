@@ -6,7 +6,7 @@
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This package is part of the [CDCS Julia package set](https://github.com/SimonAB/causal-dynamics-book/tree/main/packages). The packages are the primary software; an early draft of [*Causal Dynamics of Complex Systems*](https://simonab.github.io/causal-dynamics-book/) uses them as a pedagogical implementation.
+This package is part of the [CDCS Julia package set](https://github.com/SimonAB/causal-dynamics-book/tree/main/packages). An early draft of [*Causal Dynamics of Complex Systems*](https://simonab.github.io/causal-dynamics-book/) uses the packages as a pedagogical implementation.
 
 CausalDynamics provides causal graph operations and identification for structural
 and discrete-time dynamical models (CDMs): d-separation, backdoor / frontdoor /
@@ -212,14 +212,14 @@ and [ggdag](https://cran.r-project.org/package=ggdag).
 
 ## Related literature and software
 
-Highlights (see [references](docs/src/references.md) for DOIs and BibTeX keys):
+This package provides Julia-native implementations of the following papers
+(full list in [docs/src/references.md](docs/src/references.md)):
 
-- Pearl (2009). *Causality* (2nd ed.). Cambridge University Press
+- Pearl (2009). *Causality* (2nd ed.). Cambridge University Press — d-separation, `do(·)`, adjustment
 - Shpitser & Pearl (2006). Identification of joint interventional distributions. *AAAI*
-- Robins (1986); Hernán & Robins (2020). g-methods / *What If*
-- van der Zander, Liśkiewicz & Textor (2019). Separators and adjustment sets. *Artificial Intelligence*. [arXiv:1803.00116](https://arxiv.org/abs/1803.00116)
+- van der Zander, Liśkiewicz & Textor (2019). Separators and adjustment sets. *Artificial Intelligence*. [arXiv:1803.00116](https://arxiv.org/abs/1803.00116) — backdoor listing via CausalInference `gensearch`
 - Wienöbst, van der Zander & Liśkiewicz (2024). Linear-time front-door adjustment. *AAAI*. [arXiv:2211.16468](https://arxiv.org/abs/2211.16468)
-- Pearl (2001); Robins & Greenland (1992); VanderWeele (2015). Mediation identification (structural)
+- Pearl (2001); Robins & Greenland (1992); VanderWeele (2015). Mediation identification (`MediationQuery`)
 
 Related software: [CausalInference.jl](https://github.com/mschauer/CausalInference.jl),
 [Graphs.jl](https://github.com/JuliaGraphs/Graphs.jl),
