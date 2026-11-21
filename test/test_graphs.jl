@@ -270,4 +270,65 @@ using Test
         dir_paths = find_directed_paths(g, 1, 3)
         @test dir_paths isa Vector{Vector{Int}}
     end
+
+    @testset "max_paths exact-limit boundary" begin
+        # 1. Zero paths (disconnected target)
+        g_zero = SimpleDiGraph(3)
+        add_edge!(g_zero, 1, 2)  # P -> X, Y=3 disconnected
+        @test isempty(find_directed_paths(g_zero, 2, 3; max_paths = 0))
+        @test isempty(find_directed_paths(g_zero, 2, 3; max_paths = 1))
+        @test isempty(find_backdoor_paths(g_zero, 2, 3; max_paths = 0))
+        @test isempty(find_backdoor_paths(g_zero, 2, 3; max_paths = 1))
+
+        # 2. Negative max_paths rejected
+        @test_throws ArgumentError find_directed_paths(g_zero, 2, 3; max_paths = -1)
+        @test_throws ArgumentError find_backdoor_paths(g_zero, 2, 3; max_paths = -1)
+
+        # 3. Directed paths: exact limit (2) vs limit + 1 (3) vs cap 0
+        g_dir = SimpleDiGraph(4)
+        add_edge!(g_dir, 1, 2); add_edge!(g_dir, 2, 4)
+        add_edge!(g_dir, 1, 3); add_edge!(g_dir, 3, 4)
+        @test length(find_directed_paths(g_dir, 1, 4; max_paths = 2)) == 2
+        @test_throws ArgumentError find_directed_paths(g_dir, 1, 4; max_paths = 1)
+        @test_throws ArgumentError find_directed_paths(g_dir, 1, 4; max_paths = 0)
+
+        add_edge!(g_dir, 1, 4)  # now 3 directed paths
+        @test length(find_directed_paths(g_dir, 1, 4; max_paths = 3)) == 3
+        @test_throws ArgumentError find_directed_paths(g_dir, 1, 4; max_paths = 2)
+
+        # 4. Single-parent backdoor paths: exact limit (2) vs limit + 1 (3) vs cap 0
+        g_bd = SimpleDiGraph(5)
+        add_edge!(g_bd, 1, 4)  # P -> X
+        add_edge!(g_bd, 1, 2); add_edge!(g_bd, 2, 5)
+        add_edge!(g_bd, 1, 3); add_edge!(g_bd, 3, 5)
+        @test length(find_backdoor_paths(g_bd, 4, 5; max_paths = 2)) == 2
+        @test_throws ArgumentError find_backdoor_paths(g_bd, 4, 5; max_paths = 1)
+        @test_throws ArgumentError find_backdoor_paths(g_bd, 4, 5; max_paths = 0)
+
+        add_edge!(g_bd, 1, 5)  # now 3 backdoor paths
+        @test length(find_backdoor_paths(g_bd, 4, 5; max_paths = 3)) == 3
+        err_single = try
+            find_backdoor_paths(g_bd, 4, 5; max_paths = 2)
+            nothing
+        catch e
+            e
+        end
+        @test err_single isa ArgumentError
+        @test occursin("find_backdoor_paths exceeded max_paths=2", sprint(showerror, err_single))
+
+        # 5. Multi-parent backdoor paths: exact limit across parents and overflow on second parent
+        g_bd_multi = SimpleDiGraph(4)
+        add_edge!(g_bd_multi, 1, 3)  # P1 -> X
+        add_edge!(g_bd_multi, 2, 3)  # P2 -> X
+        add_edge!(g_bd_multi, 1, 4)  # P1 -> Y (yields 2 paths total across P1, P2)
+        @test length(find_backdoor_paths(g_bd_multi, 3, 4; max_paths = 2)) == 2
+        err_multi = try
+            find_backdoor_paths(g_bd_multi, 3, 4; max_paths = 1)
+            nothing
+        catch e
+            e
+        end
+        @test err_multi isa ArgumentError
+        @test occursin("find_backdoor_paths exceeded max_paths=1", sprint(showerror, err_multi))
+    end
 end

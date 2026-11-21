@@ -21,16 +21,30 @@ function find_backdoor_paths(g::AbstractGraph, X::Int, Y::Int; max_paths::Int = 
     if X < 1 || X > nv(g) || Y < 1 || Y > nv(g)
         throw(ArgumentError("Node indices X=$X and Y=$Y must be in range [1, $(nv(g))]. Graph has $(nv(g)) nodes."))
     end
+    if max_paths < 0
+        throw(ArgumentError("max_paths must be non-negative, got $max_paths."))
+    end
 
     backdoor_paths = Vector{Vector{Int}}()
     parents_X = inneighbors(g, X)
     for parent in parents_X
-        paths_from_parent = _all_simple_paths(g, parent, Y; max_paths = max_paths - length(backdoor_paths))
-        for path in paths_from_parent
-            push!(backdoor_paths, [X, path...])
-            length(backdoor_paths) >= max_paths && throw(ArgumentError(
+        remaining = max_paths - length(backdoor_paths)
+        paths_from_parent = Vector{Vector{Int}}()
+        exceeded = _collect_simple_paths!(
+            paths_from_parent,
+            g,
+            parent,
+            Y;
+            directed = false,
+            max_paths = remaining,
+        )
+        if exceeded
+            throw(ArgumentError(
                 "find_backdoor_paths exceeded max_paths=$max_paths between $X and $Y; use reachability helpers instead",
             ))
+        end
+        for path in paths_from_parent
+            push!(backdoor_paths, [X, path...])
         end
     end
     return backdoor_paths
@@ -146,23 +160,29 @@ When `directed=true`, only follows edge direction (used for directed path findin
 
 Raises `ArgumentError` if more than `max_paths` paths are found.
 """
-function _all_simple_paths(
+function _collect_simple_paths!(
+    paths::Vector{Vector{Int}},
     g::AbstractGraph,
     source,
     target;
     directed::Bool = false,
     max_paths::Int = 10_000,
 )
-    paths = Vector{Vector{Int}}()
+    max_paths < 0 && throw(ArgumentError("max_paths must be non-negative, got $max_paths."))
     current_path = Int[]
     visited = Set{Int}()
+    exceeded = false
 
     function dfs(node)
-        length(paths) >= max_paths && return
+        exceeded && return
         push!(current_path, node)
 
         if node == target
-            push!(paths, copy(current_path))
+            if length(paths) >= max_paths
+                exceeded = true
+            else
+                push!(paths, copy(current_path))
+            end
             pop!(current_path)
             return
         end
@@ -172,13 +192,15 @@ function _all_simple_paths(
         for neighbor in outneighbors(g, node)
             if neighbor ∉ visited
                 dfs(neighbor)
+                exceeded && break
             end
         end
 
-        if !directed
+        if !directed && !exceeded
             for neighbor in Graphs.inneighbors(g, node)
                 if neighbor ∉ visited
                     dfs(neighbor)
+                    exceeded && break
                 end
             end
         end
@@ -188,7 +210,26 @@ function _all_simple_paths(
     end
 
     dfs(source)
-    if length(paths) >= max_paths
+    return exceeded
+end
+
+function _all_simple_paths(
+    g::AbstractGraph,
+    source,
+    target;
+    directed::Bool = false,
+    max_paths::Int = 10_000,
+)
+    paths = Vector{Vector{Int}}()
+    exceeded = _collect_simple_paths!(
+        paths,
+        g,
+        source,
+        target;
+        directed = directed,
+        max_paths = max_paths,
+    )
+    if exceeded
         throw(ArgumentError(
             "_all_simple_paths exceeded max_paths=$max_paths from $source to $target; " *
             "use nodes_on_directed_paths / has_path / _has_backdoor_path instead",
