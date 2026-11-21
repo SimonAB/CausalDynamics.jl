@@ -8,6 +8,16 @@ CurrentModule = CausalDynamics
 CausalDynamics
 ```
 
+Given a diagram of how variables in a biological or dynamical system influence
+one another, CausalDynamics checks whether a causal effect can be identified
+from observational or experimental data, determines which covariates to adjust
+for (and which to exclude), and simulates interventions and counterfactual
+trajectories.
+
+**Deciding which method fits your study?** See
+[Choosing an approach](orientation.md) to match a biological question,
+estimand, and data structure to the right package and API.
+
 CausalDynamics provides causal graph operations and identification for structural
 and discrete-time dynamical models (CDMs). Identification and estimation names
 follow Pearl-style conventions (`d_separated`, `backdoor_adjustment_set`,
@@ -77,7 +87,7 @@ See [REGISTRATION.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/REG
 
 ## Documentation
 
-- [Scope](scope.md) · [Terminology](terminology.md) · [Comparison](comparison.md) · [Getting Started](getting-started.md) · [Missingness](missingness.md) · [API](api/graphs.md)
+- [Choosing an approach](orientation.md) · [Getting Started](getting-started.md) · [Scope](scope.md) · [Terminology](terminology.md) · [Comparison](comparison.md) · [Missingness](missingness.md) · [API](api/graphs.md)
 - Design: [DESIGN.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/DESIGN.md) · [BOUNDARIES.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/BOUNDARIES.md) · [ecosystem principles](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/DESIGN_PRINCIPLES.md)
 - [References](references.md) — Pearl, g-methods, discovery, temporal ID (DOIs / BibTeX keys)
 - Estimation layer: [CausalTargeted.jl references](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/references.md)

@@ -21,10 +21,11 @@ makedocs(
     ),
     pages = [
         "Home" => "index.md",
+        "Choosing an approach" => "orientation.md",
+        "Getting Started" => "getting-started.md",
         "Scope" => "scope.md",
         "Terminology" => "terminology.md",
         "Comparison" => "comparison.md",
-        "Getting Started" => "getting-started.md",
         "Hierarchical / nested units" => "hierarchy.md",
         "Missingness" => "missingness.md",
         "Integration" => [

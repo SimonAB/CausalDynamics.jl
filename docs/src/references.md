@@ -23,6 +23,8 @@ Shared BibTeX keys also appear in the [CDCS book `references.bib`](https://githu
 
 - Pearl, J. (2009). *Causality: Models, Reasoning, and Inference* (2nd ed.). Cambridge University Press. — key `pearl2009causality`
 
+- Cinelli, C., Forney, A., & Pearl, J. (2024). A crash course in good and bad controls. *Sociological Methods & Research*, *53*(3), 1071–1104. [doi:10.1177/00491241221099552](https://doi.org/10.1177/00491241221099552) — key `cinelli2024crash`
+
 - Pearl, J. (2018). *The Book of Why*. Basic Books. — key `pearl2018bookofwhy`
 
 - Shpitser, I., & Pearl, J. (2006). Identification of joint interventional distributions in recursive semi-Markovian causal models. In *AAAI*. — key `shpitser2006identification`
