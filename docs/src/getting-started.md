@@ -94,7 +94,6 @@ id.identifiable, id.strategy, id.adjustment
 **Graph (total effect).** Estimand path `X → Y` only (confounder omitted from the TE diagram).
 
 ```@example gs-backdoor
-g_te, _ = chain_graph(["X", "Y"])
 fig, _, _ = dagplot_chain(["X", "Y"];
     title = "Total effect path",
 )
@@ -193,7 +192,7 @@ attribute (genotype, site, baseline arm), declare
 `TemporalNodeSpec(...; temporal_support = FromOnsetSupport(onset))` so unrolling
 keeps one node and panel helpers map to a bare column. Ontological character,
 when claimed, is declared on a shared `ReferentSpec` and does not change node
-count ([#29](https://github.com/SimonAB/CausalDynamics.jl/issues/29)).
+count.
 
 ```@example gs-temporal
 using CausalDynamics
@@ -280,11 +279,10 @@ fig, _, p = dagplot_temporal(u;
 )
 pasture_i = single_node(u, :pasture)
 burden_i = findfirst(k -> first(k) === :burden_summary, u.index_node)
-(
-    nv(u.graph),
-    p[:node_marker][][pasture_i] == :circle,
-    p[:node_marker][][burden_i] == interval_summary_node_marker(),
-)
+@assert nv(u.graph) == 3
+@assert p[:node_marker][][pasture_i] == :circle
+@assert p[:node_marker][][burden_i] == interval_summary_node_marker()
+fig
 ```
 
 Further reading: [Time-indexed graphs](api/time_graphs.md) · [Terminology](terminology.md).
@@ -292,19 +290,15 @@ Further reading: [Time-indexed graphs](api/time_graphs.md) · [Terminology](term
 ## 4. CausalDynamics plot façades
 
 Optional helpers wrap DAGMakie when you already hold node indices from
-`backdoor_adjustment_set`:
+`backdoor_adjustment_set`. Reusing the three-node graph `g` from Section 1:
 
-```@example gs-plots
-using CausalDynamics, Graphs, DAGMakie, CairoMakie
-
-g = DiGraph(3)
-add_edge!(g, 1, 2); add_edge!(g, 1, 3); add_edge!(g, 2, 3)
+```@example gs-backdoor
 plot_backdoor_paths(g, 2, 3; node_labels = ["Z", "X", "Y"])
 ```
 
 Highlight a chosen adjustment set explicitly:
 
-```@example gs-plots
+```@example gs-backdoor
 plot_with_adjustment_set(g, 2, 3, [1]; node_labels = ["Z", "X", "Y"])
 ```
 
@@ -315,9 +309,16 @@ Layout and styling conventions: [DAGMakie user guide](https://simonab.github.io/
 `simulate_scm` evaluates each structural equation with **parent values in sorted
 `inneighbors` order**, followed by that node's exogenous draw `U`. When several
 parents exist, match the function argument order to ascending parent node indices
-(e.g. for $Z\to Y$ and $X\to Y$, use `(z, x, u) -> …`, not `(x, z, u)`).
+(e.g. for ``Z \to Y`` and ``X \to Y``, use `(z, x, u) -> …`, not `(x, z, u)`).
 
-```julia
+```@example gs-scm
+using CausalDynamics, Graphs
+
+g = DiGraph(3)
+add_edge!(g, 1, 2)  # Z → X
+add_edge!(g, 1, 3)  # Z → Y
+add_edge!(g, 2, 3)  # X → Y
+
 equations = Dict{Int, Function}(
     1 => (u,) -> u,
     2 => (z, u) -> z + u,
@@ -327,6 +328,7 @@ scm = GraphSCM(g, equations, Set{Int}())
 U = Dict(1 => 1.0, 2 => 0.5, 3 => -0.3)
 y_factual = simulate_scm(scm, U)
 y_do = simulate_scm(apply_intervention(scm, do_intervention(2, 10.0)), U)
+(factual_Y = y_factual[3], do_Y = y_do[3])
 ```
 
 Shared-`U` counterfactuals and discrete-time CDMs: [SCM API](api/scm.md) ·
@@ -353,7 +355,7 @@ isapprox(β̂[2], truth.ate; atol = 0.08)
 
 DAG unrolling with plate-style node names: [`unroll_hierarchical_dag`](hierarchy.md).
 Cluster sandwich for repeated-outcome MSM: CausalTargeted `cluster=`. Stress:
-[Hierarchical nesting stress](stress_hierarchy.md).
+[Stress validation](stress.md).
 
 ## See also
 

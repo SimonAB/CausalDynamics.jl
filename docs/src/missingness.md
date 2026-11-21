@@ -54,7 +54,7 @@ invents a float fill inside CDM solvers or [`encode_to_panel`](@ref).
 | `:mar` | Identified iff `conditioning_set` nonempty | Logistic in the conditioning covariates |
 | `:mnar` | Unidentified without further assumptions | Throws in `apply_missingness_mechanism` |
 
-```julia
+```@example missingness-mar
 using CausalDynamics, Graphs
 
 g = DiGraph(3)
@@ -67,19 +67,19 @@ id = identify(g, TotalEffectQuery(:A, :Y);
     node_names = Dict(1 => :W, 2 => :A, 3 => :Y),
     missingness = miss,
 )
-id.missingness.identifiable  # true
-id.missingness.mar_set       # [:W]
+(identifiable = id.missingness.identifiable, mar_set = id.missingness.mar_set)
 ```
 
 ## Masks and completeness guards
 
-```julia
+```@example missingness-mask
+using CausalDynamics
+
 y = [1.0, missing, 3.0]
 mask = observation_mask(Dict(:y => y); columns = [:y])
-miss_rates(mask)  # Dict(:y => 1/3)
-
-require_complete_values([1.0, 2.0]; context = "parents")  # ok
-# require_complete_values([1.0, missing]; context = "parents")  # throws
+complete_ok = require_complete_values([1.0, 2.0]; context = "parents")
+# require_complete_values([1.0, missing]; context = "parents")  # throws ArgumentError
+(miss_rates = miss_rates(mask), complete_ok = complete_ok)
 ```
 
 High-dimensional assays must be completed or row-dropped under an Observable
@@ -93,4 +93,4 @@ Do not treat survival *censoring* IPCW as the same object as MAR missing
 terminal outcomes; that distinction is owned downstream.
 
 Stress ledgers for incomplete panels and encode guards live with the estimation
-stack ([CausalTargeted missingness grid](https://simonab.github.io/CausalTargeted.jl/dev/stress_missingness/)).
+stack ([CausalTargeted missingness grid](https://simonab.github.io/CausalTargeted.jl/dev/stress_validation/#Missingness-grid-stress)).

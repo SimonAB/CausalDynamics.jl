@@ -7,14 +7,15 @@ discrete-time dynamical models (CDMs), including a lightweight SCM layer.
 Core exports cover d-separation and paths; backdoor, frontdoor, and
 instrumental-variable criteria; `GraphSCM` simulation with `do(·)`; and
 `DiscreteTimeCDM` trajectories with shared-`U` counterfactuals. Identification
-façades wrap [CausalInference.jl](https://github.com/SimonAB/CausalInference.jl).
+façades wrap [CausalInference.jl](https://github.com/mschauer/CausalInference.jl).
 Optional extensions load [DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl)
 plotting and RxInfer / GraphPPL backdoor inference.
 
 Experimental (not exported; qualify as `CausalDynamics.…`): `Hypergraph` for
 higher-order edges; symbolic do-calculus stubs; constructor-only `normalise_*`
-validators. Prefer DAGMakie for figures. `EstimationPlan` remains the hand-off
-object for CausalTargeted (package move deferred).
+validators. Prefer DAGMakie for figures. `CausalTargeted.plan_targeted_estimation`
+is the canonical estimator planner; CausalDynamics supplies panel facts and
+retains legacy `EstimationPlan` during transition.
 
 # Examples
 

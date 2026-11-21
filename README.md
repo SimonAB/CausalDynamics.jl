@@ -8,6 +8,8 @@
 
 This package is part of the [CDCS Julia package set](https://github.com/SimonAB/causal-dynamics-book/tree/main/packages). An early draft of [*Causal Dynamics of Complex Systems*](https://simonab.github.io/causal-dynamics-book/) uses the packages as a pedagogical implementation.
 
+CausalDynamics brings together published methods for causal identification and structural modelling. The algorithms are implemented directly in Julia from their mathematical specifications. See [Related literature and software](#related-literature-and-software) for the original papers and companion tools.
+
 CausalDynamics provides causal graph operations and identification for structural
 and discrete-time dynamical models (CDMs): d-separation, backdoor / frontdoor /
 IV criteria, `GraphSCM` simulation, `do(·)` interventions, and counterfactuals.
@@ -91,7 +93,7 @@ SCM intervention sketch:
 equations = Dict{Int, Function}(
     1 => (u,) -> u,
     2 => (z, u) -> z + u,
-    3 => (x, u) -> 2x + u,
+    3 => (z, x, u) -> 2x + z + u,
 )
 scm = GraphSCM(g, equations, Set{Int}())
 U = Dict(1 => 1.0, 2 => 0.5, 3 => -0.3)
@@ -146,11 +148,11 @@ If you have a scenario that should be harder to pass (tighter oracle bounds, mes
 
 ## Integrations
 
-The development RxInfer integration includes exact known-parameter linear
-Gaussian filtering, smoothing, sequential updates and cross-time covariance.
-It records whether Gaussian messages or analytic Kalman/RTS calculations were
-used. See [linear state inference](docs/src/linear_bayesian_states.md) and the
-[validation report](docs/LINEAR_STATE_VALIDATION.md).
+Shipped in **0.5.1**, the RxInfer integration includes exact known-parameter
+linear Gaussian filtering, smoothing, sequential updates and cross-time
+covariance, recording whether Gaussian messages or analytic Kalman/RTS
+calculations were used. See [linear state inference](docs/src/linear_bayesian_states.md)
+and the [validation report](docs/LINEAR_STATE_VALIDATION.md).
 
 The development API also provides experimental scalar nonlinear filtering and
 smoothing with known noise and one joint local Gaussian approximation. It
@@ -164,7 +166,7 @@ where the Gaussian covariance is substantially inaccurate.
 - **[DAGMakie.jl](https://github.com/SimonAB/DAGMakie.jl)** — optional extension for DAG figures (`plot_causal_graph`, `plot_backdoor_paths`, …)
 - **[Associations.jl](https://github.com/JuliaDynamics/Associations.jl)** — optional PC / OCE discovery bridge
 - **Representation bridge** — `RepresentationSpec` / `encode_to_panel` compress high-dim tensors (spectra, images) to low-dim **code** columns for identification and estimation (no Flux/Lux hard dependency; user-supplied encoder). Example: `examples/representation_bridge.jl`.
-- **Deep mechanisms** — `MechanismSpec` / Lux weakdep for parent-constrained ``f_i`` and ODE residuals (`examples/mechanism_ude.jl`, `examples/mechanism_scm.jl`).
+- **Deep mechanisms** — `MechanismSpec` / Lux weakdep for parent-constrained $f_i$ and ODE residuals (`examples/mechanism_ude.jl`, `examples/mechanism_scm.jl`).
 - **Generative L3** — `:generative` additive-noise abduction / counterfactuals on codes (`examples/mechanism_counterfactual.jl`).
 
 ## Related packages
@@ -187,7 +189,7 @@ packages.
 
 - [Documenter site](https://simonab.github.io/CausalDynamics.jl/dev/) (API, examples, live DAGMakie figures)
 - [References](https://simonab.github.io/CausalDynamics.jl/dev/references/) — DOIs / BibTeX keys
-- [Deep SCM stress](STRESS.md) — Quarto ([qmd](docs/stress/deep_scm_stress.qmd)); encode / CNN stub / mechanisms / L3; [Documenter](https://simonab.github.io/CausalDynamics.jl/dev/stress_deep_scm/)
+- [Deep SCM stress](STRESS.md) — Quarto ([qmd](docs/stress/deep_scm_stress.qmd)); encode / CNN stub / mechanisms / L3; [Documenter](https://simonab.github.io/CausalDynamics.jl/dev/stress/)
 - [Stack stress (Targeted)](https://github.com/SimonAB/CausalTargeted.jl/blob/main/STRESS.md) — estimation path ([qmd](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/stress/stress_validation.qmd)); [Documenter](https://simonab.github.io/CausalTargeted.jl/dev/stress_validation/)
 - [CDCS book](https://simonab.github.io/causal-dynamics-book/) — narrative companion
 

@@ -37,16 +37,12 @@ GraphPPL backdoor inference, and Associations.jl discovery bridges.
 
 ## Compared with R and Python
 
-| Need | CausalDynamics | Familiar elsewhere |
-|------|----------------|--------------------|
-| d-separation / backdoor / frontdoor / IV | Yes | dagitty, DoWhy, causal-learn |
-| Typed `identify` → certificate | **Unique** | Partial |
-| Discrete-time CDM + shared-`U` CF | **Unique** | Rare |
-| Temporal unroll / SciML continuous CDM | **Unique** | Partial / custom |
-
-**Choose CausalDynamics** when certificates and trajectories should feed Julia
-estimation and plotting. **Prefer dagitty / DoWhy** for GUI-first or existing
-Python four-step workflows. Details: [Comparison](comparison.md) ·
+CausalDynamics covers classical graphical identification (like `dagitty` and
+`DoWhy`), and pairs typed [`IdentificationResult`](@ref) certificates directly
+with discrete-time CDMs, temporal unrolling, and SciML continuous-time models in
+Julia. Choose CausalDynamics when certificates and trajectories should feed
+Julia estimation and plotting; prefer `dagitty` or `DoWhy` for GUI-first or
+existing Python four-step workflows. See [Comparison](comparison.md) and
 [ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/ECOSYSTEM_COMPARISON.md).
 
 ## Quick start
@@ -87,11 +83,9 @@ See [REGISTRATION.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/REG
 
 ## Documentation
 
-- [Choosing an approach](orientation.md) · [Getting Started](getting-started.md) · [Scope](scope.md) · [Terminology](terminology.md) · [Comparison](comparison.md) · [Missingness](missingness.md) · [API](api/graphs.md)
-- Design: [DESIGN.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/DESIGN.md) · [BOUNDARIES.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/BOUNDARIES.md) · [ecosystem principles](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/DESIGN_PRINCIPLES.md)
-- [References](references.md) — Pearl, g-methods, discovery, temporal ID (DOIs / BibTeX keys)
+- **Guides:** [Choosing an approach](orientation.md) · [Getting Started](getting-started.md) · [Examples](examples.md) · [Scope](scope.md) · [Terminology](terminology.md) · [Comparison](comparison.md)
+- **Domains & integrations:** [Hierarchical / nested units](hierarchy.md) · [Missingness](missingness.md) · [Integration](integration.md) · [Stress validation](stress.md) · [API](api/graphs.md)
+- **Design:** [DESIGN.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/DESIGN.md) · [BOUNDARIES.md](https://github.com/SimonAB/CausalDynamics.jl/blob/main/BOUNDARIES.md) · [ecosystem principles](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/DESIGN_PRINCIPLES.md)
+- [References](references.md) — Pearl, g-methods, discovery, dynamical & temporal ID (DOIs / BibTeX keys)
 - Estimation layer: [CausalTargeted.jl references](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/src/references.md)
 - Narrative companion: [CDCS Book](https://simonab.github.io/causal-dynamics-book/)
-
-Compared with R/Python graph tools and the rest of this Julia stack: see [Comparison](comparison.md)
-(summary above) and [ECOSYSTEM_COMPARISON.md](https://github.com/SimonAB/causal-dynamics-book/blob/main/packages/ECOSYSTEM_COMPARISON.md).

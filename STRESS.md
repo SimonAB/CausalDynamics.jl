@@ -18,7 +18,7 @@ OrdinaryDiffEq). Chunks use `#| warning: false`.
 **Estimation hand-off** (mediation / LMTP on codes) lives in CausalTargeted:
 [`docs/stress/deep_scm_estimation_stress.qmd`](https://github.com/SimonAB/CausalTargeted.jl/blob/main/docs/stress/deep_scm_estimation_stress.qmd).
 
-**Documenter summary:** [stress_deep_scm.md](docs/src/stress_deep_scm.md).
+**Documenter summary:** [stress.md](docs/src/stress.md).
 
 ## Last render
 

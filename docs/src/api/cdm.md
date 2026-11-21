@@ -5,70 +5,28 @@ Causal Dynamical Models advance named endogenous state over discrete occasions
 or interventional trajectories, and [`counterfactual`](@ref) to reuse realised
 exogenous draws under an alternate [`DoSequence`](@ref).
 
+> **Time-index convention:** `DiscreteTimeCDM` uses Julia 1-based occasion
+> indexing `t = 1:T`, whereas unrolled [`TemporalDAGSpec`](@ref) graphs in
+> [Time-indexed graphs](time_graphs.md) use `t = 0:T` (`t = 0` baseline/initial
+> state, `t = 1` first transition).
+
+For wide panel output, observation bridges, and missingness masks see
+[Panels, observation & masks](panels.md); for nested and relational structures
+see [Hierarchy & relational grounding](hierarchy.md); for neural/ODE mechanisms,
+typed intervention descriptors, and provenance contracts see
+[Mechanisms, representations & contracts](mechanisms_contracts.md).
+
+## Core model and trajectory types
+
 ```@docs
 AbstractCDM
 DiscreteTimeCDM
 CDMTrajectory
-CDMPanel
-panel_column_name
-check_time_resolution
-trajectory_wide_row
-simulate_panel
-RandomEffectSpec
-HIERARCHY_ASSUMPTIONS
-assign_cluster_ids
-draw_nested_effects
-add_nested_effects!
-simulate_hierarchical_panel
-simulate_hierarchical_intercept_ate
-HierarchicalNestingSpec
-HierarchicalUnrolling
-unroll_hierarchical_dag
-hierarchical_node
-hierarchical_node_names
-attach_hierarchy_assumptions
-RelationalSchema
-RelationalSkeleton
-RelationalParent
-relational_entities
-relational_attributes
-ground_relational_graph
-ObservationBridge
-available_at
-information_set_at
-policy_information_set
-identity_observation
-observe_series
-observe_trajectory
-panel_from_trajectories
-panel_from_latent_series
-simulate_observed_panel
-ObservationMask
-observation_mask
-n_units
-miss_rates
-require_complete_values
-require_complete_matrix
-apply_observation_mask
-apply_missingness_mechanism
-simulate_incomplete_panel
-RepresentationSpec
-representation_certificate
-encode_to_panel
-MechanismSpec
-MechanismLibrary
-mechanism_library_from_cdm
-register_mechanism!
-mechanism_certificate
-lux_mechanisms_available
-attach_lux_mechanism!
-build_ode_rhs
-graphscm_with_mechanisms
-train_mechanisms!
-pack_parent_vector
-abduce_noise
-generate_from_noise
-mechanism_counterfactual
+```
+
+## Interventions and policies
+
+```@docs
 AbstractIntervention
 DoSequence
 do_sequence
@@ -79,39 +37,17 @@ TimedAssignment
 AbstractAvailability
 Policy
 policy
+policy_information_set
 intervention_value
+```
+
+## Simulation, counterfactuals and g-computation
+
+```@docs
 simulate
 counterfactual
 GComputationResult
 g_computation
-```
-
-## Relational grounding
-
-`RelationalSchema` describes entity types, attributes, and binary relation
-types. `RelationalSkeleton` supplies the entities and relation instances present
-in one situation. A `RelationalParent` declares an attribute-level parent rule;
-`ground_relational_graph` expands those rules into an ordinary `Graphs.jl`
-directed graph with tuple labels. Identification and temporal unrolling remain
-downstream operations on that grounded graph. The prototype does not claim
-transportability to unseen skeletons without additional mechanism-invariance and
-confounding assumptions.
-
-```julia
-schema = RelationalSchema(
-    [:signal, :car],
-    Dict(:controls => (:signal, :car)),
-    Dict(:signal => [:walk], :car => [:brake]),
-)
-skeleton = RelationalSkeleton(
-    schema,
-    Dict(:signal => [:s1], :car => [:c1]),
-    Dict(:controls => [(:s1, :c1)]),
-)
-ground_relational_graph(
-    skeleton,
-    [RelationalParent(:signal, :walk, :car, :brake, :controls)],
-)
 ```
 
 ## Minimal example
@@ -179,131 +115,11 @@ your `step` function.
 
 ## Interventional means (g-computation)
 
-[`g_computation`](@ref) estimates `E[outcome ∣ do(·)]` by Monte Carlo over
-replicate trajectories. Contrast two interventions for an effect:
+[`g_computation`](@ref) estimates ``E[\text{outcome} \mid \text{do}(\cdot)]`` by
+Monte Carlo over replicate trajectories. Contrast two interventions for an effect:
 
 ```julia
 treated = g_computation(cdm, 20, :y; intervention = do_sequence(:a, 1.0), n = 500)
 control = g_computation(cdm, 20, :y; intervention = do_sequence(:a, 0.0), n = 500)
 effect = treated.mean - control.mean
-```
-
-## Auditable intervention and abstraction declarations
-
-[`InterventionDescriptor`](@ref) records a declared intervention's target,
-replacement identifier, timing, scope, stochasticity, and cointerventions. It is
-metadata, not a solver-backed SDE surgery. Scalar `DoIntervention` values are
-recorded directly; policies and other functions require a caller-supplied stable
-identifier before they can be fingerprinted.
-
-`CDMProvenance` also accepts optional `estimand`, `identification`, `estimator`,
-`positivity`, and `sensitivity` identifiers. These fields let an analysis
-certificate record the query and its evidential qualifications alongside the
-model semantics. They remain caller-supplied identifiers rather than hashes of
-arbitrary executable code.
-
-[`CausalAbstractionSpec`](@ref) compares finite interventional laws after
-push-forward through the declared state map. `exact` means equality of the
-laws as mass maps (support order does not matter); `accepted` is controlled by
-`law_mode` and the declared tolerance.
-
-## Structural constraint declarations
-
-[`StructuralConstraintSpec`](@ref) records an auditable claim about an
-invariance, feasibility condition, viability condition, or relation across
-embodiments. It names the variables or mechanisms to which the claim applies,
-the predicted consequences, and the identifiers of proposed tests. The
-corresponding [`constraint_certificate`](@ref) is deterministic metadata, not
-an empirical validation result.
-
-These declarations deliberately remain outside the DAG and simulation
-semantics. They do not add a causal parent, graph node, attractor, or agent.
-Pair them with a [`MechanismLibrary`](@ref), a [`CausalAbstractionSpec`](@ref),
-and typed intervention descriptors when the analysis supplies those artefacts.
-
-[`SetState`](@ref) is the typed form of [`DoIntervention`](@ref) on a
-[`GraphSCM`](@ref) and of a constant [`DoSequence`](@ref) on a
-[`DiscreteTimeCDM`](@ref). [`ReplacePolicy`](@ref) is the auditable form of
-[`Policy`](@ref) when a `rule` is supplied. [`apply_intervention`](@ref) on a
-CDM bakes that surgery into `initialise` and `step`.
-
-```@docs
-InterventionDescriptor
-intervention_descriptor
-canonical_intervention_descriptor
-compose_intervention_descriptors
-ComposedIntervention
-compose_intervention_bundle
-SetState
-SetInitialCondition
-ReplacePolicy
-ReplaceParameter
-ReplaceMechanism
-Simultaneous
-Sequential
-intervention_kind
-intervention_target
-intervention_interval
-canonical_intervention
-intervention_fingerprint
-FiniteLaw
-pushforward
-law_equal
-law_distance
-CDMProvenance
-provenance_dict
-provenance_fingerprint
-certificate_schema_version
-CertificateEnvelope
-certificate_envelope
-certificate_dict
-CausalAbstractionSpec
-CausalAbstractionResult
-validate_abstraction
-StructuralConstraintSpec
-constraint_certificate
-```
-
-## Observational panels (estimation hand-off)
-
-[`simulate_panel`](@ref) stacks `n` natural trajectories into a wide
-[`CDMPanel`](@ref) for sequential LMTP. Column roles:
-
-- **baseline** — bare symbol, value at ``t = 1`` (e.g. `:w`)
-- **timed** — [`panel_column_name`](@ref)`(v, t)` → `:a1`, `:a2`, …
-- **terminal** — bare symbol at occasion ``T`` (e.g. `:y`)
-
-```julia
-using DataFrames
-
-panel = simulate_panel(
-    cdm, 200, 2;
-    baseline = [:w],
-    timed = [:a, :l],
-    terminal = [:y],
-)
-df = DataFrame(NamedTuple(panel))  # or DataFrame(panel) when CausalDynamicsDataFramesExt is loaded
-```
-
-Leave `intervention = nothing` for observational estimation. Interventional
-Monte Carlo effects stay on [`g_computation`](@ref); CausalTargeted consumes
-`df` via `sequential_spec_from_identification` / `execute_estimand`.
-
-## Latent → observed panels
-
-When latents are inferred outside CausalDynamics (filter, smoother, EM), map them
-with [`ObservationBridge`](@ref) and [`panel_from_latent_series`](@ref). No
-Kalman/particle code lives here—only the typed hand-off to wide panels.
-
-```julia
-bridge = ObservationBridge(
-    Dict(:y_hat => :y);
-    measure = (state, t) -> (y_hat = state.x,),  # e.g. use latent x as assay
-)
-panel = panel_from_latent_series(
-    inferred_units;  # Vector{<:Dict} of series
-    bridge = bridge,
-    timed = [:y],
-    terminal = Symbol[],
-)
 ```

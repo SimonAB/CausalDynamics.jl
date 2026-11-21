@@ -4,6 +4,9 @@
 CurrentModule = CausalDynamics
 ```
 
+Core graph operations accept plain `Graphs.SimpleDiGraph` objects as well as
+[`CausalGraph`](@ref) metadata wrappers.
+
 Names also exported by DAGMakie (`find_backdoor_paths`, `find_directed_paths`,
 `is_dag`) are written fully qualified so the docs build resolves them
 unambiguously when the plotting extension is loaded.
@@ -23,7 +26,6 @@ nodes_on_directed_paths
 CausalDynamics.has_path
 CausalDynamics.is_dag
 validate_causal_graph
-create_causal_graph
 ```
 
 ## CausalGraph metadata
@@ -32,6 +34,7 @@ Optional property bag and attached data on a causal graph wrapper.
 
 ```@docs
 CausalGraph
+create_causal_graph
 attach_data!
 get_data
 has_data

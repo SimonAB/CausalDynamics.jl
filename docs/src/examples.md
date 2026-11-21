@@ -1,50 +1,12 @@
 # Examples
 
-## Basic Graph Operations
-
-### d-Separation
-
-```@example examples
-using CausalDynamics, Graphs, DAGMakie, CairoMakie
-
-# Create a graph: Z → X → Y, Z → Y
-g = DiGraph(3)
-add_edge!(g, 1, 2)  # Z → X
-add_edge!(g, 1, 3)  # Z → Y
-add_edge!(g, 2, 3)  # X → Y
-
-# X and Y are not d-separated by Z: the direct X → Y path remains open.
-d_separated(g, 2, 3, [1])  # false
-```
-
-Conditioning on `Z` blocks the backdoor path `X ← Z → Y` but does not block
-the causal path `X → Y`. The backdoor criterion below requires blocking the
-former, not d-separating `X` and `Y` in the original DAG.
-
-### Ancestors and Descendants
-
-```@example examples
-# Get ancestors of a node
-ancestors = get_ancestors(g, 3)  # {1, 2}
-
-# Get descendants of a node
-descendants = get_descendants(g, 1)  # {2, 3}
-```
+For a step-by-step introduction to d-separation, backdoor adjustment, mediation
+diagrams, and basic `GraphSCM` simulation on the three-node confounding graph,
+start with [Getting Started](getting-started.md). The examples below cover
+frontdoor adjustment, instrumental variables, cross-site transportability,
+collider counterfactuals, and discrete-time dynamical trajectories.
 
 ## Identification
-
-### Backdoor Criterion
-
-```@example examples
-# Find backdoor adjustment set
-adj_set = backdoor_adjustment_set(g, 2, 3)  # Set([1])
-
-# Check if backdoor adjustment is possible
-is_backdoor_adjustable(g, 2, 3)  # true
-
-fig = plot_backdoor_paths(g, 2, 3; node_labels = ["Z", "X", "Y"])
-fig
-```
 
 ### Frontdoor Criterion
 
@@ -165,8 +127,11 @@ cf = compute_counterfactual(scm, do_intervention(2, 0.0), U)
 ### Trajectories, counterfactuals, policies, and g-computation
 
 A [`DiscreteTimeCDM`](@ref) models systems whose state evolves across discrete
-occasions with feedback (Robins, 1986; Hernán & Robins, 2020). Beyond predetermined
-[`DoSequence`](@ref) interventions, [`policy`](@ref) defines a
+occasions with feedback (Robins, 1986; Hernán & Robins, 2020). Note the time-index
+convention: unrolled [`TemporalDAGSpec`](@ref) graphs use ``t = 0:T`` (with
+``t = 0`` as baseline), whereas `DiscreteTimeCDM` trajectories and
+[`simulate_panel`](@ref) use Julia 1-based indexing ``t = 1:T``. Beyond
+predetermined [`DoSequence`](@ref) interventions, [`policy`](@ref) defines a
 **state-dependent** rule (for example, treating an animal only when its load
 exceeds a threshold) and [`g_computation`](@ref) estimates the resulting
 interventional mean by Monte Carlo.

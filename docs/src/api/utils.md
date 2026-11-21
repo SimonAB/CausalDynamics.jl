@@ -1,7 +1,9 @@
 # Utilities
 
-Optional plotting requires [DAGMakie.jl](https://simonab.github.io/DAGMakie.jl)
-(`using DAGMakie`). See the [DAGMakie docs](https://simonab.github.io/DAGMakie.jl/dev/)
+Deterministic hashing and seed-derivation helpers (`stable_hash64`, `stable_seed`,
+`stable_rng_seed`) provide cross-session reproducible seeds from labels and
+specs. Optional plotting requires [DAGMakie.jl](https://simonab.github.io/DAGMakie.jl)
+(`using DAGMakie`); see the [DAGMakie docs](https://simonab.github.io/DAGMakie.jl/dev/)
 for layout, themes, and path-highlighting conventions.
 
 ```@docs
@@ -16,7 +18,8 @@ plot_identification_result
 ```
 
 Temporal unrollings are plotted with [`DAGMakie.dagplot_temporal`](https://simonab.github.io/DAGMakie.jl/dev/)
-(CausalDynamics extension method on `TemporalUnrolling`).
+(CausalDynamics extension method on `TemporalUnrolling`); see a live example in
+[Time-indexed graphs](time_graphs.md).
 
 ## Live example
 
@@ -31,21 +34,6 @@ add_edge!(g, 2, 3)
 fig = plot_causal_graph(g;
     node_labels = ["Z", "X", "Y"],
     highlight_nodes = Set([1]),
-)
-fig
-```
-
-## Temporal unrolling
-
-```@example api-utils-temporal
-using CausalDynamics, DAGMakie, CairoMakie
-
-spec = TemporalDAGSpec([:a, :y], [(:a, :y, 0), (:a, :a, 1), (:y, :y, 1)])
-u = unroll_temporal_dag(spec, 4)
-fig, ax, p = dagplot_temporal(u;
-    figure_size = (560, 240),
-    fit_node_size_to_labels = false,
-    node_size = 28,
 )
 fig
 ```

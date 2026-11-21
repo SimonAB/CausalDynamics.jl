@@ -61,31 +61,50 @@ confounders, ok = discover_and_prepare(
 
 - Independence / association estimators (`association`, `independence`, …)
 - PC, OCE, CCM, transfer entropy, and related tests
-- FCI, GES, PCMCI (use other tools or future Associations releases)
+- FCI, GES, PCMCI (use other tools or future `Associations.jl` releases)
 
-## IEE (Associations-backed; reference port retained)
+## Interventional Embedding Entropy (IEE)
 
-Interventional Embedding Entropy [@shi2026interventional] ranks IntDC edges from
-observational series. With Associations loaded, `mi = :auto` uses KSG1; use
-`mi = :reference` for the MATLAB-faithful port:
+Interventional Embedding Entropy (Shi et al., 2026; precursor Embedding Entropy
+in Shi et al., 2022 — see [References](references.md)) ranks interventional
+dynamical causality (IntDC) edges from observational time series in
+delay-embedding space.
+
+Use [`interventional_embedding_entropy`](@ref) for a single candidate edge
+``x \to y``. With `Associations` loaded, `mi = :auto` selects the KSG1 mutual
+information estimator; pass `mi = :reference` for the self-contained
+MATLAB-faithful `MIknn` port (useful for concordance or regression checks):
 
 ```julia
 using CausalDynamics, Associations, DataFrames
 
-scores = iee_score_matrix([x, y]; p = 2, k = 2)  # mi=:auto
+# Preferred KSG1 estimator when Associations is loaded
+s = interventional_embedding_entropy(x, y; p = 2, k = 2, mi = :auto)
+
+# Self-contained MATLAB-faithful port (no Associations dependency needed)
+s_ref = interventional_embedding_entropy(x, y; p = 2, k = 2, mi = :reference)
+```
+
+For multivariate systems, compute the pairwise matrix with
+[`iee_score_matrix`](@ref) and threshold it into a [`TemporalDAGSpec`](@ref)
+with [`iee_to_temporal_spec`](@ref) (or [`infer_iee_temporal_spec`](@ref)):
+
+```julia
+scores = iee_score_matrix([x, y]; p = 2, k = 2)  # mi = :auto
 spec = iee_to_temporal_spec(scores, [:x, :y]; threshold = 0.05, lag = 1)
 u = unroll_temporal_dag(spec, 5)
 ```
 
-See [Methods adoption](METHODS_ADOPTION.md) for ODE parent ranking and sensitivity.
+For ODE parent ranking across environments and forward sensitivity on continuous
+CDMs (``\dot{Y} \sim X_S``), see [SciML recipes](SCIML_INTEGRATION.md).
 
 ## What stays in CausalDynamics
 
 - `backdoor_adjustment_set`, `d_separated`, frontdoor, IV
 - `DiscreteTimeCDM`, `counterfactual`, `g_computation`
-- TMLE / RxInfer estimation bridges after identification
+- `CausalTargeted`, TMLE, and RxInfer estimation bridges after identification
 
-Executable recipe: `examples/discovery_to_identification.jl`.
-
-See the [CDCS book — Causal Discovery](https://simonab.github.io/causal-dynamics-book/part-structural/05b-causal-discovery.html)
+Executable recipe: `examples/discovery_to_identification.jl`. See also the
+[Integrations API](api/integration.md) and the
+[CDCS book — Causal Discovery](https://simonab.github.io/causal-dynamics-book/part-structural/05b-causal-discovery.html)
 for narrative context.

@@ -12,7 +12,7 @@ Pearl/SciML. Temporal identity may use the closed lexicon in
 Whitehead glossary terms live in the book
 ([Concept Reference](https://simonab.github.io/causal-dynamics-book/concept-reference-tables.html)).
 
-## What is in core (v0.1–v0.2)
+## What is in core
 
 | Layer | Role | Typical API |
 |-------|------|-------------|
@@ -39,10 +39,12 @@ Whitehead glossary terms live in the book
 ## What is optional
 
 - **DAGMakie.jl** — weakdep plotting (`plot_causal_graph`, …)
-- **Associations.jl** — weakdep discovery bridge (PC, OCE → identification); see [Associations integration](ASSOCIATIONS_INTEGRATION.md)
-- **RxInfer / GraphPPL / DataFrames** — weakdep variational backdoor head (narrow residualised ATE; see [RxInfer integration](RXINFER_INTEGRATION.md)); `DataFrame(::CDMPanel)` via `CausalDynamicsDataFramesExt`
+- **Associations.jl** — weakdep discovery bridge (PC, OCE → identification; IEE via `Associations`); see [Associations integration](ASSOCIATIONS_INTEGRATION.md)
+- **RxInfer / GraphPPL / DataFrames** — weakdep variational backdoor head and known-parameter linear Gaussian state inference (see [RxInfer integration](RXINFER_INTEGRATION.md)); `DataFrame(::CDMPanel)` via `CausalDynamicsDataFramesExt`
+- **Lux** (`Lux`, `ComponentArrays`, `Optimization`, `OptimizationOptimisers`) — weakdep for deep parent-constrained `MechanismSpec` neural residuals (`train_mechanisms!`, `graphscm_with_mechanisms`)
+- **SciML** (`OrdinaryDiffEq`, `DataInterpolations`, `SciMLSensitivity`) — weakdep continuous-time `ContinuousCDMSpec` g-computation, ODE parent ranking, and forward local sensitivity; see [SciML recipes](SCIML_INTEGRATION.md)
 - **TMLE.jl** — workflow helpers when the package is loaded (`prepare_for_tmle`)
-- **CausalTargeted.jl** — sequential LMTP consumes `simulate_panel` wide tables + temporal `IdentificationResult` (`plan_sequential` / `sequential_spec_from_identification`)
+- **CausalTargeted.jl** — sequential LMTP consumes `simulate_panel` wide tables + temporal `IdentificationResult` (`plan_targeted_estimation`)
 
 ## What is *not* in core
 
@@ -76,7 +78,9 @@ Whitehead glossary terms live in the book
 
 - **0.1** — static graphs, identification façades, `GraphSCM`
 - **0.2** — `DiscreteTimeCDM` trajectories (book Ch. 28); time-indexed unrolling
-- **0.3** — Associations.jl discovery bridge; `prepare_from_discovery`, OCE → `TemporalDAGSpec`
+- **0.3** — Associations.jl discovery bridge; `prepare_from_discovery`, OCE → `TemporalDAGSpec`, `MinimalMediatorSets`
+- **0.4** — mediation `moc` and `effect_kind`, wide `CDMPanel` / `simulate_panel`, `ObservationBridge`, `TransportQuery`, hierarchical nesting (`RandomEffectSpec`, `unroll_hierarchical_dag`), missingness masks and certificates (`ObservationMask`, `MissingnessSpec`), representation bridge (`RepresentationSpec`), Lux `MechanismSpec` + `:generative` L3 counterfactuals, `OutcomeKind` / `session_slice`
+- **0.5** — orthogonal temporal semantics (`TemporalSupport`, `FromOnsetSupport`, `ReferentSpec`, `graph_kind`, `causal_projection`), `StructuralConstraintSpec`, `InterventionJustification`, policy `information_set`, experimental relational grounding, RxInfer 4–6 support, and (`0.5.1`) exact known-parameter linear Gaussian filtering, smoothing, and joint trajectory covariance
 
 ## See also
 

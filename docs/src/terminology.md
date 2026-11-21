@@ -1,5 +1,12 @@
 # Terminology
 
+If you are approaching CausalDynamics from a biological or statistical study,
+[Choosing an approach](orientation.md) maps common scientific questions to the
+package's main APIs. This page serves as a compact reference for the temporal
+and semantic keywords attached to time-indexed graphs and policies—so you can
+specify what a variable represents and when it is measured without changing the
+underlying causal identification rules.
+
 Identification and estimation keep Pearl and SciML names (`DoIntervention`,
 `backdoor_adjustment_set`, `d_separated`, `Policy`, …). Those exports are not
 renamed.

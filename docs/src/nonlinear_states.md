@@ -1,12 +1,14 @@
-## Known-noise nonlinear states
+# Known-noise nonlinear state inference
 
-The development `infer_nonlinear_state_space` API provides scalar extended
+The experimental `infer_nonlinear_state_space` API provides scalar extended
 Kalman filtering and extended Rauch–Tung–Striebel smoothing. Transition and
 noise parameters are supplied constants. The observation model is linear;
-nonlinear observations and unknown parameter inference are deferred.
+nonlinear observations and unknown parameter inference are deferred. Full
+docstrings live in the [Integrations API](api/integration.md).
 
 ```julia
 using CausalDynamics, RxInfer, GraphPPL, DataFrames
+
 transition = (x, t) -> 0.8x + 0.05sin(x)
 derivative = (x, t) -> 0.8 + 0.05cos(x)
 states = infer_nonlinear_state_space([0.2, -0.1, 0.4, 0.3, -0.2, 0.1];
@@ -18,13 +20,13 @@ joint_covariance = trajectory_covariance(states)
 continued = update_state_posterior(states, [missing, 0.2])
 ```
 
-Both callbacks take `(x,t)`; the derivative is with respect to x. The initial
-prior applies to the first represented state, at `initial_time=0` by default.
-Array row j represents time `initial_time+j-1`; a transition callback at t
-maps the state at t to the state at t+1. The first observation updates the
-supplied prior without an extra transition.
+Both callbacks take `(x, t)`; the derivative is with respect to ``x``. The
+initial prior applies to the first represented state, at `initial_time = 0` by
+default. Array row ``j`` represents time `initial_time + j - 1`; a transition
+callback at ``t`` maps the state at ``t`` to the state at ``t + 1``. The first
+observation updates the supplied prior without an extra transition.
 
-### Which posterior is represented?
+## Which posterior is represented?
 
 The forward filter chooses a tangent transition at each filtered mean. These
 slopes and offsets specify a single time-varying Gaussian surrogate. Complete
@@ -32,7 +34,7 @@ informative observations use GraphPPL/RxInfer Gaussian messages for smoothing;
 missing measurements or a zero observation coefficient use analytic RTS
 smoothing. Both routes describe this same surrogate.
 
-Consequently, `certificate.exact` is false for the nonlinear model, while
+Consequently, `certificate.exact` is `false` for the nonlinear model, while
 `certificate.surrogate_exact` records exact inference within the declared
 local Gaussian approximation. Cross-time covariance is recovered from that
 surrogate's smoothing gains. It does not describe the joint distribution of
@@ -42,9 +44,9 @@ Means have one column and time in rows. Covariance vectors hold one-by-one
 matrices, following the exact linear API. Joint covariance uses time-major
 order. `posterior` is the final filtered state, rather than a retrospectively
 smoothed estimate of a past state. Diagnostic fields retain transition slopes,
-offsets and predicted moments.
+offsets, and predicted moments.
 
-### Updating and assumptions
+## Updating and assumptions
 
 Continuation forecasts one transition from the previous filtered posterior,
 consumes only new observations, and advances the callback's model time.
@@ -59,7 +61,7 @@ they are not replaced by large-variance pseudo-observations. Invalid callback
 values or nonpositive numerical variances fail explicitly. The method supplies
 no uncertainty for parameter estimates or an unknown observation mechanism.
 
-### Validation and limitations
+## Validation and limitations
 
 The affine limit is checked against an independent dense Gaussian oracle,
 including every cross-time covariance block and batch/continuation agreement.
@@ -76,6 +78,8 @@ records both the weakly nonlinear agreement and the large two-well covariance
 error, alongside the small-model benchmark.
 This experimental API makes no general nonlinear calibration claim.
 
-```@docs
-CausalDynamics.infer_nonlinear_state_space
-```
+## See also
+
+- [RxInfer & GraphPPL integration](RXINFER_INTEGRATION.md)
+- [Exact linear Gaussian states](linear_bayesian_states.md)
+- [Integrations API](api/integration.md)

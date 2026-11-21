@@ -8,6 +8,13 @@ and [`graph_kind`](@ref GraphKind), not `ontological_character`. Single-node
 supports (`FromOnsetSupport`, `GlobalSupport`, …) keep one reused node that may
 be assigned at an explicit onset.
 
+> **Time-index convention:** Unrolled [`TemporalDAGSpec`](@ref) graphs use
+> `t = 0:T` (`t = 0` baseline/initial state, `t = 1` first transition), whereas
+> [`DiscreteTimeCDM`](@ref) simulation in [Discrete-time CDMs](cdm.md) uses Julia
+> 1-based occasion indexing `t = 1:T`.
+
+## Supports and graph kinds
+
 ```@docs
 TemporalSupport
 PointwiseSupport
@@ -15,11 +22,22 @@ PointSupport
 IntervalSupport
 FromOnsetSupport
 GlobalSupport
+expands_pointwise
+is_single_node_support
+parse_temporal_support
 GraphKind
 TimeUnrolledGraph
 ProcessGraph
 SemanticGraph
 ReferentSpec
+VALUE_REPRESENTATIONS
+RELATION_KINDS
+IDENTIFICATION_STATUSES
+```
+
+## Unrolling and querying
+
+```@docs
 LaggedEdge
 TemporalNodeSpec
 TemporalDAGSpec
@@ -29,6 +47,11 @@ temporal_node
 single_node
 temporal_node_label
 is_single_node
+```
+
+## Projection, provenance and identification
+
+```@docs
 temporal_edge_role
 temporal_edge_records
 causal_projection
@@ -36,6 +59,11 @@ d_separated_temporal
 temporal_backdoor_adjustment_set
 temporal_backdoor_adjustment_nodes
 semantic_fingerprint
+```
+
+## Intervention semantics and availability
+
+```@docs
 validate_intervention_semantics
 assert_interval_summary_do!
 assert_feasibility!
@@ -43,12 +71,6 @@ InterventionJustification
 justifies
 intervention_targets
 ObservationSemantics
-expands_pointwise
-is_single_node_support
-parse_temporal_support
-VALUE_REPRESENTATIONS
-RELATION_KINDS
-IDENTIFICATION_STATUSES
 ```
 
 ## Single-node attributes from onset

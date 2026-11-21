@@ -2,15 +2,16 @@
 
 CausalDynamics owns **generative** hierarchy: shared cluster-level exogenous
 draws ``U_j`` nested with unit-level noise. This is the same role as shared
-``U`` for L3 counterfactuals, organised by cluster membership.
+``U`` for L3 counterfactuals (individual-level counterfactuals), organised by
+cluster membership.
 
 Three objects that must not be conflated:
 
 | Object | Meaning | Owner |
 |--------|---------|-------|
 | Generative hierarchy | Nested ``U_j``, ``U_{ij}`` in simulation | CausalDynamics |
-| Sampling hierarchy | Dependence in the IF / cluster-robust sandwich | CausalTargeted (mediation EIFs → CausalMediation) |
-| Partial-pooling estimator | LMM/GLMM/Bayes BLUPs | CausalTargeted optional MixedModels ext (or RxInfer demo) |
+| Sampling hierarchy | Dependence in the IF (influence function) / cluster-robust sandwich | CausalTargeted (mediation EIFs → CausalMediation) |
+| Partial-pooling estimator | LMM/GLMM/Bayes BLUPs (best linear unbiased predictors / random-effect shrinkage estimates) | CausalTargeted optional MixedModels ext (or RxInfer demo) |
 
 ## API
 
@@ -48,14 +49,14 @@ nv(un.graph)
 
 - Estimation with joint or **cluster-robust** covariance: CausalTargeted
   `run_repeated_outcome_msm(...; cluster=:cluster)` (and parametric MSM).
-  Point estimates are unchanged; only ``\\widehat{\\Sigma}`` uses the cluster sandwich.
+  Point estimates are unchanged; only ``\widehat{\Sigma}`` uses the cluster sandwich.
 - LMM / MixedModels / `mixed_g_computation`: CausalTargeted optional extension
   (`CausalTargetedMixedModelsExt`); see
   `examples/hierarchical_mixedmodels_concordance.md`. Not this package.
 - Plate figures: DAGMakie (viz only) when drawing unrolled hierarchical DAGs.
 - Optional Bayesian hierarchical heads: RxInfer demos in application code
   ([RxInfer integration](RXINFER_INTEGRATION.md)); not required for ID or LMTP.
-- Stress notebook: [Hierarchical nesting stress](stress_hierarchy.md).
+- Stress notebook: [Stress validation](stress.md).
 
 See also [Scope](scope.md) and
 [BOUNDARIES](https://github.com/SimonAB/CausalDynamics.jl/blob/main/BOUNDARIES.md).

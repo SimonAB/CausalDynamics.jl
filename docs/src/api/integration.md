@@ -1,6 +1,8 @@
 # Integration API
 
-Functions for integrating CausalDynamics.jl with other packages (TMLE.jl, RxInfer/GraphPPL).
+Functions and specs for integrating CausalDynamics.jl with TMLE.jl, RxInfer /
+GraphPPL, Associations.jl, SciML / OrdinaryDiffEq, Interventional Embedding
+Entropy (IEE), and ODE parent discovery (CausalKinetiX).
 
 ## TMLE
 
@@ -18,11 +20,28 @@ Requires `using RxInfer` to load the `CausalDynamicsRxInfer` extension.
 prepare_for_rxinfer
 has_rxinfer
 infer_backdoor_effect
-infer_bistable_state_space
+posterior_mean_τ
 backdoor_graphppl_model
 ppl_data_from_spec
 prepare_for_turing
 get_data_for_ppl
+```
+
+## State-space inference (RxInfer)
+
+Requires `using RxInfer, GraphPPL, DataFrames` to load the
+`CausalDynamicsRxInfer` extension. See [Exact linear Gaussian states](../linear_bayesian_states.md),
+[Known-noise nonlinear states](../nonlinear_states.md), and
+[RxInfer & state-space](../RXINFER_INTEGRATION.md) for modelling assumptions
+and validation notes.
+
+```@docs
+infer_linear_state_space
+update_state_posterior
+state_crosscovariance
+trajectory_covariance
+infer_nonlinear_state_space
+infer_bistable_state_space
 ```
 
 ## Associations.jl (optional)
@@ -43,9 +62,6 @@ discover_and_prepare
 DiscoveryGraphMetadata
 delay_embed_cause
 delay_embed_effect
-aggregate_parent_inclusion
-posterior_mean_τ
-state_index_map
 ```
 
 ## SciML / OrdinaryDiffEq (optional)
@@ -58,6 +74,7 @@ AbstractCausalIntervention
 AbstractContinuousIntervention
 ContinuousCDMSpec
 continuous_cdm_graph
+state_index_map
 with_parents
 ranked_variables_to_parents
 has_sciml
@@ -107,6 +124,7 @@ reference method). Load `DataInterpolations` for cubic-spline derivatives.
 ODEParentRanking
 infer_ode_parents
 score_ode_parent_sets
+aggregate_parent_inclusion
 ode_parent_ranking_to_continuous_spec
 candidate_parent_sets
 finite_difference_derivative
