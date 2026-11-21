@@ -264,6 +264,108 @@ function _targeted_engine_for_query(
 end
 
 """
+    CausalDynamics.resolve_panel_query(unrolling, query, column_names; missingness, skip, name_fn, outcome_specs)
+
+Identify a temporal query and resolve its wide-panel columns before choosing an
+estimator or examining sample support. Returns the query, identification
+result, declared outcome spec, treatment and outcome columns, and any hurdle
+component columns. `adjustment_columns` and `missing_columns` partition the
+mapped adjustment columns according to `available_columns`.
+"""
+function resolve_panel_query(
+    unrolling::TemporalUnrolling,
+    query::TemporalEffectQuery,
+    column_names;
+    missingness = nothing,
+    skip::AbstractVector{Symbol} = [:sex],
+    name_fn = panel_column_name,
+    outcome_specs::Dict{Symbol, NodeOutcomeSpec} = Dict{Symbol, NodeOutcomeSpec}(),
+)
+    result = identify(unrolling, query; missingness = missingness)
+    outcome_spec = _outcome_spec(outcome_specs, query.outcome)
+    qcols = query_panel_columns(
+        unrolling,
+        query;
+        name_fn = name_fn,
+        outcome_specs = outcome_specs,
+    )
+    baseline = temporal_adjustment_columns(
+        result, unrolling; skip = skip, name_fn = name_fn,
+    )
+    avail = Set(column_names)
+    present = Symbol[c for c in baseline if c in avail]
+    missing_cols = Symbol[c for c in baseline if !(c in avail)]
+    presence_col = nothing
+    intensity_col = nothing
+    if outcome_spec.kind == hurdle
+        hurdle_cols = _hurdle_panel_columns(outcome_spec, query, unrolling, name_fn)
+        presence_col = hurdle_cols.presence
+        intensity_col = hurdle_cols.intensity
+    end
+    return (
+        query = query,
+        result = result,
+        outcome_spec = outcome_spec,
+        treatment = qcols.treatment,
+        outcome = qcols.outcome,
+        presence_col = presence_col,
+        intensity_col = intensity_col,
+        adjustment_columns = present,
+        missing_columns = missing_cols,
+        available_columns = avail,
+    )
+end
+
+"""
+    CausalDynamics.panel_query_support(inputs; data=nothing, min_n=10)
+
+Return `min_complete_n`, `estimability`, `missingness_note`, and
+`capture_conditioned` for inputs from `CausalDynamics.resolve_panel_query`.
+An absent outcome column marks a structural skip. When `data` is supplied,
+count complete cases across the treatment, outcome, present adjustment columns
+and any hurdle component columns.
+"""
+function panel_query_support(inputs; data = nothing, min_n::Int = 10)
+    (; result, treatment, outcome, presence_col, intensity_col) = inputs
+    present = inputs.adjustment_columns
+    avail = inputs.available_columns
+    min_complete_n = nothing
+    estimability = nothing
+    missingness_note = ""
+    capture_conditioned = false
+    cert = result.missingness
+    if cert !== nothing
+        missingness_note = cert.note
+        capture_conditioned = cert.time_indexed
+    end
+    if !(outcome in avail)
+        estimability = :structural_skip
+        if isempty(missingness_note)
+            missingness_note = "outcome column :$(outcome) absent from panel"
+        end
+    elseif presence_col !== nothing && !(presence_col in avail)
+        estimability = :structural_skip
+        if isempty(missingness_note)
+            missingness_note = "presence column :$(presence_col) absent from panel"
+        end
+    end
+    if data !== nothing
+        analysis_cols = unique(vcat(
+            [treatment, outcome],
+            present,
+            presence_col === nothing ? Symbol[] : [presence_col],
+            intensity_col === nothing ? Symbol[] : [intensity_col],
+        ))
+        sup = identification_support(data, analysis_cols; min_n = min_n)
+        min_complete_n = sup.min_complete_n
+        if estimability !== :structural_skip
+            estimability = sup.estimability
+        end
+    end
+    return (; min_complete_n, estimability, missingness_note, capture_conditioned)
+end
+
+"""
     plan_targeted_estimation(unrolling, query, column_names; ...)
 
 Run temporal identification and return an [`EstimationPlan`](@ref) with engine
@@ -296,79 +398,29 @@ function plan_targeted_estimation(
     data = nothing,
     min_n::Int = 10,
 )
-    result = identify(unrolling, query; missingness = missingness)
-    outcome_spec = _outcome_spec(outcome_specs, query.outcome)
-    qcols = query_panel_columns(
-        unrolling,
-        query;
-        name_fn = name_fn,
+    inputs = resolve_panel_query(
+        unrolling, query, column_names;
+        missingness = missingness, skip = skip, name_fn = name_fn,
         outcome_specs = outcome_specs,
     )
-    baseline = temporal_adjustment_columns(
-        result, unrolling; skip = skip, name_fn = name_fn,
-    )
-    avail = Set(column_names)
-    present = Symbol[c for c in baseline if c in avail]
-    missing_cols = Symbol[c for c in baseline if !(c in avail)]
-    presence_col = nothing
-    intensity_col = nothing
-    if outcome_spec.kind == hurdle
-        hurdle_cols = _hurdle_panel_columns(outcome_spec, query, unrolling, name_fn)
-        presence_col = hurdle_cols.presence
-        intensity_col = hurdle_cols.intensity
-    end
+    (; result, outcome_spec) = inputs
     engine = _targeted_engine_for_query(query, discrete_treatment, outcome_spec)
     family_outcome = _family_outcome_for_spec(outcome_spec; count_family = count_family)
-    min_complete_n = nothing
-    estimability = nothing
-    missingness_note = ""
-    capture_conditioned = false
-    cert = result.missingness
-    if cert !== nothing
-        missingness_note = cert.note
-        capture_conditioned = cert.time_indexed
-    end
-    if !(qcols.outcome in avail)
-        estimability = :structural_skip
-        if isempty(missingness_note)
-            missingness_note = "outcome column :$(qcols.outcome) absent from panel"
-        end
-    elseif presence_col !== nothing && !(presence_col in avail)
-        estimability = :structural_skip
-        if isempty(missingness_note)
-            missingness_note = "presence column :$(presence_col) absent from panel"
-        end
-    end
-    if data !== nothing
-        analysis_cols = unique(vcat(
-            [qcols.treatment, qcols.outcome],
-            present,
-            presence_col === nothing ? Symbol[] : [presence_col],
-            intensity_col === nothing ? Symbol[] : [intensity_col],
-        ))
-        sup = identification_support(data, analysis_cols; min_n = min_n)
-        min_complete_n = sup.min_complete_n
-        if estimability !== :structural_skip
-            estimability = sup.estimability
-        end
-    end
+    support = panel_query_support(inputs; data = data, min_n = min_n)
     return EstimationPlan(
         engine,
-        qcols.treatment,
-        qcols.outcome,
-        present,
+        inputs.treatment,
+        inputs.outcome,
+        inputs.adjustment_columns,
         query,
         result.identifiable,
         result.strategy,
-        present,
-        missing_cols;
-        presence_col = presence_col,
-        intensity_col = intensity_col,
+        inputs.adjustment_columns,
+        inputs.missing_columns;
+        presence_col = inputs.presence_col,
+        intensity_col = inputs.intensity_col,
         family_outcome = family_outcome,
-        min_complete_n = min_complete_n,
-        estimability = estimability,
-        missingness_note = missingness_note,
-        capture_conditioned = capture_conditioned,
+        support...,
     )
 end
 

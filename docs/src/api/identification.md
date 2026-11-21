@@ -39,10 +39,29 @@ adjustment_columns
 query_panel_columns
 OutcomeKind
 NodeOutcomeSpec
+identification_support
+```
+
+## Panel planning and compatibility
+
+CausalDynamics owns structural identification and supplies the panel columns
+and empirical support used in estimator planning. For new analyses, use
+`CausalTargeted.plan_targeted_estimation` and pass the returned plan to
+`CausalTargeted.run_estimation_plan`. The runner also accepts plans from the
+legacy CausalDynamics entry points below. See the [CausalTargeted API overview](https://simonab.github.io/CausalTargeted.jl/dev/api/).
+
+```@docs
 EstimationPlan
 plan_targeted_estimation
 plan_session_estimation(::TemporalUnrolling, ::TemporalEffectQuery, ::Integer, ::Any)
-identification_support
+```
+
+The functions below form the qualified implementation interface used by
+CausalTargeted.
+
+```@docs
+CausalDynamics.resolve_panel_query
+CausalDynamics.panel_query_support
 ```
 
 ## Adjustment and instruments

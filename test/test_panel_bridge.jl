@@ -121,6 +121,24 @@ end
     )
     @test qcols.outcome === :fec_bin2
 
+    inputs = CausalDynamics.resolve_panel_query(
+        u, query, wide_cols; outcome_specs = outcome_specs,
+    )
+    @test inputs.query == query
+    @test inputs.result.identifiable == plan.identifiable
+    @test inputs.outcome_spec == outcome_specs[:fec]
+    @test inputs.treatment === plan.treatment
+    @test inputs.outcome === inputs.presence_col === :fec_bin2
+    @test inputs.intensity_col === :fec_intensity2
+    @test inputs.adjustment_columns == plan.adjustment_columns
+    @test inputs.missing_columns == plan.missing_columns
+    @test inputs.available_columns == Set(wide_cols)
+
+    data = (grid_type = ["R", "M"], fec_bin2 = [1, 1], fec_intensity2 = [4, missing])
+    support = CausalDynamics.panel_query_support(inputs; data = data, min_n = 2)
+    @test support.min_complete_n == 1
+    @test support.estimability === :underpowered
+
     gaussian_plan = plan_targeted_estimation(
         u, query, wide_cols,
     )

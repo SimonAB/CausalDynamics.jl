@@ -85,7 +85,15 @@ Not exported; qualify as `CausalDynamics.…` when exploring:
 - **Symbolic do-calculus stubs** (`is_identifiable`, …) — unexported until implemented.
 - **Constructor-only `normalise_*`** validators — British spelling; not part of the happy path.
 - **`SymbolicSCM`** — MTK placeholder (`system::Any`); prefer `GraphSCM`.
-- **`EstimationPlan`** — Targeted hand-off object; package move deferred.
+### Temporal panel planning
+
+CausalDynamics provides structural identification, panel column mapping,
+outcome representation, and empirical support. The qualified
+`CausalDynamics.resolve_panel_query` and `CausalDynamics.panel_query_support`
+functions supply that information to CausalTargeted, which selects the
+estimator and outcome family. New callers use
+`CausalTargeted.plan_targeted_estimation`. The CausalDynamics plan type,
+planner, and session wrapper remain available during the compatibility period.
 
 ## Adding a feature (workflow)
 
